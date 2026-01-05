@@ -14,22 +14,9 @@ mkdocstrings-python>=1.7.0
 mkdocs-git-revision-date-localized-plugin>=1.2.0
 mkdocs-minify-plugin>=0.7.0
 mkdocs-glightbox>=0.3.0
-mkdocs-redirects>=1.2.0
-mkdocs-macros-plugin>=1.0.0
-
-# PDF and social cards
-mkdocs-pdf-export-plugin>=0.5.0
-pillow>=10.0.0
-cairosvg>=2.7.0
 
 # Version management
 mike>=2.0.0
 
 # Additional markdown extensions
 pymdown-extensions>=10.0
-
-# Link checking (development)
-linkchecker>=10.0.0
-
-# Spell checking (development)
-codespell>=2.0.0

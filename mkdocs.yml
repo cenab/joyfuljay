@@ -121,9 +121,10 @@ plugins:
       htmlmin_opts:
         remove_comments: true
 
-  - social:
-      cards_layout_options:
-        background_color: "#3f51b5"
+  # Social cards plugin disabled - requires Cairo which may not be available
+  # - social:
+  #     cards_layout_options:
+  #       background_color: "#3f51b5"
 
   - tags:
       tags_file: tags.md
@@ -177,7 +178,7 @@ markdown_extensions:
   - pymdownx.smartsymbols
   - pymdownx.snippets:
       auto_append:
-        - includes/abbreviations.md
+        - docs/includes/abbreviations.md
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
