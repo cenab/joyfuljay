@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="logo.png" alt="JoyfulJay Logo" width="200">
+<img src="docs/assets/images/logo.png" alt="JoyfulJay Logo" width="200">
 
 # JoyfulJay - Encrypted Traffic Feature Extraction
 

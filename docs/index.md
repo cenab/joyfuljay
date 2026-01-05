@@ -1,6 +1,6 @@
 # JoyfulJay Documentation
 
-<div align="center">
+<div align="center" markdown="1">
 
 <img src="assets/images/logo.png" alt="JoyfulJay Logo" width="200">
 
