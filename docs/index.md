@@ -2,12 +2,19 @@
 
 <div align="center">
 
+<img src="assets/images/logo.png" alt="JoyfulJay Logo" width="200">
+
 **Extract ML-Ready Features from Encrypted Network Traffic**
 
 *Analyze TLS, QUIC, SSH, and more - without decryption*
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+![JoyfulJay](https://img.shields.io/badge/JoyfulJay-387%20Features-blue?style=flat-square)
+![ML Ready](https://img.shields.io/badge/ML-Research%20Ready-22D3EE?style=flat-square)
+![Encrypted Traffic](https://img.shields.io/badge/Encrypted-TLS%20%2F%20QUIC-success?style=flat-square)
+![Research Tool](https://img.shields.io/badge/Use-Academic%20Research-informational?style=flat-square)
 
 [Quick Start](#quick-start) | [Installation](installation.md) | [Features](features.md) | [Tutorials](tutorials/index.md)
 

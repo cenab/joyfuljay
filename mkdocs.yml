@@ -39,7 +39,7 @@ theme:
     text: Inter
     code: JetBrains Mono
 
-  logo: assets/images/logo.svg
+  logo: assets/images/logo.png
   favicon: assets/images/favicon.ico
 
   icon:

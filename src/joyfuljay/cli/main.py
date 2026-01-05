@@ -16,6 +16,14 @@ from ..core.pipeline import Pipeline
 from ..output.formats import to_csv_stream, to_json_stream
 from ..utils.progress import create_progress, is_rich_available
 
+# ASCII art splash screen
+SPLASH = r"""
+   ▗▖ ▗▄▖▗▖  ▗▖▗▄▄▄▖▗▖ ▗▖▗▖      ▗▖ ▗▄▖▗▖  ▗▖
+   ▐▌▐▌ ▐▌▝▚▞▘ ▐▌   ▐▌ ▐▌▐▌      ▐▌▐▌ ▐▌▝▚▞▘
+   ▐▌▐▌ ▐▌ ▐▌  ▐▛▀▀▘▐▌ ▐▌▐▌      ▐▌▐▛▀▜▌ ▐▌
+▗▄▄▞▘▝▚▄▞▘ ▐▌  ▐▌   ▝▚▄▞▘▐▙▄▄▖▗▄▄▞▘▐▌ ▐▌ ▐▌
+"""
+
 
 def setup_logging(verbose: bool) -> None:
     """Configure logging based on verbosity."""
@@ -41,7 +49,18 @@ def _start_prometheus_metrics(port: int | None, addr: str) -> "PrometheusMetrics
     return metrics
 
 
-@click.group()
+class SplashGroup(click.Group):
+    """Custom Click group that shows splash on help."""
+
+    def format_help(self, ctx: click.Context, formatter: click.HelpFormatter) -> None:
+        """Show splash banner before help text."""
+        formatter.write(SPLASH)
+        formatter.write(f"  Encrypted Traffic Feature Extraction v{__version__}\n")
+        formatter.write("  https://github.com/cenab/joyfuljay\n\n")
+        super().format_help(ctx, formatter)
+
+
+@click.group(cls=SplashGroup)
 @click.version_option(version=__version__, prog_name="joyfuljay")
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose output")
 @click.pass_context

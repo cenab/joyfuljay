@@ -1,9 +1,20 @@
+<div align="center">
+
+<img src="logo.png" alt="JoyfulJay Logo" width="200">
+
 # JoyfulJay - Encrypted Traffic Feature Extraction
 
 [![CI](https://github.com/cenab/joyfuljay/actions/workflows/ci.yml/badge.svg)](https://github.com/cenab/joyfuljay/actions/workflows/ci.yml)
 [![PyPI version](https://badge.fury.io/py/joyfuljay.svg)](https://badge.fury.io/py/joyfuljay)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+![JoyfulJay](https://img.shields.io/badge/JoyfulJay-387%20Features-blue?style=flat-square)
+![ML Ready](https://img.shields.io/badge/ML-Research%20Ready-22D3EE?style=flat-square)
+![Encrypted Traffic](https://img.shields.io/badge/Encrypted-TLS%20%2F%20QUIC-success?style=flat-square)
+![Research Tool](https://img.shields.io/badge/Use-Academic%20Research-informational?style=flat-square)
+
+</div>
 
 **JoyfulJay** is a Python library for extracting standardized, ML-ready features from encrypted network traffic. It operates on PCAP files and live network interfaces, producing feature vectors that capture timing, size, and protocol metadata patterns - all without decrypting any traffic.
 
