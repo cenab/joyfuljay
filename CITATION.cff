@@ -9,7 +9,7 @@ abstract: >-
 type: software
 authors:
   - name: "JoyfulJay Contributors"
-repository-code: "https://github.com/joyfuljay/joyfuljay"
+repository-code: "https://github.com/cenab/joyfuljay"
 url: "https://joyfuljay.readthedocs.io"
 license: MIT
 keywords:

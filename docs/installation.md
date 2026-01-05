@@ -102,7 +102,7 @@ pip install joyfuljay[dev]
 Clone the repository and install in development mode:
 
 ```bash
-git clone https://github.com/joyfuljay/joyfuljay.git
+git clone https://github.com/cenab/joyfuljay.git
 cd joyfuljay
 pip install -e ".[dev]"
 ```

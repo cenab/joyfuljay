@@ -25,7 +25,7 @@ Thank you for your interest in contributing to JoyfulJay! This document provides
    ```
 3. Add the upstream remote:
    ```bash
-   git remote add upstream https://github.com/joyfuljay/joyfuljay.git
+   git remote add upstream https://github.com/cenab/joyfuljay.git
    ```
 
 ### Development Environment Setup
@@ -467,8 +467,8 @@ How was this tested?
 
 ## Getting Help
 
-- **Questions**: Open a [Discussion](https://github.com/joyfuljay/joyfuljay/discussions)
-- **Bugs**: Open an [Issue](https://github.com/joyfuljay/joyfuljay/issues)
+- **Questions**: Open a [Discussion](https://github.com/cenab/joyfuljay/discussions)
+- **Bugs**: Open an [Issue](https://github.com/cenab/joyfuljay/issues)
 - **Security**: Email security@joyfuljay.dev (do not open public issues)
 
 ---

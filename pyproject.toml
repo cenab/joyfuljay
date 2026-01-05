@@ -76,10 +76,10 @@ joyfuljay = "joyfuljay.cli.main:cli"
 jj = "joyfuljay.cli.main:cli"
 
 [project.urls]
-Homepage = "https://github.com/joyfuljay/joyfuljay"
+Homepage = "https://github.com/cenab/joyfuljay"
 Documentation = "https://joyfuljay.readthedocs.io"
-Repository = "https://github.com/joyfuljay/joyfuljay"
-Issues = "https://github.com/joyfuljay/joyfuljay/issues"
+Repository = "https://github.com/cenab/joyfuljay"
+Issues = "https://github.com/cenab/joyfuljay/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/joyfuljay"]

@@ -1,6 +1,6 @@
 # JoyfulJay - Encrypted Traffic Feature Extraction
 
-[![CI](https://github.com/joyfuljay/joyfuljay/actions/workflows/ci.yml/badge.svg)](https://github.com/joyfuljay/joyfuljay/actions/workflows/ci.yml)
+[![CI](https://github.com/cenab/joyfuljay/actions/workflows/ci.yml/badge.svg)](https://github.com/cenab/joyfuljay/actions/workflows/ci.yml)
 [![PyPI version](https://badge.fury.io/py/joyfuljay.svg)](https://badge.fury.io/py/joyfuljay)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -162,7 +162,7 @@ If you use JoyfulJay in academic research, please cite:
   title = {{JoyfulJay}: Encrypted Traffic Feature Extraction Library},
   year = {2025},
   publisher = {GitHub},
-  url = {https://github.com/joyfuljay/joyfuljay}
+  url = {https://github.com/cenab/joyfuljay}
 }
 ```
 

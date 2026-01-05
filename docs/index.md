@@ -281,9 +281,9 @@ pip install joyfuljay[all]
 
 ## Getting Help
 
-- **Issues**: [GitHub Issues](https://github.com/joyfuljay/joyfuljay/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/joyfuljay/joyfuljay/discussions)
+- **Issues**: [GitHub Issues](https://github.com/cenab/joyfuljay/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/cenab/joyfuljay/discussions)
 
 ## License
 
-MIT License - see [LICENSE](https://github.com/joyfuljay/joyfuljay/blob/main/LICENSE)
+MIT License - see [LICENSE](https://github.com/cenab/joyfuljay/blob/main/LICENSE)

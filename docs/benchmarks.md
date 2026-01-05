@@ -475,7 +475,7 @@ List<Flow> flows = flowGen.generateFlows("capture.pcap");
 
 ```bash
 # Clone repository
-git clone https://github.com/joyfuljay/joyfuljay.git
+git clone https://github.com/cenab/joyfuljay.git
 cd joyfuljay
 
 # Create virtual environment
