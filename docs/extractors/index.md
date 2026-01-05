@@ -1,214 +1,262 @@
 # Feature Extractors
 
-JoyfulJay includes 24 feature extractors that produce 387 total features for ML-ready network traffic analysis. This page provides an overview of all extractors and links to detailed documentation.
-
-## Quick Reference
-
-| Group | Extractor | Features | Description |
-|-------|-----------|----------|-------------|
-| `flow_meta` | [FlowMetaExtractor](flow-meta.md) | 10 | Flow metadata (5-tuple, duration) |
-| `timing` | [TimingExtractor](timing.md) | 20+ | Inter-arrival time statistics |
-| `size` | [SizeExtractor](size.md) | 15+ | Packet/payload size statistics |
-| `tcp` | [TCPExtractor](tcp.md) | 26 | TCP flags and handshake analysis |
-| `tls` | [TLSExtractor](tls.md) | 30+ | TLS/JA3 fingerprinting |
-| `quic` | [QUICExtractor](quic.md) | 10+ | QUIC protocol features |
-| `ssh` | [SSHExtractor](ssh.md) | 10+ | SSH/HASSH fingerprinting |
-| `dns` | [DNSExtractor](dns.md) | 15+ | DNS query analysis |
-| `entropy` | [EntropyExtractor](entropy.md) | 6 | Payload entropy |
-| `padding` | [PaddingExtractor](padding.md) | 8 | Padding detection |
-| `fingerprint` | [FingerprintExtractor](fingerprint.md) | 6 | Tor/VPN/DoH detection |
-| `connection` | [ConnectionExtractor](connection.md) | 20+ | Connection graph metrics |
-| `mac` | [MACExtractor](mac.md) | 8 | Layer 2 MAC features |
-| `ip_extended` | [IPExtendedExtractor](ip-extended.md) | 12 | Extended IP header fields |
-| `ipv6_options` | [IPv6OptionsExtractor](ipv6-options.md) | 8 | IPv6 extension headers |
-| `icmp` | [ICMPExtractor](icmp.md) | 10 | ICMP features |
-| `tcp_sequence` | [TCPSequenceExtractor](tcp-sequence.md) | 10 | TCP sequence analysis |
-| `tcp_window` | [TCPWindowExtractor](tcp-window.md) | 8 | TCP window analysis |
-| `tcp_options` | [TCPOptionsExtractor](tcp-options.md) | 12 | TCP options parsing |
-| `tcp_mptcp` | [MPTCPExtractor](tcp-mptcp.md) | 6 | Multipath TCP |
-| `tcp_rtt` | [TCPRTTExtractor](tcp-rtt.md) | 8 | RTT estimation |
-| `tcp_fingerprint` | [TCPFingerprintExtractor](tcp-fingerprint.md) | 4 | TCP fingerprinting |
-| `http2` | [HTTP2Extractor](http2.md) | 10+ | HTTP/2 features |
+JoyfulJay uses a modular extractor architecture to extract features from network traffic. Each extractor focuses on a specific aspect of network behavior, producing ML-ready features without requiring decryption.
 
 ---
 
-## Selecting Features
+## How Extractors Work
 
-### All Features (Default)
+Extractors process network flows (bidirectional connections) and produce feature vectors:
 
-```python
-from joyfuljay import Config, Pipeline
-
-config = Config(features=["all"])  # Default
-pipeline = Pipeline(config)
+```mermaid
+graph LR
+    A[PCAP/Live] --> B[Flow Assembly]
+    B --> C[Packet Processing]
+    C --> D[Feature Extractors]
+    D --> E[ML-Ready Output]
 ```
 
-### Specific Groups
+Each extractor implements a simple interface:
 
-```python
-# Select specific feature groups
-config = Config(features=["flow_meta", "timing", "tls", "fingerprint"])
-```
-
-### Specific Features
-
-```python
-# Select individual features (post-extraction filter)
-config = Config(
-    features=["all"],
-    specific_features=[
-        "src_ip", "dst_ip", "duration",
-        "ja3_hash", "is_tor", "is_vpn"
-    ]
-)
-```
+1. **`extract(flow)`**: Process a flow and return features
+2. **`get_feature_names()`**: Return list of feature names
+3. **`reset()`**: Clear state for next flow
 
 ---
 
-## Feature Categories
+## Available Extractors
 
-### Core Network Features
+### Core Extractors
 
-These extractors analyze basic network properties:
+These extractors handle fundamental network traffic analysis:
 
-- **Flow Metadata** (`flow_meta`): 5-tuple, duration, packet/byte counts
-- **Timing** (`timing`): Inter-arrival times, bursts, SPLT sequences
-- **Size** (`size`): Packet lengths, payload sizes, statistics
+| Extractor | Group | Features | Description |
+|-----------|-------|----------|-------------|
+| [FlowMetaExtractor](flow-meta.md) | `flow_meta` | 22 | Flow identification, duration, packet/byte counts |
+| [TimingExtractor](timing.md) | `timing` | 35 | Inter-arrival times, bursts, idle periods |
+| [SizeExtractor](size.md) | `size` | 15 | Packet length statistics |
 
-### Protocol Analysis
+### Protocol Extractors
 
-Deep protocol inspection for encrypted traffic:
+Specialized extractors for encrypted protocol analysis:
 
-- **TLS** (`tls`): JA3/JA3S fingerprints, cipher suites, SNI, certificate info
-- **QUIC** (`quic`): Version, ALPN, connection IDs
-- **SSH** (`ssh`): HASSH fingerprints, algorithms
-- **DNS** (`dns`): Query types, counts, patterns
-- **HTTP/2** (`http2`): Frame types, stream counts, settings
+| Extractor | Group | Features | Description |
+|-----------|-------|----------|-------------|
+| [TLSExtractor](tls.md) | `tls` | 30+ | TLS metadata, JA3/JA3S fingerprints, certificates |
+| [QUICExtractor](quic.md) | `quic` | 10 | QUIC version, connection IDs, SNI |
+| [SSHExtractor](ssh.md) | `ssh` | 10 | SSH version, HASSH fingerprints |
+| [DNSExtractor](dns.md) | `dns` | 15 | DNS queries, response codes, TTLs |
 
-### TCP Analysis
+### TCP Analysis Extractors
 
 Detailed TCP behavior analysis:
 
-- **TCP Basic** (`tcp`): Flags, handshake, retransmissions
-- **TCP Sequence** (`tcp_sequence`): Sequence number patterns
-- **TCP Window** (`tcp_window`): Window sizes, scaling
-- **TCP Options** (`tcp_options`): MSS, SACK, timestamps
-- **TCP RTT** (`tcp_rtt`): Round-trip time estimation
-- **TCP MPTCP** (`tcp_mptcp`): Multipath TCP detection
-- **TCP Fingerprint** (`tcp_fingerprint`): OS fingerprinting
+| Extractor | Group | Features | Description |
+|-----------|-------|----------|-------------|
+| [TCPExtractor](tcp.md) | `tcp` | 26 | TCP flags, handshake, retransmissions |
 
-### Traffic Classification
+### Traffic Classification Extractors
 
-Pattern detection for traffic classification:
+Pattern detection for traffic fingerprinting:
 
-- **Fingerprint** (`fingerprint`): Tor, VPN, DoH detection
-- **Entropy** (`entropy`): Payload randomness
-- **Padding** (`padding`): Constant-size detection
+| Extractor | Group | Features | Description |
+|-----------|-------|----------|-------------|
+| [FingerprintExtractor](fingerprint.md) | `fingerprint` | 8 | Tor, VPN, DoH detection |
+| [EntropyExtractor](entropy.md) | `entropy` | 6 | Payload entropy analysis |
+| [PaddingExtractor](padding.md) | `padding` | 14 | Constant-size and rate detection |
 
-### Network Topology
+---
 
-Graph-based analysis:
+## Selecting Feature Groups
 
-- **Connection** (`connection`): Fan-out, communities, centrality (requires `[graphs]`)
+### Extract All Features (Default)
 
-### Layer 2/3 Extended
+```python
+import joyfuljay as jj
 
-Additional header fields:
+# All extractors enabled by default
+df = jj.extract("capture.pcap")
+```
 
-- **MAC** (`mac`): Source/dest MAC, VLAN, Ethernet type
-- **IP Extended** (`ip_extended`): TTL, ToS, flags
-- **IPv6 Options** (`ipv6_options`): Extension headers
-- **ICMP** (`icmp`): Type, code, echo analysis
+### Select Specific Groups
+
+Choose only the feature groups you need:
+
+```python
+import joyfuljay as jj
+
+# Only timing, TLS, and fingerprint features
+df = jj.extract("capture.pcap", features=["timing", "tls", "fingerprint"])
+```
+
+### Using Configuration
+
+For fine-grained control:
+
+```python
+import joyfuljay as jj
+
+config = jj.Config(
+    features=["flow_meta", "timing", "size", "tls"],
+    bidirectional_split=True,  # Separate forward/backward features
+    include_raw_sequences=True,  # Include SPLT sequences
+    max_sequence_length=100,
+)
+
+pipeline = jj.Pipeline(config)
+df = pipeline.process_pcap("capture.pcap")
+```
+
+### Command Line
+
+```bash
+# Select specific feature groups
+jj extract capture.pcap --features timing tls fingerprint -o features.csv
+
+# List all available features
+jj features
+```
 
 ---
 
 ## Feature Naming Convention
 
-Features follow a consistent naming scheme:
+All features follow a consistent naming pattern:
 
 ```
-{prefix}_{metric}[_{direction}]
+{category}_{metric}[_{direction}]
 ```
 
 **Examples:**
-- `iat_mean` - Mean inter-arrival time
-- `pkt_len_std` - Packet length standard deviation
-- `tcp_syn_count` - TCP SYN packet count
-- `iat_mean_fwd` - Forward direction IAT mean (with `bidirectional_split`)
+
+| Feature | Meaning |
+|---------|---------|
+| `iat_mean` | Mean inter-arrival time |
+| `pkt_len_std` | Packet length standard deviation |
+| `tcp_syn_count` | Count of TCP SYN flags |
+| `tls_version` | TLS protocol version |
+| `ja3_hash` | JA3 client fingerprint |
 
 ### Directional Features
 
-When `bidirectional_split=True`, directional features are split:
+When `bidirectional_split=True`, features are computed separately for each direction:
 
-| Original | Forward | Backward |
-|----------|---------|----------|
+| Base Feature | Forward | Backward |
+|--------------|---------|----------|
 | `iat_mean` | `iat_mean_fwd` | `iat_mean_bwd` |
 | `pkt_len_std` | `pkt_len_std_fwd` | `pkt_len_std_bwd` |
-| `total_packets` | `total_packets_fwd` | `total_packets_bwd` |
+| `total_bytes` | `bytes_fwd` | `bytes_bwd` |
+
+**Forward** = Client to Server (flow initiator)
+**Backward** = Server to Client (flow responder)
 
 ---
 
 ## Feature Types
 
-| Type | Python Type | Description |
-|------|-------------|-------------|
-| `int` | `int` | Counts, flags |
-| `float` | `float` | Statistics, ratios |
-| `str` | `str` | Hashes, addresses |
-| `list[int]` | `list[int]` | Sequences (e.g., SPLT) |
-| `list[float]` | `list[float]` | Raw IAT sequences |
-| `bool` | `bool` | Detection flags |
+| Type | Python Type | Example |
+|------|-------------|---------|
+| Integer | `int` | Packet counts, flag counts |
+| Float | `float` | Statistics, ratios, durations |
+| String | `str` | Hashes, IP addresses, SNI |
+| Boolean | `bool` | Detection flags (`likely_tor`) |
+| List | `list[int]` | Sequences (SPLT) |
 
 ---
 
-## Performance Considerations
+## Performance Characteristics
 
-### Fast Extractors (No Deep Inspection)
+### Fast Extractors
 
-These extractors work without raw payload:
-- `flow_meta`, `timing`, `size`, `tcp`, `mac`, `ip_extended`
-- `tcp_sequence`, `tcp_window`, `tcp_options`, `tcp_rtt`, `icmp`
+These extractors work on packet headers only:
 
-### Deep Inspection Required
+- `flow_meta` - Basic flow statistics
+- `timing` - Inter-arrival times
+- `size` - Packet lengths
+- `tcp` - TCP header analysis
 
-These extractors need `raw_payload`:
-- `tls`, `quic`, `ssh`, `dns`, `entropy`, `http2`
+### Deep Inspection Extractors
 
-The pipeline automatically enables raw payload capture when these groups are selected.
+These extractors require payload access:
 
-### Two-Phase Processing
+- `tls` - TLS handshake parsing
+- `quic` - QUIC header parsing
+- `ssh` - SSH banner parsing
+- `dns` - DNS message parsing
+- `entropy` - Payload entropy calculation
 
-The `connection` extractor requires all flows to be collected before graph analysis. This means:
-- Not available in streaming mode
-- Uses more memory for large captures
+The pipeline automatically enables payload capture when these groups are selected.
 
 ---
 
-## Example: Custom Feature Selection for ML
+## Recommended Feature Sets
+
+### For Traffic Classification
 
 ```python
-from joyfuljay import Config, Pipeline
-
-# Features proven effective for traffic classification
-config = Config(
-    features=["timing", "size", "tls", "fingerprint", "entropy"],
-    bidirectional_split=True,  # Separate forward/backward
-    include_raw_sequences=True,  # For deep learning
-    max_sequence_length=100,
+config = jj.Config(
+    features=["timing", "size", "tls", "fingerprint"],
+    bidirectional_split=True,
 )
+```
 
-pipeline = Pipeline(config)
-df = pipeline.process_pcap("capture.pcap")
+### For Anomaly Detection
 
-# Output has ~100 features optimized for ML
-print(f"Feature columns: {len(df.columns)}")
-print(df.head())
+```python
+config = jj.Config(
+    features=["timing", "size", "entropy", "tcp"],
+    include_raw_sequences=True,
+    max_sequence_length=50,
+)
+```
+
+### For Application Identification
+
+```python
+config = jj.Config(
+    features=["tls", "quic", "dns", "flow_meta"],
+)
+```
+
+### Minimal Feature Set (Fast)
+
+```python
+config = jj.Config(
+    features=["flow_meta", "timing", "size"],
+)
+```
+
+---
+
+## Creating Custom Extractors
+
+See the [Custom Extractors Tutorial](../tutorials/custom-extractors.md) for a complete guide to creating your own extractors.
+
+Basic structure:
+
+```python
+from joyfuljay.extractors.base import FeatureExtractor
+
+class MyExtractor(FeatureExtractor):
+    """Custom feature extractor."""
+
+    name = "my_features"
+
+    def get_feature_names(self) -> list[str]:
+        return ["my_feature_1", "my_feature_2"]
+
+    def extract(self, flow) -> dict:
+        return {
+            "my_feature_1": self._compute_feature_1(flow),
+            "my_feature_2": self._compute_feature_2(flow),
+        }
 ```
 
 ---
 
 ## See Also
 
-- [Configuration Reference](../configuration.md) - All configuration options
-- [Developer Guide](../developer-guide.md) - Creating custom extractors
-- [Architecture](../architecture.md) - Extractor framework design
+- [Features Reference](../features.md) - Complete feature documentation
+- [Configuration](../configuration.md) - All configuration options
+- [Architecture](../architecture.md) - System design details
+- [Developer Guide](../developer-guide.md) - Contributing extractors

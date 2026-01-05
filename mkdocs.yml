@@ -1,12 +1,12 @@
 # JoyfulJay Documentation Configuration
-# Reference: docs/PRD-DOCUMENTATION.md
+# Streamlined navigation based on actual content
 
 site_name: JoyfulJay Documentation
 site_url: https://joyfuljay.readthedocs.io
 site_author: JoyfulJay Contributors
 site_description: >-
   JoyfulJay - Python library for extracting ML-ready features from encrypted network traffic.
-  387 features, TLS/QUIC/SSH analysis, traffic fingerprinting, and enterprise integrations.
+  Comprehensive feature extraction for TLS, QUIC, SSH analysis and traffic fingerprinting.
 
 repo_url: https://github.com/cenab/joyfuljay
 repo_name: joyfuljay/joyfuljay
@@ -54,14 +54,12 @@ theme:
     - navigation.sections
     - navigation.expand
     - navigation.path
-    - navigation.indexes
     - navigation.top
     - navigation.footer
     - navigation.tracking
 
     # Table of contents
     - toc.follow
-    - toc.integrate
 
     # Search
     - search.suggest
@@ -78,17 +76,12 @@ theme:
 
     # Header
     - header.autohide
-    - announce.dismiss
 
 # Plugins
 plugins:
   - search:
       lang: en
       separator: '[\s\-\.]+'
-      pipeline:
-        - stemmer
-        - stopWordFilter
-        - trimmer
 
   - mkdocstrings:
       default_handler: python
@@ -100,13 +93,10 @@ plugins:
             show_source: true
             show_root_heading: true
             show_root_full_path: false
-            show_symbol_type_heading: true
-            show_symbol_type_toc: true
             members_order: source
             merge_init_into_class: true
             separate_signature: true
             show_signature_annotations: true
-            signature_crossrefs: true
           paths: [src]
 
   - git-revision-date-localized:
@@ -120,14 +110,6 @@ plugins:
       minify_css: true
       htmlmin_opts:
         remove_comments: true
-
-  # Social cards plugin disabled - requires Cairo which may not be available
-  # - social:
-  #     cards_layout_options:
-  #       background_color: "#3f51b5"
-
-  - tags:
-      tags_file: tags.md
 
   - glightbox:
       touchNavigation: true
@@ -207,32 +189,6 @@ extra:
       link: https://pypi.org/project/joyfuljay/
       name: JoyfulJay on PyPI
 
-  analytics:
-    provider: google
-    property: G-XXXXXXXXXX
-    feedback:
-      title: Was this page helpful?
-      ratings:
-        - icon: material/emoticon-happy-outline
-          name: This page was helpful
-          data: 1
-          note: >-
-            Thanks for your feedback!
-        - icon: material/emoticon-sad-outline
-          name: This page could be improved
-          data: 0
-          note: >-
-            Thanks for your feedback! Help us improve by
-            <a href="https://github.com/cenab/joyfuljay/issues/new?title=[Docs]+{title}" target="_blank" rel="noopener">opening an issue</a>.
-
-  consent:
-    title: Cookie consent
-    description: >-
-      We use cookies to recognize your repeated visits and preferences, as well
-      as to measure the effectiveness of our documentation and whether users
-      find what they're searching for. With your consent, you're helping us to
-      make our documentation better.
-
   generator: false
 
 # Extra CSS and JavaScript
@@ -249,242 +205,52 @@ extra_javascript:
 watch:
   - src/joyfuljay
 
-# Navigation Structure
+# Navigation Structure - Focused on real content
 nav:
   - Home: index.md
 
   - Getting Started:
-    - getting-started/index.md
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quickstart.md
-    - First Extraction: getting-started/first-extraction.md
-    - Next Steps: getting-started/next-steps.md
+    - Installation: installation.md
+    - Quick Start: quickstart.md
+    - Why JoyfulJay?: why-joyfuljay.md
 
   - User Guide:
-    - user-guide/index.md
-    - Core Concepts:
-      - user-guide/concepts/index.md
-      - Understanding Flows: user-guide/concepts/flows.md
-      - Feature Extraction: user-guide/concepts/features.md
-      - Pipelines: user-guide/concepts/pipelines.md
-      - Capture Backends: user-guide/concepts/backends.md
-    - Python API:
-      - user-guide/python-api/index.md
-      - Basic Usage: user-guide/python-api/basic-usage.md
-      - Configuration: user-guide/python-api/configuration.md
-      - Pipelines: user-guide/python-api/pipelines.md
-      - Streaming: user-guide/python-api/streaming.md
-      - Advanced Patterns: user-guide/python-api/advanced.md
-    - Command Line:
-      - user-guide/cli/index.md
-      - jj extract: user-guide/cli/extract.md
-      - jj live: user-guide/cli/live.md
-      - jj serve: user-guide/cli/serve.md
-      - jj info: user-guide/cli/info.md
-      - All Commands: user-guide/cli/all-commands.md
-    - Output Formats:
-      - user-guide/output-formats/index.md
-      - DataFrame: user-guide/output-formats/dataframe.md
-      - NumPy: user-guide/output-formats/numpy.md
-      - CSV & JSON: user-guide/output-formats/csv-json.md
-      - Parquet: user-guide/output-formats/parquet.md
-      - Streaming: user-guide/output-formats/streaming-output.md
-    - Configuration:
-      - user-guide/configuration/index.md
-      - Flow Management: user-guide/configuration/flow-management.md
-      - Feature Selection: user-guide/configuration/feature-selection.md
-      - Privacy Options: user-guide/configuration/privacy.md
-      - Performance: user-guide/configuration/performance.md
-      - Config Files: user-guide/configuration/config-files.md
-
-  - Features:
-    - features/index.md
-    - Feature Groups: features/feature-groups.md
-    - Complete Reference: features/complete-reference.md
-    - Flow Metadata:
-      - features/flow-meta/index.md
-    - Timing:
-      - features/timing/index.md
-      - Inter-Arrival Time: features/timing/iat.md
-      - Burst Metrics: features/timing/burst.md
-    - Size:
-      - features/size/index.md
-    - TLS:
-      - features/tls/index.md
-      - JA3 Fingerprinting: features/tls/ja3.md
-      - JA3S Fingerprinting: features/tls/ja3s.md
-      - Certificates: features/tls/certificates.md
-    - QUIC:
-      - features/quic/index.md
-    - SSH:
-      - features/ssh/index.md
-      - HASSH: features/ssh/hassh.md
-    - DNS:
-      - features/dns/index.md
-    - TCP:
-      - features/tcp/index.md
-      - Flags: features/tcp/flags.md
-      - Handshake: features/tcp/handshake.md
-      - Sequence: features/tcp/sequence.md
-      - Window: features/tcp/window.md
-      - Options: features/tcp/options.md
-      - RTT: features/tcp/rtt.md
-      - Fingerprint: features/tcp/fingerprint.md
-    - Fingerprint:
-      - features/fingerprint/index.md
-      - Tor Detection: features/fingerprint/tor.md
-      - VPN Detection: features/fingerprint/vpn.md
-      - DoH Detection: features/fingerprint/doh.md
-    - Entropy:
-      - features/entropy/index.md
-    - Padding:
-      - features/padding/index.md
-    - Connection Graph:
-      - features/connection/index.md
-    - MAC/Layer 2:
-      - features/mac/index.md
-    - ICMP:
-      - features/icmp/index.md
-    - HTTP/2:
-      - features/http2/index.md
+    - Features: features.md
+    - Configuration: configuration.md
+    - CLI Reference: cli-reference.md
+    - Architecture: architecture.md
 
   - Extractors:
     - extractors/index.md
-    - Architecture: extractors/architecture.md
-    - FlowMetaExtractor: extractors/flow-meta.md
-    - TimingExtractor: extractors/timing.md
-    - SizeExtractor: extractors/size.md
-    - TLSExtractor: extractors/tls.md
-    - QUICExtractor: extractors/quic.md
-    - SSHExtractor: extractors/ssh.md
-    - DNSExtractor: extractors/dns.md
-    - TCPExtractor: extractors/tcp.md
-    - FingerprintExtractor: extractors/fingerprint.md
-    - EntropyExtractor: extractors/entropy.md
-    - PaddingExtractor: extractors/padding.md
-    - ConnectionExtractor: extractors/connection.md
+    - Flow Metadata: extractors/flow-meta.md
+    - Timing: extractors/timing.md
+    - Size: extractors/size.md
+    - TLS: extractors/tls.md
+    - QUIC: extractors/quic.md
+    - SSH: extractors/ssh.md
+    - DNS: extractors/dns.md
+    - TCP: extractors/tcp.md
+    - Fingerprint: extractors/fingerprint.md
+    - Entropy: extractors/entropy.md
+    - Padding: extractors/padding.md
+    - Connection Graph: extractors/connection.md
 
   - Tutorials:
     - tutorials/index.md
-    - Beginner:
-      - tutorials/beginner/index.md
-      - Your First PCAP: tutorials/beginner/your-first-pcap.md
-      - Understanding Output: tutorials/beginner/understanding-output.md
-      - Selecting Features: tutorials/beginner/selecting-features.md
-      - Saving Results: tutorials/beginner/saving-results.md
-    - Intermediate:
-      - tutorials/intermediate/index.md
-      - Traffic Classification: tutorials/traffic-classification.md
-      - Encrypted Traffic Analysis: tutorials/encrypted-traffic.md
-      - Batch Processing: tutorials/batch-processing.md
-      - Live Capture: tutorials/intermediate/live-capture.md
-      - Custom Configuration: tutorials/intermediate/custom-config.md
-    - Advanced:
-      - tutorials/advanced/index.md
-      - Custom Extractors: tutorials/custom-extractors.md
-      - Real-time Monitoring: tutorials/realtime-monitoring.md
-      - Remote Capture: tutorials/advanced/remote-capture.md
-      - Deep Learning: tutorials/advanced/deep-learning.md
-      - Production Deployment: tutorials/advanced/production-deployment.md
-    - Use Cases:
-      - tutorials/use-cases/index.md
-      - Malware Detection: tutorials/use-cases/malware-detection.md
-      - Application Identification: tutorials/use-cases/application-identification.md
-      - Anomaly Detection: tutorials/use-cases/anomaly-detection.md
-      - Network Forensics: tutorials/use-cases/network-forensics.md
-      - IoT Security: tutorials/use-cases/iot-security.md
+    - Traffic Classification: tutorials/traffic-classification.md
+    - Encrypted Traffic Analysis: tutorials/encrypted-traffic.md
+    - Batch Processing: tutorials/batch-processing.md
+    - Real-time Monitoring: tutorials/realtime-monitoring.md
+    - Custom Extractors: tutorials/custom-extractors.md
 
   - Integrations:
-    - integrations/index.md
-    - Kafka:
-      - integrations/kafka/index.md
-      - Setup: integrations/kafka/setup.md
-      - Streaming: integrations/kafka/streaming.md
-    - Prometheus:
-      - integrations/prometheus/index.md
-      - Metrics: integrations/prometheus/metrics.md
-      - Setup: integrations/prometheus/setup.md
-    - Grafana:
-      - integrations/grafana/index.md
-      - Dashboards: integrations/grafana/dashboards.md
-    - Databases:
-      - integrations/databases/index.md
-      - PostgreSQL: integrations/databases/postgresql.md
-      - SQLite: integrations/databases/sqlite.md
-    - ML Frameworks:
-      - integrations/ml-frameworks/index.md
-      - scikit-learn: integrations/ml-frameworks/scikit-learn.md
-      - PyTorch: integrations/ml-frameworks/pytorch.md
-      - TensorFlow: integrations/ml-frameworks/tensorflow.md
+    - Kafka Streaming: kafka.md
+    - Prometheus Monitoring: monitoring.md
+    - Remote Capture: remote-capture.md
 
-  - Remote Capture:
-    - remote-capture/index.md
-    - Architecture: remote-capture/architecture.md
-    - Server Setup: remote-capture/server-setup.md
-    - Client Connection: remote-capture/client-connection.md
-    - Security: remote-capture/security.md
-    - Discovery: remote-capture/discovery.md
-    - Troubleshooting: remote-capture/troubleshooting.md
-
-  - API Reference:
-    - api-reference/index.md
-    - joyfuljay Module:
-      - api-reference/joyfuljay/index.md
-      - extract(): api-reference/joyfuljay/extract.md
-      - extract_live(): api-reference/joyfuljay/extract-live.md
-    - Core:
-      - api-reference/core/index.md
-      - Config: api-reference/core/config.md
-      - Pipeline: api-reference/core/pipeline.md
-      - Flow: api-reference/core/flow.md
-      - Packet: api-reference/core/packet.md
-    - Capture:
-      - api-reference/capture/index.md
-      - Backends: api-reference/capture/backends.md
-    - Output:
-      - api-reference/output/index.md
-      - Writers: api-reference/output/writers.md
-    - Monitoring:
-      - api-reference/monitoring/index.md
-    - Utils:
-      - api-reference/utils/index.md
-
-  - Architecture:
-    - architecture/index.md
-    - Design Principles: architecture/design-principles.md
-    - Data Flow: architecture/data-flow.md
-    - Extractor System: architecture/extractor-system.md
-    - Performance: architecture/performance.md
-
-  - Comparison:
-    - comparison/index.md
-    - Feature Comparison: comparison/feature-comparison.md
-    - vs CICFlowMeter: comparison/vs-cicflowmeter.md
-    - vs NFStream: comparison/vs-nfstream.md
-    - vs Tranalyzer2: comparison/vs-tranalyzer.md
-    - Benchmarks: benchmarks.md
+  - API Reference: api.md
 
   - Development:
-    - development/index.md
-    - Contributing: development/contributing.md
-    - Code Style: development/code-style.md
+    - Developer Guide: developer-guide.md
     - Testing: testing.md
-    - Building: development/building.md
-    - Documentation: development/documentation.md
-
-  - Reference:
-    - reference/index.md
-    - Changelog: reference/changelog.md
-    - Migration: reference/migration.md
-    - Glossary: reference/glossary.md
-    - FAQ: reference/faq.md
-    - Troubleshooting: reference/troubleshooting.md
-    - Security: reference/security.md
-
-  - Appendix:
-    - appendix/index.md
-    - BPF Filters: appendix/bpf-filters.md
-    - TCP Flags: appendix/tcp-flags.md
-    - TLS Reference: appendix/tls-versions.md
-    - Port Numbers: appendix/port-numbers.md
-    - Sample PCAPs: appendix/sample-pcaps.md
+    - Benchmarks: benchmarks.md
