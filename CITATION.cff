@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use JoyfulJay in your research, please cite it as below."
+title: "JoyfulJay: Encrypted Traffic Feature Extraction Library"
+abstract: >-
+  JoyfulJay is a Python library for extracting standardized, ML-ready features
+  from encrypted network traffic. It operates on PCAP files and live network
+  interfaces, producing feature vectors that capture timing, size, and
+  protocol metadata patterns without decrypting traffic.
+type: software
+authors:
+  - name: "JoyfulJay Contributors"
+repository-code: "https://github.com/joyfuljay/joyfuljay"
+url: "https://joyfuljay.readthedocs.io"
+license: MIT
+keywords:
+  - network traffic
+  - encrypted traffic
+  - machine learning
+  - feature extraction
+  - TLS
+  - QUIC
+  - security
+version: 0.1.0
+date-released: 2025-01-01

@@ -1,0 +1,16 @@
+# Total packets: 38
+# Total bytes: 3706 (3.71 K)
+# L2/3 Protocol	                       Packets	                         Bytes	Description
+
+
+# Total IPv4 packets: 0 [0.00%]
+# Total IPv6 packets: 0 [0.00%]
+# L4 Protocol	                       Packets	                         Bytes	Description
+
+
+# Total TCP packets: 0 [0.00%]
+# Total TCP bytes: 0 [0.00%]
+
+
+# Total UDP packets: 0 [0.00%]
+# Total UDP bytes: 0 [0.00%]

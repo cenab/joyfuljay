@@ -1,0 +1,616 @@
+{
+  "summary": {
+    "total_files": 498,
+    "total_size_mb": 287.6149311065674
+  },
+  "joyfuljay": {
+    "success_count": 470,
+    "fail_count": 28,
+    "total_time_s": 31.453091372619383,
+    "total_flows": 30662,
+    "avg_features": 368.0617021276596,
+    "throughput_mbs": 9.14425001025313
+  },
+  "nfstream": {
+    "success_count": 379,
+    "fail_count": 119,
+    "total_time_s": 18.2385923396796,
+    "total_flows": 18930,
+    "avg_features": 38.0,
+    "throughput_mbs": 15.769579458214919
+  },
+  "failures": {
+    "joyfuljay": [
+      {
+        "file": "Ethernet_Pause_Frame.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "l2ping.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "greb_DSLkeepalive_m.cap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "jaeger-compact.pcap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "BitTorrent.Transfer1.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "hp-erm-2.cap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "x11-xinput.pcapng",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "fw1_mon2018.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "RTSPPACKETS1.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "i4b.trace",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "Bluetooth1.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "hsrp.pcap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "SoulSeekRoom.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "hiqnet_visiremote-soundcraft_session.pcapng",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "Mixed1.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "metamako_trailer.pcap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "ascend.trace",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "PioletSearch.Manolito.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "c07-sip-r2.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "vlan.cap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "FTPv6-1.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "iseries.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "FTPv6-2.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "MicrosoftNTP.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "Manolito2.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "cmp-trace.pcap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "opensafety_udp_trace.pcap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "curl-packets-syscalls-2016-05-04.pcapng",
+        "error": "Unable to read PCAP file: unpack requires a buffer of 1 bytes"
+      }
+    ],
+    "nfstream": [
+      {
+        "file": "homeplug_request_parameters_and_statistics.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "homeplug_request_channel_estimation.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "Apple_IP-over-IEEE_1394_Packet.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "dvb-ci_UV1_0000.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "udp-nm_anon.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "lldp.minimal.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "cdp-BCM1100.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "ansi_tcap_over_itu_sccp_over_mtp3_over_mtp2.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "wisunSimple.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "Ethernet_Pause_Frame.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "homeplug_network_statistics_basic.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "mdb_bill_validator.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "rarp_req_reply.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "lldp.detailed.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "lldpmed_civicloc.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "cdp.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "gsm-r.uus1.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "configuration_test_protocol_aka_loop.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "DTP.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "l2ping.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "mouse_replug2.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "Stanag5066-RAW-ENCAP-Bftp-Exchange-tx.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "ppp_lcp_ipcp.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "edp.trace",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "atm_capture1.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "dssetup_DsRoleGetPrimaryDomainInformation_ad_dc.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "lacp1.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "ecpri.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "STP_UplinkFast.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "etsi-its-cam-unsecured.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "SyncE_bidirectional.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "telecomitalia-pppoe.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "cdp_v2.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "jaeger-compact.pcap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "msgpack-generated.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "fcoe-t11-short.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "novell_llc_netbios.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "BitTorrent.Transfer1.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "novell_raw_netbios.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "zigbee-join-authenticate.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "edp1.trace",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "novell_eth2_netbios.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "lldp-shutdown-pdu.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "x11-xinput.pcapng",
+        "error": "unknown file format"
+      },
+      {
+        "file": "fw1_mon2018.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "RTSPPACKETS1.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "i4b.trace",
+        "error": "unknown file format"
+      },
+      {
+        "file": "abis-reject-network.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "fip-ka.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "6lowpan-rfrag-icmpv6.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "Bluetooth1.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "mdb_cashless_1.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "mesh_assoc_truncated.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "XHC1-SanDiskExtremePortableSSD.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "nflog-ebtables.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "wpsdata.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "eigrp-ipx.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "stp.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "nflog.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "fip-adv.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "infiniband.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "usb_memory_stick_delete_file.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "alp-sample1.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "ipmb.multi.packets.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "netlink-nflog.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "eapol-mka.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "fcoe-drop-rddata.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "SoulSeekRoom.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "usbhub.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "Mixed1.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "SITA-Protocols.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "netlink-conntrack.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "usb_u3v_sample.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "usb_memory_stick_create_file.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "fcoe1.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "IrDA_Traffic.ntar",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "etsi-its-denm-unsecured.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "lls-tables-alp.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "ciscowl.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "bacnet-arcnet-linux.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "netlink-ipset.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "XHC20-MicrosoftKeyboard.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "XHC20-LogitechUnifying.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "usbstick3.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "arp-storm.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "tipc_v2_fragmenter_messages.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "220703_arp-storm.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "http_PPI.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "isl-2-dot1q.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "edp.eaps.mirror2.trace",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "ascend.trace",
+        "error": "unknown file format"
+      },
+      {
+        "file": "ch11-25-slt.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "Read-FeliCa-Lite-NDEF-Tags.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "PioletSearch.Manolito.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "alp-sample2.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "epl.cap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "mesh.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "c07-sip-r2.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "dvb-ci_2.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "xrite-i1displaypro-argyllcms-1.9.2-spotread.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "Network_Join_Nokia_Mobile.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "FTPv6-1.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "macsec_cisco_trunk.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "dvb-ci_1.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "netlink.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "VariousUSBDevices.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "iseries.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "isup_load_generator.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "usb_memory_stick.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "XHC20-OpenVizsla.pcapng",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "FTPv6-2.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "MicrosoftNTP.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "dump_2009-02-02_23_17_18_RFPI_00_4e_b4_bd_50.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "Manolito2.cap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "cmp-trace.pcap",
+        "error": "unknown file format"
+      },
+      {
+        "file": "xrite-i1displaypro-i1profiler.pcap",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "BT_USB_LinCooked_Eth_80211_RT.ntar",
+        "error": "object of type 'NoneType' has no len()"
+      },
+      {
+        "file": "curl-packets-syscalls-2016-05-04.pcapng",
+        "error": "Interface Description Block has if_tsresol option with length 4 != 1"
+      },
+      {
+        "file": "Bluetooth_HCI_and_OBEX_Transaction_over_USB.ntar",
+        "error": "object of type 'NoneType' has no len()"
+      }
+    ]
+  }
+}

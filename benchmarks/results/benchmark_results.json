@@ -1,0 +1,67 @@
+[
+  {
+    "tool": "NFStream",
+    "pcap_file": "smallFlows.pcap",
+    "pcap_size_mb": 9.007197380065918,
+    "packet_count": 13510,
+    "duration_seconds": 0.23681737505830824,
+    "throughput_mbps": 38.03436034981893,
+    "packets_per_second": 57048.17898886693,
+    "flows_extracted": 641,
+    "feature_count": 38,
+    "peak_memory_mb": 0.8397407531738281,
+    "error": null
+  },
+  {
+    "tool": "Tranalyzer2",
+    "pcap_file": "smallFlows.pcap",
+    "pcap_size_mb": 9.007197380065918,
+    "packet_count": 13510,
+    "duration_seconds": 0.017275040969252586,
+    "throughput_mbps": 521.3994800995033,
+    "packets_per_second": 782053.1380531086,
+    "flows_extracted": 0,
+    "feature_count": 112,
+    "peak_memory_mb": 55.90625,
+    "error": null
+  },
+  {
+    "tool": "Scapy (manual)",
+    "pcap_file": "smallFlows.pcap",
+    "pcap_size_mb": 9.007197380065918,
+    "packet_count": 13510,
+    "duration_seconds": 4.784932083101012,
+    "throughput_mbps": 1.8824086159711062,
+    "packets_per_second": 2823.4465537584933,
+    "flows_extracted": 1209,
+    "feature_count": 2,
+    "peak_memory_mb": 96.58847427368164,
+    "error": null
+  },
+  {
+    "tool": "NFStream",
+    "pcap_file": "bigFlows.pcap",
+    "pcap_size_mb": 351.03192138671875,
+    "packet_count": 526547,
+    "duration_seconds": 9.23312258394435,
+    "throughput_mbps": 38.01876539548329,
+    "packets_per_second": 57028.052558905954,
+    "flows_extracted": 28576,
+    "feature_count": 38,
+    "peak_memory_mb": 28.19591999053955,
+    "error": null
+  },
+  {
+    "tool": "Tranalyzer2",
+    "pcap_file": "bigFlows.pcap",
+    "pcap_size_mb": 351.03192138671875,
+    "packet_count": 526547,
+    "duration_seconds": 0.12606475001666695,
+    "throughput_mbps": 2784.536687220726,
+    "packets_per_second": 4176798.03379125,
+    "flows_extracted": 0,
+    "feature_count": 112,
+    "peak_memory_mb": 55.90625,
+    "error": null
+  }
+]

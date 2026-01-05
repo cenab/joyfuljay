@@ -1,0 +1,71 @@
+name: Tranalyzer2 Benchmark
+
+on:
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpcap-dev zlib1g-dev
+
+      - name: Download and build Tranalyzer2
+        run: |
+          cd /tmp
+          wget -q https://tranalyzer.com/downloads/tranalyzer2/tranalyzer2-0.9.4.tar.gz
+          tar xzf tranalyzer2-0.9.4.tar.gz
+          cd tranalyzer2-0.9.4/tranalyzer2
+          ./autogen.sh && make -j$(nproc)
+          echo "/tmp/tranalyzer2-0.9.4/tranalyzer2/build" >> $GITHUB_PATH
+
+      - name: Build plugins
+        run: |
+          cd /tmp/tranalyzer2-0.9.4
+          for plugin in basicFlow basicStats tcpFlags tcpStates connStat txtSink; do
+            cd plugins/$plugin && ./autogen.sh && make -j$(nproc) && cd ../..
+          done
+          mkdir -p ~/.tranalyzer/plugins
+          cp plugins/*/src/*.so ~/.tranalyzer/plugins/ 2>/dev/null || true
+
+      - name: Verify Tranalyzer2
+        run: |
+          /tmp/tranalyzer2-0.9.4/tranalyzer2/build/tranalyzer --version
+
+      - name: Download test captures
+        run: |
+          cd benchmarks
+          pip install requests
+          python download_all_samples.py
+
+      - name: Run benchmark
+        run: |
+          cd benchmarks/data/wireshark_samples
+          T2=/tmp/tranalyzer2-0.9.4/tranalyzer2/build/tranalyzer
+
+          echo "file,flows,features" > /tmp/results.csv
+          TOTAL=0
+
+          for f in *.pcap *.pcapng *.cap 2>/dev/null; do
+            [ -f "$f" ] || continue
+            $T2 -r "$f" -w /tmp/out 2>/dev/null || continue
+            FLOWS=$(($(wc -l < /tmp/out_flows.txt) - 1))
+            FEATURES=$(head -1 /tmp/out_flows.txt | tr '\t' '\n' | wc -l)
+            echo "$f,$FLOWS,$FEATURES" >> /tmp/results.csv
+            TOTAL=$((TOTAL + FLOWS))
+          done
+
+          echo "=== RESULTS ==="
+          echo "Total flows: $TOTAL"
+          cat /tmp/results.csv
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: tranalyzer2-results
+          path: /tmp/results.csv

@@ -1,0 +1,183 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "joyfuljay"
+version = "0.1.0"
+description = "Python library for extracting ML-ready features from encrypted network traffic"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "JoyfulJay Contributors" }
+]
+keywords = [
+    "network",
+    "traffic",
+    "encrypted",
+    "TLS",
+    "QUIC",
+    "machine-learning",
+    "features",
+    "pcap",
+    "security",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: System :: Networking :: Monitoring",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+dependencies = [
+    "scapy>=2.5.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "click>=8.0.0",
+    "websockets>=12.0",
+    "msgpack>=1.0.0",
+]
+
+[project.optional-dependencies]
+fast = ["dpkt>=1.9.8"]
+libpcap = ["python-libpcap>=0.4.0"]
+graphs = ["networkx>=3.0"]
+db = ["psycopg>=3.1"]
+kafka = ["kafka-python>=2.0"]
+monitoring = ["prometheus-client>=0.17.0"]
+discovery = ["zeroconf>=0.131.0"]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "hypothesis>=6.0",
+    "prometheus-client>=0.17.0",
+    "mypy>=1.0",
+    "ruff>=0.1.0",
+    "pandas-stubs>=2.0",
+    "types-click>=7.1",
+]
+docs = [
+    "mkdocs>=1.5",
+    "mkdocs-material>=9.0",
+    "mkdocstrings[python]>=0.24",
+]
+
+[project.scripts]
+joyfuljay = "joyfuljay.cli.main:cli"
+jj = "joyfuljay.cli.main:cli"
+
+[project.urls]
+Homepage = "https://github.com/joyfuljay/joyfuljay"
+Documentation = "https://joyfuljay.readthedocs.io"
+Repository = "https://github.com/joyfuljay/joyfuljay"
+Issues = "https://github.com/joyfuljay/joyfuljay/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/joyfuljay"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+    "/CITATION.cff",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG",    # flake8-unused-arguments
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "PTH",    # flake8-use-pathlib
+    "RUF",    # Ruff-specific rules
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B008",   # do not perform function calls in argument defaults
+    "B905",   # zip without strict (Python 3.10+)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["joyfuljay"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+follow_imports = "normal"
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "scapy.*",
+    "dpkt.*",
+    "websockets.*",
+    "msgpack.*",
+    "networkx.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = [
+    "-ra",
+    "-q",
+    "--strict-markers",
+    "--strict-config",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
+
+[tool.coverage.run]
+source = ["src/joyfuljay"]
+branch = true
+parallel = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "@abstractmethod",
+]

@@ -1,0 +1,46 @@
+[
+  {
+    "tool": "JoyfulJay",
+    "pcap": "smallFlows.pcap",
+    "size_mb": 9.0,
+    "packets": 14261,
+    "time_s": 1.5813960420200601,
+    "throughput_mbs": 5.691173975940579,
+    "pps": 9017.981341209843,
+    "flows": 1253,
+    "features": 387
+  },
+  {
+    "tool": "NFStream",
+    "pcap": "smallFlows.pcap",
+    "size_mb": 9.0,
+    "packets": 14261,
+    "time_s": 0.09219912497792393,
+    "throughput_mbs": 97.6148092745452,
+    "pps": 154676.08834047656,
+    "flows": 641,
+    "features": 38
+  },
+  {
+    "tool": "JoyfulJay",
+    "pcap": "bigFlows.pcap",
+    "size_mb": 351.0,
+    "packets": 791615,
+    "time_s": 103.07616545807105,
+    "throughput_mbs": 3.4052489092910476,
+    "pps": 7679.903462474167,
+    "flows": 52670,
+    "features": 387
+  },
+  {
+    "tool": "NFStream",
+    "pcap": "bigFlows.pcap",
+    "size_mb": 351.0,
+    "packets": 791615,
+    "time_s": 2.1873209580080584,
+    "throughput_mbs": 160.47027699110396,
+    "pps": 361910.7644453355,
+    "flows": 28576,
+    "features": 38
+  }
+]

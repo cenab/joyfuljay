@@ -1,0 +1,224 @@
+{
+  "summary": {
+    "total_files": 498,
+    "total_size_mb": 287.6149311065674
+  },
+  "joyfuljay": {
+    "success_count": 470,
+    "fail_count": 28,
+    "total_time_s": 29.044430811190978,
+    "total_flows": 30662,
+    "avg_features": 368.0617021276596,
+    "throughput_mbs": 9.90258452562781
+  },
+  "tranalyzer2": {
+    "success_count": 477,
+    "fail_count": 21,
+    "total_time_s": 8.017261787783355,
+    "total_flows": 1210,
+    "avg_features": 112.0,
+    "throughput_mbs": 35.87445922557162
+  },
+  "failures": {
+    "joyfuljay": [
+      {
+        "file": "Ethernet_Pause_Frame.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "l2ping.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "greb_DSLkeepalive_m.cap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "jaeger-compact.pcap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "BitTorrent.Transfer1.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "hp-erm-2.cap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "x11-xinput.pcapng",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "fw1_mon2018.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "RTSPPACKETS1.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "i4b.trace",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "Bluetooth1.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "hsrp.pcap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "SoulSeekRoom.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "hiqnet_visiremote-soundcraft_session.pcapng",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "Mixed1.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "metamako_trailer.pcap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "ascend.trace",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "PioletSearch.Manolito.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "c07-sip-r2.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "vlan.cap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "FTPv6-1.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "iseries.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "FTPv6-2.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "MicrosoftNTP.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "Manolito2.cap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "cmp-trace.pcap",
+        "error": "invalid tcpdump header"
+      },
+      {
+        "file": "opensafety_udp_trace.pcap",
+        "error": "slice(None, 2, None)"
+      },
+      {
+        "file": "curl-packets-syscalls-2016-05-04.pcapng",
+        "error": "Unable to read PCAP file: unpack requires a buffer of 1 bytes"
+      }
+    ],
+    "tranalyzer2": [
+      {
+        "file": "Ethernet_Pause_Frame.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "l2ping.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "jaeger-compact.pcap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "BitTorrent.Transfer1.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "x11-xinput.pcapng",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "fw1_mon2018.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "RTSPPACKETS1.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "i4b.trace",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "Bluetooth1.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "SoulSeekRoom.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "Mixed1.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "ascend.trace",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "PioletSearch.Manolito.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "c07-sip-r2.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "FTPv6-1.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "iseries.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "FTPv6-2.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "MicrosoftNTP.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "Manolito2.cap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "cmp-trace.pcap",
+        "error": "No flow file produced"
+      },
+      {
+        "file": "curl-packets-syscalls-2016-05-04.pcapng",
+        "error": "No flow file produced"
+      }
+    ]
+  }
+}
