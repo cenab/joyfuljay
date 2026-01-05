@@ -58,7 +58,8 @@ theme:
     - navigation.footer
     - navigation.tracking
 
-    # Table of contents
+    # Table of contents - integrated into left sidebar
+    - toc.integrate
     - toc.follow
 
     # Search

@@ -1,6 +1,29 @@
 /* JoyfulJay Documentation - Custom Styles */
 
 /* =====================================================
+   Hide MkDocs Material Promotional Elements
+   ===================================================== */
+
+/* Hide sponsor/advertisement badges */
+.md-sponsor,
+.md-sponsor__link,
+[data-md-component="announce"],
+.md-banner,
+.md-banner--warning,
+.mdx-sponsor,
+.mdx-sponsor__list,
+.md-typeset .mdx-insiders,
+.md-source__repository {
+  display: none !important;
+}
+
+/* Hide "Made with Material for MkDocs" in footer if not already hidden */
+.md-footer-meta__inner.md-typeset a[href*="squidfunk"],
+.md-footer-meta__inner.md-typeset a[href*="mkdocs-material"] {
+  display: none !important;
+}
+
+/* =====================================================
    Root Variables & Theme Customization
    ===================================================== */
 
