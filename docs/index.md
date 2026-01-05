@@ -2,43 +2,69 @@
 
 <div align="center">
 
-**Encrypted Traffic Feature Extraction for Machine Learning**
+**Extract ML-Ready Features from Encrypted Network Traffic**
+
+*Analyze TLS, QUIC, SSH, and more - without decryption*
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[Quick Start](#quick-start) | [Installation](installation.md) | [API Reference](api.md) | [Benchmarks](benchmarks.md)
+[Quick Start](#quick-start) | [Installation](installation.md) | [Features](features.md) | [Tutorials](tutorials/index.md)
 
 </div>
 
 ---
 
-## What is JoyfulJay?
+## The Problem: Encrypted Traffic is Hard to Analyze
 
-JoyfulJay extracts **ML-ready features** from encrypted network traffic without decrypting it. It analyzes timing patterns, packet sizes, and protocol metadata to produce feature vectors suitable for traffic classification, anomaly detection, and network forensics.
+Over 95% of web traffic is now encrypted with TLS. Traditional deep packet inspection can't see inside encrypted connections, yet you still need to:
+
+- **Classify traffic** (streaming vs. browsing vs. malicious)
+- **Detect threats** (malware C2, data exfiltration, policy violations)
+- **Identify applications** (what's running on your network?)
+- **Detect anonymization** (Tor, VPNs, DNS-over-HTTPS)
+
+**The solution?** Analyze the *behavior* of encrypted traffic - timing patterns, packet sizes, protocol handshakes - without ever needing to decrypt it.
+
+---
+
+## How JoyfulJay Works
+
+JoyfulJay extracts **200+ behavioral features** from network flows that reveal traffic characteristics without exposing content:
 
 ```python
 import joyfuljay as jj
 
-# Extract features from a PCAP file
-df = jj.extract("capture.pcap")
-print(f"Extracted {len(df)} flows with {len(df.columns)} features")
+# Extract features from encrypted traffic
+df = jj.extract("https_traffic.pcap")
+
+# You now have ML-ready features like:
+# - Timing: iat_mean, iat_std, burstiness_index
+# - Size: pkt_len_mean, pkt_len_std, byte_asymmetry
+# - TLS: ja3_hash, tls_sni, tls_cipher_count
+# - Detection: likely_tor, vpn_type, likely_doh
 ```
+
+These features can distinguish a Tor connection from a VPN connection from regular HTTPS - all without seeing the encrypted payload.
 
 ---
 
-## Key Features
+## What Can You Do With JoyfulJay?
 
-| Feature | Description |
-|---------|-------------|
-| **12x Faster** | Process 10+ GB/s with DPKT backend |
-| **387 Features** | 4.6x more features than CICFlowMeter |
-| **ML-Ready Output** | DataFrame, NumPy, CSV, JSON, Parquet |
-| **Protocol Analysis** | TLS, QUIC, SSH, DNS, HTTP/2, ICMP |
-| **Traffic Fingerprinting** | Detect Tor, VPN, DoH patterns |
-| **Enterprise Ready** | Kafka streaming, Prometheus metrics |
+### Traffic Classification
+Train ML models to identify application types (Netflix vs. YouTube vs. Zoom) based on behavioral patterns.
 
-See [Why JoyfulJay?](why-joyfuljay.md) for detailed comparisons and [Benchmarks](benchmarks.md) for performance data.
+### Threat Detection
+Detect malware command-and-control traffic, data exfiltration attempts, and suspicious communication patterns.
+
+### Network Forensics
+Analyze captured traffic to understand what happened during a security incident.
+
+### Privacy Research
+Study anonymization tools and encrypted DNS to understand their fingerprints.
+
+### QoS Monitoring
+Classify traffic for quality-of-service policies without inspecting content.
 
 ---
 
@@ -55,38 +81,117 @@ pip install joyfuljay
 ```python
 import joyfuljay as jj
 
-# Simple extraction
+# Extract all features (200+)
 df = jj.extract("traffic.pcap")
+print(f"Extracted {len(df)} flows with {len(df.columns)} features")
 
-# With specific feature groups
+# Select specific feature groups
 df = jj.extract("traffic.pcap", features=["timing", "tls", "fingerprint"])
 
-# Save to CSV
+# Save for ML training
 df.to_csv("features.csv", index=False)
 ```
 
-### Command Line
+### Command Line Interface
 
 ```bash
 # Extract to CSV
 jj extract capture.pcap -o features.csv
 
-# Live capture for 60 seconds
+# Select features
+jj extract capture.pcap --features timing tls -o features.csv
+
+# Live capture from network interface
 jj live eth0 --duration 60 -o live.csv
 
-# View system status
-jj status
+# View available features
+jj features
 ```
 
-### Live Capture
+### Detect Tor Traffic
 
 ```python
 import joyfuljay as jj
 
-# Capture from network interface
-df = jj.extract_live("eth0", duration=30)
-print(f"Captured {len(df)} flows")
+df = jj.extract("capture.pcap", features=["fingerprint", "padding"])
+
+# Find Tor flows
+tor_flows = df[df['likely_tor'] == True]
+print(f"Detected {len(tor_flows)} potential Tor connections")
+
+# Check confidence scores
+print(tor_flows[['src_ip', 'dst_ip', 'tor_confidence', 'padding_score']])
 ```
+
+### Train a Traffic Classifier
+
+```python
+import joyfuljay as jj
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+# Extract features
+df = jj.extract("labeled_traffic.pcap", features=["timing", "size", "tls"])
+
+# Prepare for ML (numeric features only)
+X = df.select_dtypes(include=['number']).fillna(0)
+y = df['label']  # Assuming you have labels
+
+# Train/test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# Train classifier
+clf = RandomForestClassifier(n_estimators=100)
+clf.fit(X_train, y_train)
+
+# Evaluate
+print(f"Accuracy: {clf.score(X_test, y_test):.2%}")
+```
+
+---
+
+## Key Capabilities
+
+| Capability | Description |
+|------------|-------------|
+| **200+ Features** | Timing, size, TLS, QUIC, SSH, DNS, TCP, entropy, padding, graph metrics |
+| **12x Faster** | Process 10+ GB/s with optimized DPKT backend |
+| **Protocol Analysis** | Parse TLS handshakes, extract JA3/JA3S fingerprints, SNI, certificates |
+| **Traffic Fingerprinting** | Detect Tor, VPN (WireGuard, OpenVPN, IPSec), DNS-over-HTTPS |
+| **Enterprise Ready** | Kafka streaming, Prometheus metrics, parallel processing |
+| **Privacy Preserving** | Anonymize IPs, exclude identifiers for research datasets |
+
+---
+
+## Feature Groups
+
+JoyfulJay organizes 200+ features into logical groups:
+
+| Group | Description | Key Features |
+|-------|-------------|--------------|
+| `flow_meta` | Flow identification | src_ip, dst_ip, duration, packet counts |
+| `timing` | Temporal patterns | iat_mean, iat_std, burstiness, burst_count |
+| `size` | Packet sizes | pkt_len_mean, pkt_len_std, byte_asymmetry |
+| `tls` | TLS analysis | ja3_hash, tls_sni, tls_version, cipher_count |
+| `quic` | QUIC protocol | quic_version, quic_alpn, quic_sni |
+| `ssh` | SSH fingerprinting | ssh_hassh, ssh_version, ssh_software |
+| `tcp` | TCP behavior | syn_count, rst_count, handshake_complete |
+| `fingerprint` | Traffic detection | likely_tor, likely_vpn, vpn_type, likely_doh |
+| `entropy` | Payload analysis | entropy_payload, printable_ratio |
+| `padding` | Obfuscation detection | is_constant_size, padding_score |
+| `connection` | Graph analysis | unique_dsts, betweenness, community_id |
+
+Select groups when extracting:
+
+```python
+# Only what you need (faster)
+df = jj.extract("capture.pcap", features=["timing", "tls"])
+
+# Everything (comprehensive)
+df = jj.extract("capture.pcap", features=["all"])
+```
+
+See [Complete Feature Reference](features.md) for detailed documentation of every feature.
 
 ---
 
@@ -97,155 +202,49 @@ print(f"Captured {len(df)} flows")
 |----------|-------------|
 | [Installation](installation.md) | Install JoyfulJay and optional dependencies |
 | [Quick Start](quickstart.md) | Your first feature extraction in 5 minutes |
-| [CLI Reference](cli-reference.md) | Complete command-line interface guide |
+| [Why JoyfulJay?](why-joyfuljay.md) | Comparison with alternatives |
 
 ### Core Concepts
 | Document | Description |
 |----------|-------------|
-| [Configuration](configuration.md) | All 40+ configuration options explained |
-| [Features](features.md) | Complete list of 387 features |
+| [Features Reference](features.md) | **Complete guide to all 200+ features** |
+| [Configuration](configuration.md) | All configuration options explained |
+| [CLI Reference](cli-reference.md) | Command-line interface |
 | [Architecture](architecture.md) | System design and data flow |
 
 ### Feature Extractors
 | Document | Description |
 |----------|-------------|
-| [Extractors Overview](extractors/index.md) | All 24 extractors at a glance |
-| [TLS Extractor](extractors/tls.md) | TLS/SSL analysis and JA3 fingerprints |
-| [Timing Extractor](extractors/timing.md) | Inter-arrival times and burst metrics |
-| [Fingerprint Extractor](extractors/fingerprint.md) | Tor/VPN/DoH detection |
-
-### Advanced Features
-| Document | Description |
-|----------|-------------|
-| [Remote Capture](remote-capture.md) | Stream packets from remote devices |
-| [Kafka Streaming](kafka.md) | Real-time feature pipelines |
-| [Monitoring](monitoring.md) | Prometheus metrics and Grafana dashboards |
+| [Extractors Overview](extractors/index.md) | All extractors at a glance |
+| [Flow Metadata](extractors/flow-meta.md) | Basic flow identification |
+| [Timing](extractors/timing.md) | Inter-arrival times and bursts |
+| [Size](extractors/size.md) | Packet size analysis |
+| [TLS](extractors/tls.md) | TLS/SSL analysis and JA3 |
+| [Fingerprint](extractors/fingerprint.md) | Tor/VPN/DoH detection |
 
 ### Tutorials
-| Document | Description |
-|----------|-------------|
-| [Traffic Classification](tutorials/traffic-classification.md) | Train ML models on network traffic |
-| [Encrypted Traffic Analysis](tutorials/encrypted-traffic.md) | Detect Tor, VPN, DoH |
-| [Real-time Monitoring](tutorials/realtime-monitoring.md) | Kafka + Prometheus + Grafana |
-| [Batch Processing](tutorials/batch-processing.md) | Process large datasets efficiently |
+| Tutorial | Level | Description |
+|----------|-------|-------------|
+| [Traffic Classification](tutorials/traffic-classification.md) | Beginner | Train ML models on network traffic |
+| [Encrypted Traffic Analysis](tutorials/encrypted-traffic.md) | Beginner | Detect Tor, VPN, DoH |
+| [Batch Processing](tutorials/batch-processing.md) | Intermediate | Process large datasets |
+| [Real-time Monitoring](tutorials/realtime-monitoring.md) | Advanced | Kafka + Prometheus + Grafana |
+| [Custom Extractors](tutorials/custom-extractors.md) | Advanced | Create your own extractors |
 
-### Benchmarks & Comparisons
+### Advanced
 | Document | Description |
 |----------|-------------|
-| [Why JoyfulJay?](why-joyfuljay.md) | Comparison with CICFlowMeter, NFStream, Zeek |
-| [Benchmarks](benchmarks.md) | Detailed performance benchmarks |
+| [Kafka Streaming](kafka.md) | Real-time feature pipelines |
+| [Prometheus Monitoring](monitoring.md) | Metrics and dashboards |
+| [Remote Capture](remote-capture.md) | Distributed packet capture |
+| [Benchmarks](benchmarks.md) | Performance data |
 
-### For Contributors
+### Development
 | Document | Description |
 |----------|-------------|
-| [Developer Guide](developer-guide.md) | Create extractors, extend JoyfulJay |
-| [Testing Guide](testing.md) | Run tests, add coverage |
+| [Developer Guide](developer-guide.md) | Contribute to JoyfulJay |
+| [Testing](testing.md) | Run tests, add coverage |
 | [API Reference](api.md) | Python API documentation |
-
----
-
-## Feature Groups
-
-JoyfulJay organizes features into logical groups:
-
-| Group | Features | Description |
-|-------|----------|-------------|
-| `flow_meta` | 10 | Basic flow metadata (IPs, ports, duration, counts) |
-| `timing` | 25+ | Inter-arrival times, burst/idle metrics |
-| `size` | 20+ | Packet lengths, payload statistics |
-| `tls` | 30+ | TLS version, ciphers, SNI, JA3/JA3S |
-| `quic` | 15+ | QUIC version, ALPN, connection IDs |
-| `ssh` | 10+ | SSH version, HASSH fingerprints |
-| `dns` | 10+ | Query names, types, response codes |
-| `tcp` | 25+ | Flags, handshake, window analysis |
-| `fingerprint` | 10+ | Tor/VPN/DoH classification |
-| `entropy` | 5+ | Payload entropy, byte distribution |
-| `padding` | 5+ | Fixed-size and constant-rate detection |
-| `connection` | 10+ | Fan-out, graph metrics |
-
-Select groups when extracting:
-
-```python
-import joyfuljay as jj
-
-# Only TLS and timing features
-df = jj.extract("capture.pcap", features=["tls", "timing"])
-
-# All features (default)
-df = jj.extract("capture.pcap", features="all")
-```
-
----
-
-## Common Use Cases
-
-### Traffic Classification
-
-```python
-import joyfuljay as jj
-from sklearn.ensemble import RandomForestClassifier
-
-# Extract features
-df = jj.extract("labeled_traffic.pcap", features=["timing", "size", "tls"])
-
-# Prepare for ML
-X = df.select_dtypes(include=['number']).fillna(0)
-y = df['label']  # Assuming labels are present
-
-# Train classifier
-clf = RandomForestClassifier()
-clf.fit(X, y)
-```
-
-### Tor Detection
-
-```python
-import joyfuljay as jj
-
-df = jj.extract("capture.pcap", features=["fingerprint", "tls"])
-
-# Check Tor indicators
-tor_flows = df[df['likely_tor'] == True]
-print(f"Found {len(tor_flows)} potential Tor flows")
-```
-
-### Real-time Monitoring
-
-```python
-import joyfuljay as jj
-from joyfuljay.output import KafkaWriter
-
-# Stream features to Kafka
-config = jj.Config(features=["flow_meta", "tls"])
-pipeline = jj.Pipeline(config)
-
-with KafkaWriter("localhost:9092", topic="features") as writer:
-    for flow_features in pipeline.iter_features("eth0", live=True):
-        writer.write(flow_features)
-```
-
-### Remote Capture
-
-```bash
-# On capture device (e.g., Raspberry Pi)
-jj serve wlan0 --port 8765 --announce
-
-# On analysis machine
-jj discover  # Find servers
-jj connect jj://192.168.1.100:8765 -o features.csv
-```
-
----
-
-## Output Formats
-
-| Format | Function | Use Case |
-|--------|----------|----------|
-| DataFrame | `jj.extract(..., output_format="dataframe")` | Interactive analysis, Jupyter |
-| NumPy | `jj.extract(..., output_format="numpy")` | ML pipelines |
-| CSV | `jj extract ... -o file.csv` | File storage, sharing |
-| JSON | `jj extract ... -o file.json -f json` | Web APIs, streaming |
-| Parquet | `jj extract ... -o file.parquet -f parquet` | Big data, columnar storage |
 
 ---
 
@@ -253,22 +252,19 @@ jj connect jj://192.168.1.100:8765 -o features.csv
 
 - **Python**: 3.10, 3.11, or 3.12
 - **OS**: Linux, macOS, Windows
-- **Dependencies**: scapy, pandas, numpy (auto-installed)
+- **Dependencies**: Auto-installed (scapy, pandas, numpy)
 
-### Optional Dependencies
+### Optional Extras
 
 ```bash
-# Fast PCAP parsing (10x faster)
+# Fast PCAP parsing (recommended for large files)
 pip install joyfuljay[fast]
 
-# Kafka streaming
+# Kafka streaming output
 pip install joyfuljay[kafka]
 
 # Prometheus metrics
 pip install joyfuljay[monitoring]
-
-# mDNS server discovery
-pip install joyfuljay[discovery]
 
 # Connection graph analysis
 pip install joyfuljay[graphs]
@@ -279,8 +275,44 @@ pip install joyfuljay[all]
 
 ---
 
+## Example: Complete Traffic Analysis
+
+```python
+import joyfuljay as jj
+
+# Configure for comprehensive analysis
+config = jj.Config(
+    features=["flow_meta", "timing", "size", "tls", "fingerprint"],
+    include_raw_sequences=True,
+    max_sequence_length=100,
+)
+
+# Create pipeline
+pipeline = jj.Pipeline(config)
+
+# Process PCAP
+df = pipeline.process_pcap("enterprise_traffic.pcap")
+
+# Analyze results
+print(f"Total flows: {len(df)}")
+print(f"TLS flows: {df['tls_detected'].sum()}")
+print(f"Tor flows: {df['likely_tor'].sum()}")
+print(f"VPN flows: {df['likely_vpn'].sum()}")
+
+# Top destinations by volume
+top_dsts = df.groupby('dst_ip')['total_bytes'].sum().nlargest(10)
+print("Top destinations:")
+print(top_dsts)
+
+# Export for ML
+df.to_parquet("features.parquet")
+```
+
+---
+
 ## Getting Help
 
+- **Documentation**: You're here!
 - **Issues**: [GitHub Issues](https://github.com/cenab/joyfuljay/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/cenab/joyfuljay/discussions)
 
