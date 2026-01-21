@@ -9,6 +9,7 @@ from .base import FeatureExtractor
 
 if TYPE_CHECKING:
     from ..core.flow import Flow
+    from ..schema.registry import FeatureMeta
 
 # QUIC packet types (long header)
 QUIC_INITIAL = 0x00
@@ -333,3 +334,193 @@ class QUICExtractor(FeatureExtractor):
             "quic_alpn",
             "quic_sni",
         ]
+
+    @property
+    def extractor_id(self) -> str:
+        """Get the stable identifier for this extractor."""
+        return "quic"
+
+    def feature_meta(self) -> dict[str, FeatureMeta]:
+        """Get metadata for all features produced by this extractor."""
+        from ..schema.registry import FeatureMeta
+
+        meta: dict[str, FeatureMeta] = {}
+        prefix = self.extractor_id
+
+        feature_definitions = {
+            "quic_detected": FeatureMeta(
+                id=f"{prefix}.quic_detected",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Whether QUIC protocol was detected",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="safe",
+                description="QUIC protocol detection flag",
+            ),
+            "quic_version": FeatureMeta(
+                id=f"{prefix}.quic_version",
+                dtype="int64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="QUIC protocol version number",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="safe",
+                description="QUIC version as integer",
+            ),
+            "quic_version_str": FeatureMeta(
+                id=f"{prefix}.quic_version_str",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Human-readable QUIC version",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="safe",
+                description="QUIC version as human-readable string",
+            ),
+            "quic_dcid_len": FeatureMeta(
+                id=f"{prefix}.quic_dcid_len",
+                dtype="int64",
+                shape=[1],
+                units="bytes",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Destination connection ID length",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="safe",
+                description="Length of destination connection ID",
+            ),
+            "quic_scid_len": FeatureMeta(
+                id=f"{prefix}.quic_scid_len",
+                dtype="int64",
+                shape=[1],
+                units="bytes",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Source connection ID length",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="safe",
+                description="Length of source connection ID",
+            ),
+            "quic_pn_length": FeatureMeta(
+                id=f"{prefix}.quic_pn_length",
+                dtype="int64",
+                shape=[1],
+                units="bytes",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Packet number field length",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="safe",
+                description="QUIC packet number length (1-4 bytes)",
+            ),
+            "quic_initial_packets": FeatureMeta(
+                id=f"{prefix}.quic_initial_packets",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Count of QUIC Initial packets",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="safe",
+                description="Number of QUIC Initial packets in flow",
+            ),
+            "quic_0rtt_detected": FeatureMeta(
+                id=f"{prefix}.quic_0rtt_detected",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Whether 0-RTT was detected",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="safe",
+                description="QUIC 0-RTT early data detection flag",
+            ),
+            "quic_retry_detected": FeatureMeta(
+                id=f"{prefix}.quic_retry_detected",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Whether Retry packet was detected",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="safe",
+                description="QUIC Retry packet detection flag",
+            ),
+            "quic_spin_bit": FeatureMeta(
+                id=f"{prefix}.quic_spin_bit",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Whether spin bit is in use",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="safe",
+                description="QUIC spin bit detection for RTT estimation",
+            ),
+            "quic_alpn": FeatureMeta(
+                id=f"{prefix}.quic_alpn",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Application-Layer Protocol Negotiation value",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="safe",
+                description="QUIC ALPN protocol identifier (e.g., h3)",
+            ),
+            "quic_sni": FeatureMeta(
+                id=f"{prefix}.quic_sni",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Server Name Indication hostname",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["udp", "quic"],
+                privacy_level="sensitive",
+                description="QUIC SNI hostname from ClientHello",
+            ),
+        }
+
+        # Include metadata for all features
+        for name in self.feature_names:
+            if name in feature_definitions:
+                meta[f"{prefix}.{name}"] = feature_definitions[name]
+
+        return meta

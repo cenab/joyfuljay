@@ -9,6 +9,7 @@ from .base import FeatureExtractor
 
 if TYPE_CHECKING:
     from ..core.flow import Flow
+    from ..schema.registry import FeatureMeta
 
 
 class TCPRTTExtractor(FeatureExtractor):
@@ -228,6 +229,162 @@ class TCPRTTExtractor(FeatureExtractor):
             "tcp_rtt_ack_max",
             "tcp_rtt_ack_mean",
         ]
+
+    @property
+    def extractor_id(self) -> str:
+        """Return the unique identifier for this extractor."""
+        return "tcp_rtt"
+
+    def feature_meta(self) -> dict[str, FeatureMeta]:
+        """Return metadata for all features produced by this extractor.
+
+        Returns:
+            Dictionary mapping feature IDs to their FeatureMeta objects.
+        """
+        from ..schema.registry import FeatureMeta
+
+        return {
+            "tcp_rtt.handshake": FeatureMeta(
+                id="tcp_rtt.handshake",
+                dtype="float64",
+                shape=[1],
+                units="s",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="RTT from TCP 3-way handshake",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Round-trip time estimated from TCP handshake (SYN -> SYN-ACK -> ACK)",
+            ),
+            "tcp_rtt.min": FeatureMeta(
+                id="tcp_rtt.min",
+                dtype="float64",
+                shape=[1],
+                units="s",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Minimum RTT observed from timestamp echoes",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Minimum round-trip time from TCP timestamp echo replies",
+            ),
+            "tcp_rtt.max": FeatureMeta(
+                id="tcp_rtt.max",
+                dtype="float64",
+                shape=[1],
+                units="s",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Maximum RTT observed from timestamp echoes",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Maximum round-trip time from TCP timestamp echo replies",
+            ),
+            "tcp_rtt.mean": FeatureMeta(
+                id="tcp_rtt.mean",
+                dtype="float64",
+                shape=[1],
+                units="s",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Mean RTT from timestamp echoes",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Mean round-trip time from TCP timestamp echo replies",
+            ),
+            "tcp_rtt.samples": FeatureMeta(
+                id="tcp_rtt.samples",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Number of RTT samples collected",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Number of RTT samples from TCP timestamp echo replies",
+            ),
+            "tcp_rtt.std": FeatureMeta(
+                id="tcp_rtt.std",
+                dtype="float64",
+                shape=[1],
+                units="s",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Standard deviation of RTT samples",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Standard deviation of round-trip times",
+            ),
+            "tcp_rtt.jitter_avg": FeatureMeta(
+                id="tcp_rtt.jitter_avg",
+                dtype="float64",
+                shape=[1],
+                units="s",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Average absolute difference between consecutive RTT samples",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Average RTT jitter (variation between consecutive samples)",
+            ),
+            "tcp_rtt.ack_min": FeatureMeta(
+                id="tcp_rtt.ack_min",
+                dtype="float64",
+                shape=[1],
+                units="s",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Minimum RTT from data-to-ACK timing",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Minimum round-trip time from data packet to ACK timing",
+            ),
+            "tcp_rtt.ack_max": FeatureMeta(
+                id="tcp_rtt.ack_max",
+                dtype="float64",
+                shape=[1],
+                units="s",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Maximum RTT from data-to-ACK timing",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Maximum round-trip time from data packet to ACK timing",
+            ),
+            "tcp_rtt.ack_mean": FeatureMeta(
+                id="tcp_rtt.ack_mean",
+                dtype="float64",
+                shape=[1],
+                units="s",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Mean RTT from data-to-ACK timing",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Mean round-trip time from data packet to ACK timing",
+            ),
+        }
 
     @property
     def name(self) -> str:

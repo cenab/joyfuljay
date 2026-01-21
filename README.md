@@ -34,9 +34,11 @@
 
 ```bash
 pip install joyfuljay
+# or
+uv pip install joyfuljay
 ```
 
-For optional features:
+For optional features (same syntax works with `uv pip`):
 
 ```bash
 # Fast parsing with dpkt

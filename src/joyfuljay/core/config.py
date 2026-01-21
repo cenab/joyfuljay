@@ -10,6 +10,7 @@ from typing import Any, Literal
 
 EvictionStrategy = Literal["lru", "oldest"]
 CaptureBackendType = Literal["scapy", "dpkt", "auto"]
+ProfileType = Literal["JJ-CORE", "JJ-EXTENDED", "JJ-EXPERIMENTAL"]
 
 
 class FeatureGroup(str, Enum):
@@ -71,6 +72,9 @@ class Config:
         connection_include_graph_metrics: Compute graph metrics (requires NetworkX).
         connection_include_temporal: Compute temporal connection patterns.
         connection_community_algorithm: Algorithm for community detection.
+        profile: Feature profile to use ("JJ-CORE", "JJ-EXTENDED", "JJ-EXPERIMENTAL").
+            If set, only features in this profile will be included in output.
+            Takes precedence over specific_features if both are set.
     """
 
     flow_timeout: float = 60.0
@@ -80,6 +84,7 @@ class Config:
     sampling_rate: float | None = None
     features: list[str] = field(default_factory=lambda: ["all"])
     specific_features: list[str] | None = None
+    profile: ProfileType | None = None
     bidirectional_split: bool = False
     include_raw_sequences: bool = False
     include_splt: bool = False
@@ -99,6 +104,8 @@ class Config:
     connection_include_temporal: bool = False
     connection_community_algorithm: str = "louvain"
 
+    _profile_features: set[str] | None = field(default=None, init=False, repr=False)
+
     def __post_init__(self) -> None:
         """Validate configuration after initialization."""
         if self.flow_timeout <= 0:
@@ -111,6 +118,18 @@ class Config:
             raise ValueError("max_concurrent_flows must be non-negative")
         if self.sampling_rate is not None and not (0.0 <= self.sampling_rate <= 1.0):
             raise ValueError("sampling_rate must be between 0.0 and 1.0")
+
+        # Load and validate profile if specified
+        if self.profile is not None:
+            from ..schema.profiles import list_profiles, get_profile_features
+
+            valid_profiles = list_profiles()
+            if self.profile not in valid_profiles:
+                raise ValueError(
+                    f"Invalid profile: {self.profile}. "
+                    f"Valid profiles: {valid_profiles}"
+                )
+            self._profile_features = get_profile_features(self.profile)
 
     def should_extract(self, group: str | FeatureGroup) -> bool:
         """Check if a feature group should be extracted.
@@ -149,12 +168,39 @@ class Config:
     def filter_features(self, features: dict[str, Any]) -> dict[str, Any]:
         """Filter a feature dictionary to include only specified features.
 
+        Profile filtering takes precedence over specific_features.
+        Feature names are matched with extractor prefix (e.g., "flow_meta.src_ip")
+        or without prefix for backwards compatibility (e.g., "src_ip").
+
         Args:
             features: Dictionary of all extracted features.
 
         Returns:
             Filtered dictionary with only requested features.
         """
+        # Profile filtering takes precedence
+        if self._profile_features is not None:
+            # Match both prefixed (flow_meta.src_ip) and unprefixed (src_ip) names
+            result = {}
+            for k, v in features.items():
+                # Direct match
+                if k in self._profile_features:
+                    result[k] = v
+                    continue
+                # Try with common prefixes for unprefixed names
+                for prefix in [
+                    "flow_meta", "timing", "size", "tcp", "tls", "dns",
+                    "ssh", "quic", "http2", "entropy", "fingerprint",
+                    "padding", "connection", "mac", "ip_extended",
+                    "ipv6_options", "tcp_sequence", "tcp_window",
+                    "tcp_options", "tcp_mptcp", "tcp_rtt",
+                    "tcp_fingerprint", "icmp",
+                ]:
+                    if f"{prefix}.{k}" in self._profile_features:
+                        result[k] = v
+                        break
+            return result
+
         if self.specific_features is None:
             return features
         return {k: v for k, v in features.items() if k in self.specific_features}
@@ -173,6 +219,7 @@ class Config:
             "sampling_rate": self.sampling_rate,
             "features": self.features,
             "specific_features": self.specific_features,
+            "profile": self.profile,
             "bidirectional_split": self.bidirectional_split,
             "include_raw_sequences": self.include_raw_sequences,
             "include_splt": self.include_splt,
@@ -238,6 +285,7 @@ class Config:
             sampling_rate=data.get("sampling_rate"),
             features=data.get("features", ["all"]),
             specific_features=data.get("specific_features"),
+            profile=data.get("profile"),
             bidirectional_split=data.get("bidirectional_split", False),
             include_raw_sequences=data.get("include_raw_sequences", False),
             include_splt=data.get("include_splt", False),

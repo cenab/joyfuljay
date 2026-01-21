@@ -3,7 +3,7 @@
 ## Requirements
 
 - Python 3.10 or higher
-- pip package manager
+- pip or uv package manager
 
 ## Basic Installation
 
@@ -11,6 +11,8 @@ Install JoyfulJay from PyPI:
 
 ```bash
 pip install joyfuljay
+# or
+uv pip install joyfuljay
 ```
 
 ## Optional Dependencies

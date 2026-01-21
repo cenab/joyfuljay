@@ -206,20 +206,30 @@ extra_javascript:
 watch:
   - src/joyfuljay
 
-# Navigation Structure - Focused on real content
+# Navigation Structure
 nav:
   - Home: index.md
+  - Quick Start: quickstart.md
+  - Installation: installation.md
+  - Citation: citation.md
 
-  - Getting Started:
-    - Installation: installation.md
-    - Quick Start: quickstart.md
-    - Why JoyfulJay?: why-joyfuljay.md
+  - Concepts:
+    - concepts/index.md
+    - Feature Schema: concepts/schema.md
+    - Determinism: concepts/determinism.md
 
-  - User Guide:
+  - Usage:
+    - usage/index.md
     - Features: features.md
     - Configuration: configuration.md
     - CLI Reference: cli-reference.md
+    - Why JoyfulJay?: why-joyfuljay.md
     - Architecture: architecture.md
+
+  - Benchmarks:
+    - benchmarks/index.md
+    - Performance Comparison: benchmarks.md
+    - Benchmark Protocol: benchmarks/benchmark-protocol.md
 
   - Extractors:
     - extractors/index.md
@@ -249,9 +259,14 @@ nav:
     - Prometheus Monitoring: monitoring.md
     - Remote Capture: remote-capture.md
 
-  - API Reference: api.md
-
-  - Development:
+  - Developers:
+    - developers/index.md
     - Developer Guide: developer-guide.md
     - Testing: testing.md
-    - Benchmarks: benchmarks.md
+    - API Reference: api.md
+    - Architecture Layers: engineering/layers.md
+
+  - Release:
+    - release/index.md
+    - Versioning: release/versioning.md
+    - Reproducibility: release/reproducibility.md

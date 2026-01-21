@@ -1,16 +1,36 @@
-# Byte-compiled / optimized / DLL files
+# =============================================================================
+# JoyfulJay .gitignore
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Python
+# -----------------------------------------------------------------------------
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyd
+*.pyo
 
-# C extensions
+# -----------------------------------------------------------------------------
+# C/Cython extensions and build artifacts
+# -----------------------------------------------------------------------------
 *.so
+*.dylib
+*.dll
+*.o
+*.obj
+*.a
+*.lib
 
-# Generated Cython files
+# Cython generated files
+src/joyfuljay/accelerators/*.c
+src/joyfuljay/accelerators/*.html
 src/joyfuljay/extensions/*.c
 src/joyfuljay/extensions/*.html
 
+# -----------------------------------------------------------------------------
 # Distribution / packaging
+# -----------------------------------------------------------------------------
 .Python
 build/
 develop-eggs/
@@ -24,20 +44,15 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
+# -----------------------------------------------------------------------------
+# Testing
+# -----------------------------------------------------------------------------
 htmlcov/
 .tox/
 .nox/
@@ -51,11 +66,23 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
-# Translations
-*.mo
-*.pot
+# -----------------------------------------------------------------------------
+# Type checking / linting
+# -----------------------------------------------------------------------------
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
 
+# -----------------------------------------------------------------------------
+# Documentation
+# -----------------------------------------------------------------------------
+/site
+docs/_build/
+
+# -----------------------------------------------------------------------------
 # Environments
+# -----------------------------------------------------------------------------
 .env
 .venv
 env/
@@ -64,44 +91,75 @@ ENV/
 env.bak/
 venv.bak/
 
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Ruff
-.ruff_cache/
-
-# IDE
+# -----------------------------------------------------------------------------
+# IDE / Editor
+# -----------------------------------------------------------------------------
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
+.spyderproject
+.spyproject
+.ropeproject
 
-# OS
+# -----------------------------------------------------------------------------
+# OS files
+# -----------------------------------------------------------------------------
 .DS_Store
 Thumbs.db
+ehthumbs.db
+Desktop.ini
 
-# Project specific
+# -----------------------------------------------------------------------------
+# Jupyter
+# -----------------------------------------------------------------------------
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# -----------------------------------------------------------------------------
+# Project specific: PCAP files
+# -----------------------------------------------------------------------------
+# Ignore all PCAPs except small test files
 *.pcap
 *.pcapng
+*.cap
+*.ntar
+
+# Allow only small test files
 !tests/data/*.pcap
 !tests/data/*.pcapng
+!benchmarks/datasets.small/*.pcap
+!benchmarks/datasets.small/*.pcapng
 
-# Jupyter
-.ipynb_checkpoints/
+# -----------------------------------------------------------------------------
+# Benchmarks: Large data (download on demand)
+# -----------------------------------------------------------------------------
+benchmarks/data/
+benchmarks/datasets/
+benchmarks/_data_cache/
+benchmarks/results/
 
-# Local dev
+# Keep only small datasets and reports
+!benchmarks/datasets.small/
+!benchmarks/reports/
+
+# -----------------------------------------------------------------------------
+# Local development
+# -----------------------------------------------------------------------------
 .local/
 scratch/
+*.local
+*.bak
+
+# -----------------------------------------------------------------------------
+# Generated schema (keep only the packaged version)
+# -----------------------------------------------------------------------------
+/schema/
+
+# -----------------------------------------------------------------------------
+# Temporary files
+# -----------------------------------------------------------------------------
+*.tmp
+*.temp
+*.log

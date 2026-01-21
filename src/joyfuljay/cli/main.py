@@ -110,6 +110,11 @@ def cli(ctx: click.Context, verbose: bool) -> None:
     help="Specific feature names to include (can specify multiple, e.g., --feature ja3_hash --feature duration).",
 )
 @click.option(
+    "--profile",
+    type=click.Choice(["JJ-CORE", "JJ-EXTENDED", "JJ-EXPERIMENTAL"]),
+    help="Feature profile to use. Filters output to only include features in the specified profile.",
+)
+@click.option(
     "--timeout",
     type=float,
     default=None,
@@ -214,6 +219,7 @@ def extract(
     config_file: str | None,
     features: tuple[str, ...],
     specific_features: tuple[str, ...],
+    profile: str | None,
     timeout: float | None,
     no_ips: bool,
     no_ports: bool,
@@ -274,6 +280,8 @@ def extract(
             config.features = list(features)
         if specific_features:
             config.specific_features = list(specific_features)
+        if profile:
+            config.profile = profile  # type: ignore[assignment]
         if bidir_split:
             config.bidirectional_split = True
         if no_ips:
@@ -289,6 +297,7 @@ def extract(
             flow_timeout=timeout if timeout is not None else 60.0,
             features=list(features) if features else ["all"],
             specific_features=list(specific_features) if specific_features else None,
+            profile=profile,  # type: ignore[arg-type]
             bidirectional_split=bidir_split,
             include_ip_addresses=not no_ips,
             include_ports=not no_ports,
@@ -1577,6 +1586,319 @@ def repl(ctx: click.Context) -> None:
             f"REPL dependencies not available: {e}. "
             "The REPL requires standard Python libraries."
         )
+
+
+@cli.group()
+@click.pass_context
+def profiles(ctx: click.Context) -> None:
+    """Manage feature profiles.
+
+    Profiles define subsets of features for different use cases:
+    - JJ-CORE: Stable, commonly-used features (151 features)
+    - JJ-EXTENDED: Additional analysis features (148 features)
+    - JJ-EXPERIMENTAL: Experimental/specialized features (102 features)
+
+    Use --profile with extract/live commands to filter output.
+    """
+    pass
+
+
+@profiles.command(name="list")
+@click.option(
+    "--json",
+    "json_output",
+    is_flag=True,
+    help="Output as JSON.",
+)
+@click.pass_context
+def profiles_list(ctx: click.Context, json_output: bool) -> None:
+    """List all available feature profiles."""
+    from ..schema.profiles import list_profiles, load_profile
+
+    profile_names = list_profiles()
+
+    if json_output:
+        data = {}
+        for name in profile_names:
+            features = load_profile(name)
+            data[name] = {
+                "feature_count": len(features),
+                "features": features,
+            }
+        click.echo(json.dumps(data, indent=2))
+        return
+
+    click.echo("Available feature profiles:\n")
+    for name in profile_names:
+        features = load_profile(name)
+        click.echo(f"  {name}: {len(features)} features")
+
+    click.echo("\nUse 'jj profiles show <profile>' to see features in a profile.")
+    click.echo("Use 'jj extract --profile <profile>' to filter extraction output.")
+
+
+@profiles.command(name="show")
+@click.argument("profile_name")
+@click.option(
+    "--json",
+    "json_output",
+    is_flag=True,
+    help="Output as JSON.",
+)
+@click.option(
+    "--group",
+    type=str,
+    help="Filter by extractor group (e.g., 'tls', 'timing').",
+)
+@click.pass_context
+def profiles_show(
+    ctx: click.Context,
+    profile_name: str,
+    json_output: bool,
+    group: str | None,
+) -> None:
+    """Show features in a specific profile.
+
+    Examples:
+
+        jj profiles show JJ-CORE
+
+        jj profiles show JJ-EXTENDED --group tls
+
+        jj profiles show JJ-CORE --json
+    """
+    from ..schema.profiles import list_profiles, load_profile
+
+    # Validate profile name
+    valid_profiles = list_profiles()
+    if profile_name not in valid_profiles:
+        raise click.ClickException(
+            f"Unknown profile: {profile_name}. "
+            f"Valid profiles: {', '.join(valid_profiles)}"
+        )
+
+    features = load_profile(profile_name)
+
+    # Filter by group if specified
+    if group:
+        features = [f for f in features if f.startswith(f"{group}.")]
+        if not features:
+            raise click.ClickException(
+                f"No features found for group '{group}' in profile {profile_name}"
+            )
+
+    if json_output:
+        click.echo(json.dumps(features, indent=2))
+        return
+
+    click.echo(f"{profile_name} ({len(features)} features):\n")
+
+    # Group by extractor
+    grouped: dict[str, list[str]] = {}
+    for feature in features:
+        if "." in feature:
+            extractor, name = feature.split(".", 1)
+        else:
+            extractor, name = "other", feature
+        grouped.setdefault(extractor, []).append(name)
+
+    for extractor, names in sorted(grouped.items()):
+        click.echo(f"  {extractor}:")
+        for name in names:
+            click.echo(f"    - {name}")
+
+
+@profiles.command(name="validate")
+@click.pass_context
+def profiles_validate(ctx: click.Context) -> None:
+    """Validate that all features are assigned to exactly one profile."""
+    from ..schema.tiering import validate_tiering_complete
+
+    try:
+        validate_tiering_complete()
+        click.echo("Validation passed: All features are assigned to exactly one profile.")
+    except ValueError as e:
+        raise click.ClickException(f"Validation failed: {e}")
+
+
+@cli.command()
+@click.option(
+    "-f",
+    "--format",
+    "output_format",
+    type=click.Choice(["bibtex", "apa", "cff"]),
+    default="bibtex",
+    help="Citation format.",
+)
+@click.pass_context
+def cite(ctx: click.Context, output_format: str) -> None:
+    """Print citation information for JoyfulJay.
+
+    Examples:
+
+        jj cite
+
+        jj cite -f apa
+
+        jj cite -f cff
+    """
+    if output_format == "bibtex":
+        citation = f'''@software{{joyfuljay,
+  title = {{JoyfulJay: Encrypted Traffic Feature Extraction Library}},
+  author = {{JoyfulJay Contributors}},
+  year = {{2025}},
+  url = {{https://github.com/cenab/joyfuljay}},
+  version = {{{__version__}}},
+  license = {{MIT}},
+}}'''
+    elif output_format == "apa":
+        citation = f'''JoyfulJay Contributors. (2025). JoyfulJay: Encrypted Traffic Feature Extraction Library (Version {__version__}) [Computer software]. https://github.com/cenab/joyfuljay'''
+    else:  # cff
+        from pathlib import Path
+        cff_path = Path(__file__).parents[2] / "CITATION.cff"
+        if cff_path.exists():
+            citation = cff_path.read_text()
+        else:
+            citation = "CITATION.cff not found. See https://github.com/cenab/joyfuljay"
+
+    click.echo(citation)
+
+
+@cli.command(name="validate")
+@click.argument("pcap_path", type=click.Path(exists=True))
+@click.option(
+    "--expected",
+    type=click.Path(exists=True),
+    required=True,
+    help="Path to expected output JSON file.",
+)
+@click.option(
+    "--profile",
+    type=click.Choice(["JJ-CORE", "JJ-EXTENDED", "JJ-EXPERIMENTAL"]),
+    default="JJ-CORE",
+    help="Feature profile to use for extraction.",
+)
+@click.option(
+    "--tolerance",
+    type=float,
+    default=1e-9,
+    help="Tolerance for floating-point comparisons.",
+)
+@click.option(
+    "--verbose",
+    "-v",
+    is_flag=True,
+    help="Show detailed comparison output.",
+)
+@click.pass_context
+def validate_golden(
+    ctx: click.Context,
+    pcap_path: str,
+    expected: str,
+    profile: str,
+    tolerance: float,
+    verbose: bool,
+) -> None:
+    """Validate PCAP extraction against expected golden output.
+
+    This command compares extracted features against a known-good output
+    to verify determinism and reproducibility.
+
+    Examples:
+
+        jj validate tests/golden/sample.pcap --expected tests/golden/sample.json
+
+        jj validate capture.pcap --expected expected.json --profile JJ-CORE
+
+        jj validate test.pcap --expected golden.json --tolerance 1e-6 -v
+    """
+    import json as json_module
+    from pathlib import Path
+
+    # Load expected output
+    expected_path = Path(expected)
+    try:
+        with open(expected_path) as f:
+            expected_data = json_module.load(f)
+    except Exception as e:
+        raise click.ClickException(f"Failed to load expected output: {e}")
+
+    # Extract features
+    config = Config(profile=profile)  # type: ignore[arg-type]
+    pipeline = Pipeline(config)
+
+    click.echo(f"Extracting features from: {pcap_path}", err=True)
+    click.echo(f"Profile: {profile}", err=True)
+
+    try:
+        features_result = pipeline.process_pcap(pcap_path, output_format="dict")
+        if hasattr(features_result, "to_dict"):
+            actual_flows = features_result.to_dict(orient="records")
+        else:
+            actual_flows = list(features_result)
+    except Exception as e:
+        raise click.ClickException(f"Failed to extract features: {e}")
+
+    # Get expected flows
+    expected_flows = expected_data.get("flows", [])
+
+    click.echo(f"Extracted: {len(actual_flows)} flows", err=True)
+    click.echo(f"Expected: {len(expected_flows)} flows", err=True)
+
+    # Compare
+    if len(actual_flows) != len(expected_flows):
+        raise click.ClickException(
+            f"Flow count mismatch: expected {len(expected_flows)}, got {len(actual_flows)}"
+        )
+
+    differences: list[str] = []
+
+    for i, (actual, expected_flow) in enumerate(zip(actual_flows, expected_flows)):
+        flow_diffs: list[str] = []
+
+        # Check for missing or extra keys
+        actual_keys = set(actual.keys())
+        expected_keys = set(expected_flow.keys())
+
+        missing = expected_keys - actual_keys
+        extra = actual_keys - expected_keys
+
+        if missing:
+            flow_diffs.append(f"  Missing features: {sorted(missing)}")
+        if extra and verbose:
+            flow_diffs.append(f"  Extra features: {sorted(extra)}")
+
+        # Compare common keys
+        for key in actual_keys & expected_keys:
+            actual_val = actual[key]
+            expected_val = expected_flow[key]
+
+            # Handle float comparison with tolerance
+            if isinstance(expected_val, float) and isinstance(actual_val, (int, float)):
+                if abs(float(actual_val) - expected_val) > tolerance:
+                    flow_diffs.append(
+                        f"  {key}: expected {expected_val}, got {actual_val} "
+                        f"(diff: {abs(float(actual_val) - expected_val):.2e})"
+                    )
+            elif actual_val != expected_val:
+                if verbose:
+                    flow_diffs.append(f"  {key}: expected {expected_val!r}, got {actual_val!r}")
+                else:
+                    flow_diffs.append(f"  {key}: mismatch")
+
+        if flow_diffs:
+            differences.append(f"Flow {i}:")
+            differences.extend(flow_diffs)
+
+    if differences:
+        click.echo("\nValidation FAILED:", err=True)
+        for diff in differences[:50]:  # Limit output
+            click.echo(diff, err=True)
+        if len(differences) > 50:
+            click.echo(f"  ... and {len(differences) - 50} more differences", err=True)
+        raise click.ClickException("Output does not match expected golden output")
+
+    click.echo("\nValidation PASSED: Output matches expected golden output.", err=True)
 
 
 if __name__ == "__main__":

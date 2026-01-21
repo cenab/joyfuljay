@@ -8,6 +8,7 @@ from .base import FeatureExtractor
 
 if TYPE_CHECKING:
     from ..core.flow import Flow
+    from ..schema.registry import FeatureMeta
 
 
 class MACExtractor(FeatureExtractor):
@@ -132,6 +133,169 @@ class MACExtractor(FeatureExtractor):
             "mac_broadcast_count",
             "mac_multicast_count",
         ]
+
+    @property
+    def extractor_id(self) -> str:
+        """Get the stable identifier for this extractor."""
+        return "mac"
+
+    def feature_meta(self) -> dict[str, FeatureMeta]:
+        """Get metadata for all features produced by this extractor."""
+        from ..schema.registry import FeatureMeta
+
+        meta: dict[str, FeatureMeta] = {}
+        prefix = self.extractor_id
+
+        # Define metadata for each feature
+        feature_definitions = {
+            "mac_src": FeatureMeta(
+                id=f"{prefix}.mac_src",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="Source MAC address from first packet",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["eth"],
+                privacy_level="high",
+                description="Source MAC address of flow initiator",
+            ),
+            "mac_dst": FeatureMeta(
+                id=f"{prefix}.mac_dst",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="Destination MAC address from first packet",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["eth"],
+                privacy_level="high",
+                description="Destination MAC address of flow responder",
+            ),
+            "mac_eth_type": FeatureMeta(
+                id=f"{prefix}.mac_eth_type",
+                dtype="int64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Ethernet frame type",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["eth"],
+                privacy_level="safe",
+                description="Ethernet type field (e.g., 0x0800=IPv4, 0x86DD=IPv6)",
+            ),
+            "mac_vlan_id": FeatureMeta(
+                id=f"{prefix}.mac_vlan_id",
+                dtype="int64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Minimum VLAN ID observed in flow",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["eth"],
+                privacy_level="sensitive",
+                description="VLAN identifier (802.1Q tag)",
+            ),
+            "mac_vlan_count": FeatureMeta(
+                id=f"{prefix}.mac_vlan_count",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Number of unique VLAN IDs observed",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["eth"],
+                privacy_level="safe",
+                description="Count of unique VLAN IDs in flow",
+            ),
+            "mac_unique_src_count": FeatureMeta(
+                id=f"{prefix}.mac_unique_src_count",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Number of unique source MACs observed",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["eth"],
+                privacy_level="safe",
+                description="Count of unique source MAC addresses in flow",
+            ),
+            "mac_unique_dst_count": FeatureMeta(
+                id=f"{prefix}.mac_unique_dst_count",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Number of unique destination MACs observed",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["eth"],
+                privacy_level="safe",
+                description="Count of unique destination MAC addresses in flow",
+            ),
+            "mac_stat": FeatureMeta(
+                id=f"{prefix}.mac_stat",
+                dtype="int64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="MAC layer status bitmap",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["eth"],
+                privacy_level="safe",
+                description="MAC status bitmap (bit0=src, bit1=dst, bit2=multi-src, bit3=multi-dst, bit4=VLAN)",
+            ),
+            "mac_broadcast_count": FeatureMeta(
+                id=f"{prefix}.mac_broadcast_count",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Number of broadcast destination packets",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["eth"],
+                privacy_level="safe",
+                description="Count of packets with broadcast destination MAC (ff:ff:ff:ff:ff:ff)",
+            ),
+            "mac_multicast_count": FeatureMeta(
+                id=f"{prefix}.mac_multicast_count",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Number of multicast destination packets",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["eth"],
+                privacy_level="safe",
+                description="Count of packets with multicast destination MAC",
+            ),
+        }
+
+        # Only include metadata for features we actually produce
+        for name in self.feature_names:
+            if name in feature_definitions:
+                meta[f"{prefix}.{name}"] = feature_definitions[name]
+
+        return meta
 
     @property
     def name(self) -> str:

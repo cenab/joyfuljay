@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from ..core.flow import Flow
+    from ..schema.registry import FeatureMeta
 
 
 class FeatureExtractor(ABC):
@@ -15,6 +16,12 @@ class FeatureExtractor(ABC):
     Each extractor is responsible for computing a specific group
     of features from a completed flow. Extractors should be stateless
     and thread-safe.
+
+    Subclasses must implement:
+        - extract(): Extract features from a flow
+        - feature_names: List of raw feature names
+        - extractor_id: Stable extractor identifier (e.g., "tls", "timing")
+        - feature_meta(): Metadata for each feature
     """
 
     @abstractmethod
@@ -34,7 +41,26 @@ class FeatureExtractor(ABC):
         """Get the list of feature names this extractor produces.
 
         Returns:
-            List of feature name strings.
+            List of feature name strings (without extractor prefix).
+        """
+
+    @property
+    @abstractmethod
+    def extractor_id(self) -> str:
+        """Get the stable identifier for this extractor.
+
+        This ID is used as a prefix for feature IDs (e.g., "tls" -> "tls.ja3_hash").
+
+        Returns:
+            Stable extractor identifier string.
+        """
+
+    @abstractmethod
+    def feature_meta(self) -> dict[str, FeatureMeta]:
+        """Get metadata for all features produced by this extractor.
+
+        Returns:
+            Dictionary mapping feature ID (with prefix) to FeatureMeta.
         """
 
     @property
@@ -45,6 +71,15 @@ class FeatureExtractor(ABC):
             Extractor name, defaults to class name.
         """
         return self.__class__.__name__
+
+    def feature_ids(self) -> list[str]:
+        """Get stable feature IDs with extractor prefix.
+
+        Returns:
+            List of feature IDs in format "{extractor_id}.{feature_name}".
+        """
+        prefix = self.extractor_id
+        return [f"{prefix}.{name}" for name in self.feature_names]
 
     def validate_features(self, features: dict[str, Any]) -> bool:
         """Validate that extracted features match expected names.

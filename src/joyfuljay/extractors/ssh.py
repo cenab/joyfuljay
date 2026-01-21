@@ -10,6 +10,7 @@ from .base import FeatureExtractor
 
 if TYPE_CHECKING:
     from ..core.flow import Flow
+    from ..schema.registry import FeatureMeta
 
 # SSH message types
 SSH_MSG_KEXINIT = 20
@@ -270,3 +271,165 @@ class SSHExtractor(FeatureExtractor):
             "ssh_kex_packets",
             "ssh_encrypted_packets",
         ]
+
+    @property
+    def extractor_id(self) -> str:
+        """Get the stable identifier for this extractor."""
+        return "ssh"
+
+    def feature_meta(self) -> dict[str, FeatureMeta]:
+        """Get metadata for all features produced by this extractor."""
+        from ..schema.registry import FeatureMeta
+
+        meta: dict[str, FeatureMeta] = {}
+        prefix = self.extractor_id
+
+        feature_definitions = {
+            "ssh_detected": FeatureMeta(
+                id=f"{prefix}.ssh_detected",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="SSH protocol detected in flow",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "ssh"],
+                privacy_level="safe",
+                description="Whether SSH traffic was detected",
+            ),
+            "ssh_version": FeatureMeta(
+                id=f"{prefix}.ssh_version",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="SSH protocol version",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["tcp", "ssh"],
+                privacy_level="safe",
+                description="SSH protocol version (e.g., 2.0)",
+            ),
+            "ssh_client_software": FeatureMeta(
+                id=f"{prefix}.ssh_client_software",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="SSH client software identifier",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["tcp", "ssh"],
+                privacy_level="sensitive",
+                description="SSH client software name from banner",
+            ),
+            "ssh_server_software": FeatureMeta(
+                id=f"{prefix}.ssh_server_software",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="SSH server software identifier",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["tcp", "ssh"],
+                privacy_level="sensitive",
+                description="SSH server software name from banner",
+            ),
+            "ssh_client_version": FeatureMeta(
+                id=f"{prefix}.ssh_client_version",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="SSH protocol version from client",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["tcp", "ssh"],
+                privacy_level="safe",
+                description="SSH protocol version advertised by client",
+            ),
+            "ssh_server_version": FeatureMeta(
+                id=f"{prefix}.ssh_server_version",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="SSH protocol version from server",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["tcp", "ssh"],
+                privacy_level="safe",
+                description="SSH protocol version advertised by server",
+            ),
+            "ssh_hassh": FeatureMeta(
+                id=f"{prefix}.ssh_hassh",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="HASSH client fingerprint",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["tcp", "ssh"],
+                privacy_level="safe",
+                description="MD5 hash of client KEXINIT parameters",
+            ),
+            "ssh_hassh_server": FeatureMeta(
+                id=f"{prefix}.ssh_hassh_server",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="HASSH server fingerprint",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["tcp", "ssh"],
+                privacy_level="safe",
+                description="MD5 hash of server KEXINIT parameters",
+            ),
+            "ssh_kex_packets": FeatureMeta(
+                id=f"{prefix}.ssh_kex_packets",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Key exchange packets in flow",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "ssh"],
+                privacy_level="safe",
+                description="Number of SSH key exchange packets",
+            ),
+            "ssh_encrypted_packets": FeatureMeta(
+                id=f"{prefix}.ssh_encrypted_packets",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Encrypted packets after key exchange",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "ssh"],
+                privacy_level="safe",
+                description="Number of encrypted packets after NEWKEYS",
+            ),
+        }
+
+        # Include metadata for all features
+        for name in self.feature_names:
+            if name in feature_definitions:
+                meta[f"{prefix}.{name}"] = feature_definitions[name]
+
+        return meta

@@ -8,6 +8,7 @@ from .base import FeatureExtractor
 
 if TYPE_CHECKING:
     from ..core.flow import Flow
+    from ..schema.registry import FeatureMeta
 
 # Known DoH server SNIs
 DOH_PROVIDERS = {
@@ -289,3 +290,131 @@ class FingerprintExtractor(FeatureExtractor):
             "doh_confidence",
             "traffic_type",
         ]
+
+    @property
+    def extractor_id(self) -> str:
+        """Get the stable identifier for this extractor."""
+        return "fingerprint"
+
+    def feature_meta(self) -> dict[str, FeatureMeta]:
+        """Get metadata for all features produced by this extractor."""
+        from ..schema.registry import FeatureMeta
+
+        prefix = self.extractor_id
+
+        meta: dict[str, FeatureMeta] = {
+            f"{prefix}.likely_tor": FeatureMeta(
+                id=f"{prefix}.likely_tor",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Bidirectional Tor detection flag",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["ip"],
+                privacy_level="safe",
+                description="Whether flow is likely Tor traffic based on packet patterns",
+            ),
+            f"{prefix}.tor_confidence": FeatureMeta(
+                id=f"{prefix}.tor_confidence",
+                dtype="float64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Bidirectional Tor detection confidence",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["ip"],
+                privacy_level="safe",
+                description="Confidence score (0-1) for Tor traffic detection",
+            ),
+            f"{prefix}.likely_vpn": FeatureMeta(
+                id=f"{prefix}.likely_vpn",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Bidirectional VPN detection flag",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["ip"],
+                privacy_level="safe",
+                description="Whether flow is likely VPN traffic based on protocol patterns",
+            ),
+            f"{prefix}.vpn_confidence": FeatureMeta(
+                id=f"{prefix}.vpn_confidence",
+                dtype="float64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Bidirectional VPN detection confidence",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["ip"],
+                privacy_level="safe",
+                description="Confidence score (0-1) for VPN traffic detection",
+            ),
+            f"{prefix}.vpn_type": FeatureMeta(
+                id=f"{prefix}.vpn_type",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Detected VPN protocol type",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["ip"],
+                privacy_level="safe",
+                description="VPN type if detected (openvpn, wireguard, ipsec-esp, ipsec-ah, ipsec-ike, l2tp)",
+            ),
+            f"{prefix}.likely_doh": FeatureMeta(
+                id=f"{prefix}.likely_doh",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Bidirectional DoH detection flag",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["ip"],
+                privacy_level="safe",
+                description="Whether flow is likely DNS over HTTPS traffic",
+            ),
+            f"{prefix}.doh_confidence": FeatureMeta(
+                id=f"{prefix}.doh_confidence",
+                dtype="float64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Bidirectional DoH detection confidence",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["ip"],
+                privacy_level="safe",
+                description="Confidence score (0-1) for DoH traffic detection",
+            ),
+            f"{prefix}.traffic_type": FeatureMeta(
+                id=f"{prefix}.traffic_type",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Overall traffic classification",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["ip"],
+                privacy_level="safe",
+                description="Traffic type classification (tor, vpn:*, doh, encrypted, unknown)",
+            ),
+        }
+
+        return meta

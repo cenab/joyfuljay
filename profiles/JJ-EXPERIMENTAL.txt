@@ -1,0 +1,121 @@
+# JJ-EXPERIMENTAL Profile
+# Experimental and specialized features
+# These features may change or be removed in future versions
+
+# === Traffic Fingerprinting ===
+fingerprint.traffic_type
+fingerprint.likely_vpn
+fingerprint.vpn_confidence
+fingerprint.vpn_type
+fingerprint.likely_tor
+fingerprint.tor_confidence
+fingerprint.likely_doh
+fingerprint.doh_confidence
+
+# === TCP Fingerprinting ===
+tcp_fingerprint.tcp_fp_fwd
+tcp_fingerprint.tcp_fp_bwd
+tcp_fingerprint.tcp_fp_fwd_window
+tcp_fingerprint.tcp_fp_fwd_ttl
+tcp_fingerprint.tcp_fp_fwd_mss
+tcp_fingerprint.tcp_fp_fwd_ws
+tcp_fingerprint.tcp_fp_bwd_window
+tcp_fingerprint.tcp_fp_bwd_ttl
+tcp_fingerprint.tcp_fp_bwd_mss
+tcp_fingerprint.tcp_fp_bwd_ws
+tcp_fingerprint.tcp_os_hint_fwd
+tcp_fingerprint.tcp_os_hint_bwd
+tcp_fingerprint.tcp_uptime_fwd
+tcp_fingerprint.tcp_uptime_bwd
+
+# === Padding Analysis ===
+padding.is_constant_size
+padding.is_constant_rate
+padding.pkt_size_variance
+padding.pkt_size_cv
+padding.iat_variance
+padding.iat_cv
+padding.unique_size_count
+padding.size_entropy
+padding.padding_score
+padding.is_tor_like
+padding.tor_cell_count
+padding.tor_cell_ratio
+padding.dominant_size_mode
+padding.dominant_size_ratio
+padding.avg_burst_payload_efficiency
+padding.burst_padding_ratio
+padding.burst_overhead_bytes
+
+# === Connection Graph Features ===
+connection.conn_src_total_flows
+connection.conn_src_total_packets
+connection.conn_src_total_bytes
+connection.conn_src_unique_dsts
+connection.conn_src_unique_ports
+connection.conn_src_dst_flows
+connection.conn_src_port_flows
+connection.conn_src_out_degree
+connection.conn_src_clustering
+connection.conn_src_betweenness
+connection.conn_src_community
+connection.conn_dst_total_flows
+connection.conn_dst_total_packets
+connection.conn_dst_total_bytes
+connection.conn_dst_unique_srcs
+connection.conn_dst_in_degree
+connection.conn_dst_clustering
+connection.conn_dst_betweenness
+connection.conn_dst_community
+connection.conn_same_community
+
+# === MAC Address Features ===
+mac.mac_src
+mac.mac_dst
+mac.mac_eth_type
+mac.mac_unique_src_count
+mac.mac_unique_dst_count
+mac.mac_broadcast_count
+mac.mac_multicast_count
+mac.mac_vlan_id
+mac.mac_vlan_count
+mac.mac_stat
+
+# === MPTCP Features ===
+tcp_mptcp.mptcp_detected
+tcp_mptcp.is_mptcp
+tcp_mptcp.mptcp_capable_fwd
+tcp_mptcp.mptcp_capable_bwd
+tcp_mptcp.mptcp_option_count
+tcp_mptcp.mptcp_stat
+
+# === IPv6 Options ===
+ipv6_options.ipv6_packet_count
+ipv6_options.ipv4_packet_count
+ipv6_options.ipv6_ratio
+ipv6_options.is_ipv6_only
+ipv6_options.ipv6_flow_label
+ipv6_options.ipv6_flow_label_unique_count
+ipv6_options.ipv6_flow_label_changes
+ipv6_options.ipv6_traffic_class
+ipv6_options.ipv6_traffic_class_unique_count
+ipv6_options.ipv6_dscp
+ipv6_options.ipv6_ecn
+
+# === ICMP Features ===
+icmp.icmp_packet_count
+icmp.icmp_ratio
+icmp.is_icmp_only
+icmp.icmp_stat
+icmp.icmp_echo_request_count
+icmp.icmp_echo_reply_count
+icmp.icmp_echo_success_ratio
+icmp.icmp_dest_unreachable_count
+icmp.icmp_time_exceeded_count
+icmp.icmp_unique_type_codes
+icmp.icmp_dominant_type
+icmp.icmp_dominant_type_count
+icmp.icmp_unique_ids
+icmp.icmp_seq_min
+icmp.icmp_seq_max
+icmp.icmp_seq_gaps

@@ -8,6 +8,7 @@ from .base import FeatureExtractor
 
 if TYPE_CHECKING:
     from ..core.flow import Flow
+    from ..schema.registry import FeatureMeta
 
 
 class MPTCPExtractor(FeatureExtractor):
@@ -144,6 +145,106 @@ class MPTCPExtractor(FeatureExtractor):
             "mptcp_stat",
             "is_mptcp",
         ]
+
+    @property
+    def extractor_id(self) -> str:
+        """Return the unique identifier for this extractor."""
+        return "tcp_mptcp"
+
+    def feature_meta(self) -> dict[str, FeatureMeta]:
+        """Return metadata for all features produced by this extractor.
+
+        Returns:
+            Dictionary mapping feature IDs to their FeatureMeta objects.
+        """
+        from ..schema.registry import FeatureMeta
+
+        return {
+            "tcp_mptcp.detected": FeatureMeta(
+                id="tcp_mptcp.detected",
+                dtype="int64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="1 if any MPTCP option detected in flow",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Whether MPTCP option (kind 30) was detected in any packet",
+            ),
+            "tcp_mptcp.capable_fwd": FeatureMeta(
+                id="tcp_mptcp.capable_fwd",
+                dtype="int64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="1 if MP_CAPABLE seen in forward SYN",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Whether MP_CAPABLE was seen in forward direction SYN packet",
+            ),
+            "tcp_mptcp.capable_bwd": FeatureMeta(
+                id="tcp_mptcp.capable_bwd",
+                dtype="int64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="1 if MP_CAPABLE seen in backward SYN",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Whether MP_CAPABLE was seen in backward direction SYN packet",
+            ),
+            "tcp_mptcp.option_count": FeatureMeta(
+                id="tcp_mptcp.option_count",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Count of packets containing MPTCP options",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Number of packets containing MPTCP TCP option (kind 30)",
+            ),
+            "tcp_mptcp.stat": FeatureMeta(
+                id="tcp_mptcp.stat",
+                dtype="int64",
+                shape=[1],
+                units="bitmap",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Bitmap: bit0=detected, bit1=fwd_capable, bit2=bwd_capable, bit3=full_mptcp",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="MPTCP status bitmap encoding detection and capability flags",
+            ),
+            "tcp_mptcp.is_mptcp": FeatureMeta(
+                id="tcp_mptcp.is_mptcp",
+                dtype="int64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="1 if both directions are MP_CAPABLE",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="Whether this is a full MPTCP session (both directions capable)",
+            ),
+        }
 
     @property
     def name(self) -> str:

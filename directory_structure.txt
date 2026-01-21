@@ -1,0 +1,1029 @@
+.
+├── benchmarks
+│   ├── __init__.py
+│   ├── benchmark_all_wireshark.py
+│   ├── benchmark_pipeline.py
+│   ├── benchmark_stats.py
+│   ├── benchmark_tranalyzer2.py
+│   ├── comprehensive_benchmark.py
+│   ├── data
+│   │   ├── bigFlows.pcap
+│   │   ├── smallFlows.pcap
+│   │   └── wireshark_samples
+│   │       ├── 10_sqldeveloper10_2016.pcapng
+│   │       ├── 11_sqldeveloper11_2016.pcapng
+│   │       ├── 12_sqldeveloper12_2016.pcapng
+│   │       ├── 1920x1080_H.265.pcapng
+│   │       ├── 200722_tcp_anon.pcapng
+│   │       ├── 200722_win_scale_examples_anon.pcapng
+│   │       ├── 220614_ip_flags_google.pcapng
+│   │       ├── 220703_arp-storm.pcapng
+│   │       ├── 2dParityFEC-Example.cap
+│   │       ├── 3gpp_mc.cap
+│   │       ├── 6lowpan-rfrag-icmpv6.pcapng
+│   │       ├── 6LoWPAN.pcap
+│   │       ├── 6to4.pcap
+│   │       ├── 7_oracle10_2016.pcapng
+│   │       ├── 8_oracle11_2016.pcapng
+│   │       ├── 9_oracle12_2016.pcapng
+│   │       ├── aaa.pcap
+│   │       ├── abis-reject-network.pcap
+│   │       ├── acn_capture_example_1.cap
+│   │       ├── afs.cap
+│   │       ├── alp-sample1.pcap
+│   │       ├── alp-sample2.pcap
+│   │       ├── amqps.pcapng
+│   │       ├── ancp.pcap
+│   │       ├── anony-tcp-std.pcap
+│   │       ├── ansi_map_ota.pcap
+│   │       ├── ansi_map_win.pcap
+│   │       ├── ansi_tcap_over_itu_sccp_over_mtp3_over_mtp2.pcap
+│   │       ├── apache-cassandra-cql-v3.pcapng
+│   │       ├── Apple_IP-over-IEEE_1394_Packet.pcap
+│   │       ├── arp-storm.pcap
+│   │       ├── ascend.trace
+│   │       ├── Asphodel_WMRTCP5135.pcapng
+│   │       ├── Asterisk_ZFONE_XLITE.pcap
+│   │       ├── atm_capture1.cap
+│   │       ├── b6300a.cap
+│   │       ├── bacnet-arcnet-linux.cap
+│   │       ├── bfd-raw-auth-md5.pcap
+│   │       ├── bfd-raw-auth-simple.pcap
+│   │       ├── bgp_shutdown_communication.pcap
+│   │       ├── bgp.pcap
+│   │       ├── bgp.pcapng
+│   │       ├── bgpsec.pcap
+│   │       ├── bicc.pcap
+│   │       ├── BITTORRENT.pcap
+│   │       ├── BitTorrent.Transfer1.cap
+│   │       ├── Bluetooth_HCI_and_OBEX_Transaction_over_USB.ntar
+│   │       ├── Bluetooth1.cap
+│   │       ├── bmp.pcap
+│   │       ├── bootparams.cap
+│   │       ├── BT_USB_LinCooked_Eth_80211_RT.ntar
+│   │       ├── c05-http-reply-r1.pcap
+│   │       ├── c06-ldapv3-app-r1.pcap
+│   │       ├── c06-ldapv3-enc-r1.pcap
+│   │       ├── c06-snmpv1-req-app-r1.pcap
+│   │       ├── c06-snmpv1-trap-app-r1.pcap
+│   │       ├── c06-snmpv1-trap-enc-r1.pcap
+│   │       ├── c07-sip-r2.cap
+│   │       ├── c1222_over_ipv6.pcap
+│   │       ├── c1222_std_example8.pcap
+│   │       ├── c1222overIPv4.cap
+│   │       ├── camel.pcap
+│   │       ├── camel2.pcap
+│   │       ├── can-2003-0003.pcap
+│   │       ├── caneth.pcapng
+│   │       ├── captura.NNTP.cap
+│   │       ├── cdp_v2.pcap
+│   │       ├── cdp-BCM1100.cap
+│   │       ├── cdp.pcap
+│   │       ├── ch11-25-slt.pcap
+│   │       ├── chargen-tcp.pcap
+│   │       ├── chargen-udp.pcap
+│   │       ├── cigi2.pcap
+│   │       ├── cigi3.pcap
+│   │       ├── cisco-nexus10-erspan-marker.pcap
+│   │       ├── cisco-nexus92-erspan-marker.pcap
+│   │       ├── ciscowl_version_0xc1.pcap
+│   │       ├── ciscowl.pcap
+│   │       ├── cmp_in_http_with_pkixcmp-poll_content_type.pcap
+│   │       ├── cmp_IR_sequence_-OpenSSL-EJBCA.pcap
+│   │       ├── cmp_IR_sequence_OpenSSL-Cryptlib.pcap
+│   │       ├── cmp-in-http-with-errors-in-cmp-protocol.pcap
+│   │       ├── cmp-trace.pcap
+│   │       ├── coap-cbor.pcap
+│   │       ├── configuration_test_protocol_aka_loop.pcap
+│   │       ├── cops-pr.cap
+│   │       ├── COTP_Example.pcapng
+│   │       ├── couchbase_subdoc_multi.pcap
+│   │       ├── couchbase-create-bucket.pcapng
+│   │       ├── couchbase-lww.pcap
+│   │       ├── couchbase-xattr.pcapng
+│   │       ├── create_two_tasks_then_enum_RPC_C_AUTHN_LEVEL_CONNECT_NTLMv2.pcapng
+│   │       ├── create_two_tasks_then_enum_RPC_C_AUTHN_LEVEL_PKT_PRIVACY_NTLMv2__password_clem.pcapng
+│   │       ├── curl-packets-syscalls-2016-05-04.pcapng
+│   │       ├── dccp_trace.pcap
+│   │       ├── dcerpc_witness.pcapng
+│   │       ├── dcerpc-fault-stub-data-02.pcap
+│   │       ├── dcerpc-winreg-with-rpc-sec-verification-trailer.pcap
+│   │       ├── dhcp-and-dyndns.pcap
+│   │       ├── dhcp-auth.pcap
+│   │       ├── dhcp-nanosecond.pcap
+│   │       ├── dhcp.pcap
+│   │       ├── dhcpv6_1.pcap
+│   │       ├── DHCPv6.pcap
+│   │       ├── DICOM_C-ECHO-echoscu.pcap
+│   │       ├── DIS_EntityState_1.pcapng
+│   │       ├── DIS_EntityState_2.pcapng
+│   │       ├── DIS_signal_and_transmitter.pcapng
+│   │       ├── dmp-examples.pcap
+│   │       ├── dnp3_select_operate.pcap
+│   │       ├── dnp3_write.pcap
+│   │       ├── dns_flows.txt
+│   │       ├── dns_headers.txt
+│   │       ├── dns_icmpStats.txt
+│   │       ├── dns_port.pcap
+│   │       ├── dns_protocols.txt
+│   │       ├── dns-icmp.pcapng
+│   │       ├── dns.cap
+│   │       ├── dof-short-capture.pcapng
+│   │       ├── dof-small-device.pcapng
+│   │       ├── dos_win98_smb_netbeui.pcapng
+│   │       ├── dssetup_DsRoleDnsNameToFlatName_w2k.cap
+│   │       ├── dssetup_DsRoleDnsNameToFlatName_w2k3_op_rng_error.cap
+│   │       ├── dssetup_DsRoleGetPrimaryDomainInformation_ad_dc.cap
+│   │       ├── dssetup_DsRoleGetPrimaryDomainInformation_ad_member.cap
+│   │       ├── dssetup_DsRoleGetPrimaryDomainInformation_standalone_workstation.cap
+│   │       ├── dssetup_DsRoleUpgradeDownlevelServer_MS04-011_exploit.cap
+│   │       ├── DTMFsipinfo.pcap
+│   │       ├── DTP.pcapng
+│   │       ├── dump_2009-02-02_23_17_18_RFPI_00_4e_b4_bd_50.pcap
+│   │       ├── dvb-ci_1.pcap
+│   │       ├── dvb-ci_2.pcap
+│   │       ├── dvb-ci_UV1_0000.pcap
+│   │       ├── EA_Request.pcapng
+│   │       ├── eapol-mka.pcap
+│   │       ├── ecpri.pcap
+│   │       ├── edp.eaps.mirror2.trace
+│   │       ├── edp.trace
+│   │       ├── edp1.trace
+│   │       ├── eia709.1-over-eia852.pcap
+│   │       ├── EIGRP_Neighbors.cap
+│   │       ├── eigrp-for-ipv6-stub.pcap
+│   │       ├── eigrp-for-ipv6-updates.pcap
+│   │       ├── eigrp-ipx.pcap
+│   │       ├── EmergeSync.cap
+│   │       ├── epl_sdo_udp.cap
+│   │       ├── epl.cap
+│   │       ├── epmd.pcap
+│   │       ├── Ether-S-IO_traffic_01.pcap
+│   │       ├── ethercat.cap
+│   │       ├── Ethernet_Pause_Frame.cap
+│   │       ├── etsi-its-cam-secured.pcapng
+│   │       ├── etsi-its-cam-unsecured.pcapng
+│   │       ├── etsi-its-denm-unsecured.pcapng
+│   │       ├── exablaze_trailer.pcap
+│   │       ├── exec-sample.pcap
+│   │       ├── FAX-Call-t38-CA-TDM-SIP-FB-1.pcap
+│   │       ├── fcgi.pcap
+│   │       ├── fcip_trace.cap
+│   │       ├── fcoe-drop-rddata.cap
+│   │       ├── fcoe-t11-short.cap
+│   │       ├── fcoe1.cap
+│   │       ├── fip-adv.cap
+│   │       ├── fip-ka.cap
+│   │       ├── FTPv6-1.cap
+│   │       ├── FTPv6-2.cap
+│   │       ├── fw1_mon2018.cap
+│   │       ├── gearman.pcap
+│   │       ├── getsetacl.cap
+│   │       ├── gopher.pcap
+│   │       ├── greb_DSLkeepalive_m.cap
+│   │       ├── greb_filterlist.pcap
+│   │       ├── greb_notifyDSLfail_overLTE.cap
+│   │       ├── grpc_person_search_json_with_image.pcapng
+│   │       ├── grpc_person_search_protobuf_with_image.pcapng
+│   │       ├── gryphon.cap
+│   │       ├── gsm_map_with_ussd_string.pcap
+│   │       ├── gsm-r.uus1.pcap
+│   │       ├── h223-over-iax.pcap
+│   │       ├── h223-over-rtp.pcap
+│   │       ├── h223-over-tcp.pcap
+│   │       ├── h263-over-rtp.pcap
+│   │       ├── hcrt.pcap
+│   │       ├── hdcp_authentication_sample.pcap
+│   │       ├── hiqnet_netsetter-soundcraft_session.pcapng
+│   │       ├── hiqnet_visiremote-soundcraft_session.pcapng
+│   │       ├── homeplug_network_statistics_basic.pcap
+│   │       ├── homeplug_request_channel_estimation.pcap
+│   │       ├── homeplug_request_parameters_and_statistics.pcap
+│   │       ├── hp-erm-2.cap
+│   │       ├── hsrp.pcap
+│   │       ├── http_gzip.cap
+│   │       ├── http_PPI.cap
+│   │       ├── http_redirects.pcapng
+│   │       ├── http_with_jpegs.cap
+│   │       ├── http-chunked-gzip.pcap
+│   │       ├── http.cap
+│   │       ├── http2-16-ssl.pcapng
+│   │       ├── i4b.trace
+│   │       ├── IEC104_SQ.pcapng
+│   │       ├── iec104.pcap
+│   │       ├── IGMP-dataset.pcap
+│   │       ├── imap-ssl.pcapng
+│   │       ├── imap.cap
+│   │       ├── infiniband.pcap
+│   │       ├── iperf-mptcp-0-0.pcap
+│   │       ├── ipmb.multi.packets.pcap
+│   │       ├── ipmi.sensor.event.RR.pcap
+│   │       ├── ipv4_cipso_option.pcap
+│   │       ├── IrDA_Traffic.ntar
+│   │       ├── iseries.cap
+│   │       ├── isl-2-dot1q.cap
+│   │       ├── isup_load_generator.pcap
+│   │       ├── jaeger-compact.pcap
+│   │       ├── japan_tcap_over_m2pa.pcap
+│   │       ├── jxta-mcast-sample.pcap
+│   │       ├── jxta-sample.pcap
+│   │       ├── KasperskyPackets.CAP
+│   │       ├── kdsp.pcap
+│   │       ├── kismet-client-server-dump-1.pcap
+│   │       ├── kismet-client-server-dump-2.pcap
+│   │       ├── klm.pcap
+│   │       ├── kpasswd_tcp.cap
+│   │       ├── l2ping.cap
+│   │       ├── lacp1.pcap
+│   │       ├── ldap-and-search.pcap
+│   │       ├── ldap-attribute-value-list.pcap
+│   │       ├── ldap-controls-dirsync-01.cap
+│   │       ├── ldap-extensible-match-with-dn.pcap
+│   │       ├── ldap-extensible-match.pcap
+│   │       ├── ldap-krb5-sign-seal-01.cap
+│   │       ├── ldap-ssl.pcapng
+│   │       ├── ldap-substring.pcap
+│   │       ├── linx-setup-pingpong-shutdown.pcap
+│   │       ├── lldp-shutdown-pdu.pcapng
+│   │       ├── lldp.detailed.pcap
+│   │       ├── lldp.minimal.pcap
+│   │       ├── lldpmed_civicloc.pcap
+│   │       ├── llrp.cap
+│   │       ├── lls-tables-alp.pcap
+│   │       ├── macsec_cisco_trunk.pcap
+│   │       ├── MagicJack-_short_call.pcap
+│   │       ├── Manolito2.cap
+│   │       ├── mapi.cap
+│   │       ├── MCPE-0.15.pcapng
+│   │       ├── mdb_bill_validator.pcap
+│   │       ├── mdb_cashless_1.pcap
+│   │       ├── mesh_assoc_truncated.pcapng
+│   │       ├── mesh.pcap
+│   │       ├── messenger.pcap
+│   │       ├── metamako_trailer.pcap
+│   │       ├── metasploit-sip-invite-spoof.pcap
+│   │       ├── MGCP.pcap
+│   │       ├── microsoft_npc_netbios.pcapng
+│   │       ├── MicrosoftNTP.cap
+│   │       ├── Mixed1.cap
+│   │       ├── mms.pcap
+│   │       ├── mndp.pcap
+│   │       ├── Mobile-Originating-Call(AMR).pcap
+│   │       ├── monotone-netsync.cap
+│   │       ├── mouse_replug2.pcap
+│   │       ├── mpls-basic.cap
+│   │       ├── mpls-te.cap
+│   │       ├── mptcp_v1.pcapng
+│   │       ├── ms-sql-tds-rpc-requests.cap
+│   │       ├── msgpack-generated.pcap
+│   │       ├── msnms.pcap
+│   │       ├── mysql_complete.pcap
+│   │       ├── mysql-ssl-larger.pcapng
+│   │       ├── mysql-ssl.pcapng
+│   │       ├── nano_tcp.pcap
+│   │       ├── nb6-http.pcap
+│   │       ├── nb6-startup.pcap
+│   │       ├── nb6-telephone.pcap
+│   │       ├── ndmp.pcap
+│   │       ├── ndsp_v2.pcapng
+│   │       ├── netbench_1.cap
+│   │       ├── netlink-conntrack.pcap
+│   │       ├── netlink-ipset.pcap
+│   │       ├── netlink-nflog.pcap
+│   │       ├── netlink.pcap
+│   │       ├── Network_Join_Nokia_Mobile.pcap
+│   │       ├── new_rfp_on_wire.pcap
+│   │       ├── new_rfp.pcap
+│   │       ├── nflog-ebtables.pcapng
+│   │       ├── nflog.pcap
+│   │       ├── nfs_bad_stalls.cap
+│   │       ├── nfsv2.pcap
+│   │       ├── nfsv3.pcap
+│   │       ├── nfsv4.1_pnfs.cap
+│   │       ├── nntp.pcap
+│   │       ├── notifyLTE.pcap
+│   │       ├── novell_eth2_netbios.pcapng
+│   │       ├── novell_llc_netbios.pcapng
+│   │       ├── novell_raw_netbios.pcapng
+│   │       ├── nsm.pcap
+│   │       ├── nspi.pcap
+│   │       ├── ntlm_ldap.pcapng
+│   │       ├── ntlm_rpc.pcapng
+│   │       ├── NTLM-wenchao.pcap
+│   │       ├── NTP_sync.pcap
+│   │       ├── Obsolete_Packets.cap
+│   │       ├── openflow_v1.3_messages.pcapng
+│   │       ├── opensafety_epl_trace.pcap
+│   │       ├── opensafety_sercosiii_trace.pcap
+│   │       ├── opensafety_udp_trace.pcap
+│   │       ├── oracle12-example.pcapng
+│   │       ├── ospf.cap
+│   │       ├── p772-transfer-success.pcap
+│   │       ├── packlog-example.cap
+│   │       ├── pana-draft18.cap
+│   │       ├── pana-rfc5191.cap
+│   │       ├── pana.cap
+│   │       ├── pcapng-example.pcapng
+│   │       ├── pgsql-jdbc.pcap
+│   │       ├── pim-reg.cap
+│   │       ├── PioletSearch.Manolito.cap
+│   │       ├── policy-authorizeNV.pcap
+│   │       ├── pop-ssl.pcapng
+│   │       ├── ppp_lcp_ipcp.pcap
+│   │       ├── PPP-config.cap
+│   │       ├── PRIV_bootp-both_overload_empty-no_end.pcap
+│   │       ├── PRIV_bootp-both_overload.pcap
+│   │       ├── protobuf_tcp_addressbook.pcapng
+│   │       ├── protobuf_udp_addressbook_with_image_ts.pcapng
+│   │       ├── protobuf_udp_addressbook_with_image.pcapng
+│   │       ├── protobuf_udp_addressbook.pcapng
+│   │       ├── ptpv2_anon.pcapng
+│   │       ├── ptpv2.pcap
+│   │       ├── pvfs2-sample.pcap
+│   │       ├── radius_localhost.pcapng
+│   │       ├── rarp_req_reply.pcapng
+│   │       ├── RawPacketIPv6Tunnel-UK6x.cap
+│   │       ├── Read-FeliCa-Lite-NDEF-Tags.cap
+│   │       ├── redundant_stream1.pcapng
+│   │       ├── rquota.pcap
+│   │       ├── rsasnakeoil2.pcap
+│   │       ├── rsvp-PATH-RESV.pcap
+│   │       ├── RTP_L16_monaural_sample.pcapng
+│   │       ├── rtp-norm-transfer.pcap
+│   │       ├── rtp-opus-only.pcap
+│   │       ├── rtps_cooked.pcapng
+│   │       ├── rtsp_with_data_over_tcp.cap
+│   │       ├── RTSPPACKETS1.cap
+│   │       ├── s101glow.pcap
+│   │       ├── S5066-Expedited.pcap
+│   │       ├── S5066-HFChat-1.pcap
+│   │       ├── S5066-HFChat-Rejected.pcap
+│   │       ├── s7comm_downloading_block_db1.pcap
+│   │       ├── s7comm_program_blocklist_onlineview.pcap
+│   │       ├── s7comm_reading_plc_status.pcap
+│   │       ├── s7comm_reading_setting_plc_time.pcap
+│   │       ├── s7comm_varservice_libnodavedemo_bench.pcap
+│   │       ├── s7comm_varservice_libnodavedemo.pcap
+│   │       ├── sample-imf.pcap
+│   │       ├── sample-TNEF.pcap
+│   │       ├── sbus.pcap
+│   │       ├── sctp-addip.cap
+│   │       ├── SCTP-INIT-Collision.cap
+│   │       ├── sctp-test.cap
+│   │       ├── sctp-www.cap
+│   │       ├── sctp.cap
+│   │       ├── sftp_curve25519-aes128-ctr_reassembleS.pcapng
+│   │       ├── sftp_curve25519-chacha20-poly1305_openssh-reassembleS.pcapng
+│   │       ├── sftp_dhgex-sha1_aes128-ctr-reassembledS.pcapng
+│   │       ├── sftp_dhgex-sha1_aes256-gcm_openssh-reassembleS.pcapng
+│   │       ├── ShortMAPI.pcapng
+│   │       ├── SIMULCRYPT.pcap
+│   │       ├── sip-rtp-dvi4.pcap
+│   │       ├── sip-rtp-g711.pcap
+│   │       ├── sip-rtp-g722.pcap
+│   │       ├── sip-rtp-g726.pcap
+│   │       ├── sip-rtp-g729a.pcap
+│   │       ├── sip-rtp-gsm.pcap
+│   │       ├── sip-rtp-l16.pcap
+│   │       ├── sip-rtp-lpc.pcap
+│   │       ├── sip-rtp-opus-hybrid.pcap
+│   │       ├── sip-rtp-opus.pcap
+│   │       ├── sip-rtp-speex.pcap
+│   │       ├── siso_std_002_annex_b_example.pcap
+│   │       ├── siso_std_002_transmitter.pcap
+│   │       ├── SITA-Protocols.cap
+│   │       ├── slammer.pcap
+│   │       ├── smb-browser-elections.pcapng
+│   │       ├── smb-direct-man-in-the-middle-02-reassemble-frames9.pcap
+│   │       ├── smb-legacy-implementation.pcapng
+│   │       ├── SMB-locking.pcapng
+│   │       ├── smb-on-windows-10.pcapng
+│   │       ├── smb3-aes-128-ccm.pcap
+│   │       ├── smb311-aes-128-ccm-filt.pcap
+│   │       ├── smbtorture.cap
+│   │       ├── smpp.cap
+│   │       ├── smtp-ssl.pcapng
+│   │       ├── smtp.pcap
+│   │       ├── smtp2525-ssl.pcapng
+│   │       ├── snakeoil-dtls.pcap
+│   │       ├── snmp_usm.pcap
+│   │       ├── SoulSeekRoom.cap
+│   │       ├── sr-header.pcap
+│   │       ├── ssh_curve25519-aes128-cbc_opensshS.pcapng
+│   │       ├── ssh_curve25519-aes128-ctr_opensshS.pcapng
+│   │       ├── ssh_curve25519-aes128-gcm_opensshS.pcapng
+│   │       ├── ssh_curve25519-aes192-cbc_opensshS.pcapng
+│   │       ├── ssh_curve25519-aes192-ctr_opensshS.pcapng
+│   │       ├── ssh_curve25519-aes256-cbc_opensshS.pcapng
+│   │       ├── ssh_curve25519-aes256-ctr_opensshS.pcapng
+│   │       ├── ssh_curve25519-aes256-gcm_opensshS.pcapng
+│   │       ├── ssh_dhg1-sha1_aes256-gcm_opensshS.pcapng
+│   │       ├── ssh_dhg14-sha256_aes256-gcm_opensshS.pcapng
+│   │       ├── ssh_dhg16-sha512_aes256-gcm_opensshS.pcapng
+│   │       ├── ssh_dhgex-sha1_aes256-gcm_opensshS.pcapng
+│   │       ├── ssh_dhgex-sha256_aes256-gcm_opensshS.pcapng
+│   │       ├── stanag-5602-simple-example.pcap
+│   │       ├── Stanag5066-RAW-ENCAP-Bftp-Exchange-tx.pcap
+│   │       ├── Stanag5066-TCP-ENCAP-Bftp-Exchange-tx-rx.pcapng
+│   │       ├── steam-ihs-discovery.pcap
+│   │       ├── STP_UplinkFast.pcapng
+│   │       ├── stp.pcap
+│   │       ├── SyncE_bidirectional.pcapng
+│   │       ├── tcp-ecn-sample.pcap
+│   │       ├── tcp-ethereal-file1.trace
+│   │       ├── TeamSpeak2.pcap
+│   │       ├── teardrop.cap
+│   │       ├── telecomitalia-pppoe.pcap
+│   │       ├── telnet-cooked.pcap
+│   │       ├── telnet-raw.pcap
+│   │       ├── tfp_capture.pcapng
+│   │       ├── tftp_rrq.pcap
+│   │       ├── tftp_wrq.pcap
+│   │       ├── ThreadCommissioning-JPAKE-DTLS-1.pcapng
+│   │       ├── ThreadCommissioning-JPAKE-DTLS-2.pcapng
+│   │       ├── tipc_v2_fragmenter_messages.pcap
+│   │       ├── TIPC-over-TCP_disc-publ-inventory_sim-withd.pcap
+│   │       ├── TIPC-over-TCP_MTU-discovery.pcap
+│   │       ├── tipc-publication-payload-withdrawal.pcap
+│   │       ├── TNS_Oracle1.pcap
+│   │       ├── TNS_Oracle2.pcap
+│   │       ├── TNS_Oracle3.pcap
+│   │       ├── TNS_Oracle5.pcap
+│   │       ├── tpncp_tcp.pcap
+│   │       ├── tpncp_udp.pcap
+│   │       ├── TTE_mix_small.pcap
+│   │       ├── ua3g_freeseating_ipv4.pcap
+│   │       ├── ua3g_freeseating_ipv6.pcap
+│   │       ├── uaudp_ipv6.pcap
+│   │       ├── udp_lite_checksum_0.pcap
+│   │       ├── udp_lite_full_coverage_0.pcap
+│   │       ├── udp_lite_illegal_1-7.pcap
+│   │       ├── udp_lite_illegal_large-coverage.pcap
+│   │       ├── udp_lite_normal_coverage_8-20.pcap
+│   │       ├── udp-nm_anon.pcap
+│   │       ├── UFTP_v3_transfer.pcapng
+│   │       ├── UFTP_v4_transfer.pcapng
+│   │       ├── UFTP_v5_transfer.pcapng
+│   │       ├── uma_ho_req_bug.cap
+│   │       ├── UMTS_FP_MAC_RLC_RRC_NBAP.pcap
+│   │       ├── unistim_phone_startup.pcap
+│   │       ├── unistim-call.pcap
+│   │       ├── usb_memory_stick_create_file.pcap
+│   │       ├── usb_memory_stick_delete_file.pcap
+│   │       ├── usb_memory_stick.pcap
+│   │       ├── usb_u3v_sample.pcapng
+│   │       ├── usbhub.pcap
+│   │       ├── usbstick3.pcap
+│   │       ├── UserLog.pcap
+│   │       ├── v6-http.cap
+│   │       ├── v6.pcap
+│   │       ├── VariousUSBDevices.pcap
+│   │       ├── vlan.cap
+│   │       ├── vnc-sample.pcap
+│   │       ├── vxi-11.pcap
+│   │       ├── wap_google.pcap
+│   │       ├── WAP_WBXML_Provisioning_Push.pcap
+│   │       ├── wcf_nettcpbinding.pcapng
+│   │       ├── win_s4u2self.pcap
+│   │       ├── WINS-Replication-01.cap
+│   │       ├── WINS-Replication-02.cap
+│   │       ├── WINS-Replication-03.cap
+│   │       ├── wisunSimple.pcapng
+│   │       ├── wol.pcap
+│   │       ├── wpa-eap-tls.pcap
+│   │       ├── wpa-Induction.pcap
+│   │       ├── wpa2linkuppassphraseiswireshark.pcap
+│   │       ├── wpsdata.cap
+│   │       ├── x11-composite.pcap
+│   │       ├── x11-glx.pcap
+│   │       ├── x11-gtk.pcap
+│   │       ├── x11-res.pcap
+│   │       ├── x11-shape.pcap
+│   │       ├── x11-xinput.pcapng
+│   │       ├── x11-xtest.pcap
+│   │       ├── x509-with-logo.cap
+│   │       ├── XHC1-SanDiskExtremePortableSSD.pcapng
+│   │       ├── XHC20-LogitechUnifying.pcapng
+│   │       ├── XHC20-MicrosoftKeyboard.pcapng
+│   │       ├── XHC20-OpenVizsla.pcapng
+│   │       ├── xmpp-ssl.pcapng
+│   │       ├── xrite-i1displaypro-argyllcms-1.9.2-spotread.pcapng
+│   │       ├── xrite-i1displaypro-i1profiler.pcap
+│   │       ├── yami.pcap
+│   │       ├── zabbix30-proxy-and-agent.pcapng
+│   │       ├── zigbee-join-authenticate.pcap
+│   │       └── zlip-2.pcap
+│   ├── feature_benchmark.py
+│   ├── memory_benchmark.py
+│   ├── README.md
+│   ├── real_benchmark.py
+│   ├── results
+│   │   ├── benchmark_results.json
+│   │   ├── comprehensive_benchmark_results.json
+│   │   ├── real_benchmark_results.json
+│   │   ├── t2_docker_results.txt
+│   │   ├── TRANALYZER2_BENCHMARK_REPORT.md
+│   │   ├── tranalyzer2_benchmark_results.json
+│   │   ├── tranalyzer2_benchmark_summary.json
+│   │   ├── wireshark_benchmark_results.json
+│   │   ├── wireshark_benchmark_summary.json
+│   │   └── WIRESHARK_SAMPLES_BENCHMARK_REPORT.md
+│   ├── run_all.py
+│   └── speed_benchmark.py
+├── build
+│   ├── lib.macosx-26.0-arm64-cpython-314
+│   │   └── joyfuljay
+│   │       └── extensions
+│   │           ├── _fast_entropy.cpython-314-darwin.so
+│   │           └── _fast_stats.cpython-314-darwin.so
+│   └── temp.macosx-26.0-arm64-cpython-314
+│       └── Users
+│           └── batu
+│               └── Documents
+│                   └── DEVELOPMENT
+│                       └── jade
+│                           └── src
+│                               └── joyfuljay
+│                                   └── extensions
+│                                       ├── _fast_entropy.o
+│                                       └── _fast_stats.o
+├── CHANGELOG.md
+├── CITATION.cff
+├── CONTRIBUTING.md
+├── dashboards
+│   └── joyfuljay-overview.json
+├── directory_structure.txt
+├── docs
+│   ├── api.md
+│   ├── architecture.md
+│   ├── assets
+│   │   └── images
+│   │       ├── favicon.ico
+│   │       ├── logo.png
+│   │       └── logo.svg
+│   ├── benchmarks.md
+│   ├── cli-reference.md
+│   ├── configuration.md
+│   ├── developer-guide.md
+│   ├── engineering
+│   │   ├── determinism.md
+│   │   ├── FEATURE_FREEZE.md
+│   │   ├── INITIAL-CONCEPT.md
+│   │   ├── PARITY.md
+│   │   ├── TODO.md
+│   │   └── versioning.md
+│   ├── extractors
+│   │   ├── connection.md
+│   │   ├── dns.md
+│   │   ├── entropy.md
+│   │   ├── fingerprint.md
+│   │   ├── flow-meta.md
+│   │   ├── index.md
+│   │   ├── padding.md
+│   │   ├── quic.md
+│   │   ├── size.md
+│   │   ├── ssh.md
+│   │   ├── tcp.md
+│   │   ├── timing.md
+│   │   └── tls.md
+│   ├── features.md
+│   ├── includes
+│   │   └── abbreviations.md
+│   ├── index.md
+│   ├── installation.md
+│   ├── javascripts
+│   │   ├── extra.js
+│   │   └── mathjax.js
+│   ├── kafka.md
+│   ├── monitoring.md
+│   ├── overrides
+│   ├── quickstart.md
+│   ├── remote-capture.md
+│   ├── requirements.txt
+│   ├── stylesheets
+│   │   └── extra.css
+│   ├── testing.md
+│   ├── tutorials
+│   │   ├── batch-processing.md
+│   │   ├── custom-extractors.md
+│   │   ├── encrypted-traffic.md
+│   │   ├── index.md
+│   │   ├── realtime-monitoring.md
+│   │   └── traffic-classification.md
+│   └── why-joyfuljay.md
+├── examples
+│   ├── basic_extraction.py
+│   ├── batch_processing.py
+│   ├── custom_extractor.py
+│   ├── kafka_streaming.py
+│   ├── live_capture.py
+│   ├── ml_classification.py
+│   └── remote_capture.py
+├── LICENSE
+├── mkdocs.yml
+├── PLAN.md
+├── profiles
+│   ├── JJ-CORE.txt
+│   ├── JJ-EXPERIMENTAL.txt
+│   └── JJ-EXTENDED.txt
+├── pyproject.toml
+├── README.md
+├── schema
+│   └── v1.0
+├── src
+│   └── joyfuljay
+│       ├── __init__.py
+│       ├── __main__.py
+│       ├── __pycache__
+│       │   ├── __init__.cpython-311.pyc
+│       │   └── __init__.cpython-314.pyc
+│       ├── analysis
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   └── connection_graph.cpython-314.pyc
+│       │   └── connection_graph.py
+│       ├── capture
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-311.pyc
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── base.cpython-311.pyc
+│       │   │   ├── base.cpython-314.pyc
+│       │   │   ├── dpkt_backend.cpython-314.pyc
+│       │   │   ├── remote_backend.cpython-311.pyc
+│       │   │   ├── remote_backend.cpython-314.pyc
+│       │   │   ├── scapy_backend.cpython-311.pyc
+│       │   │   └── scapy_backend.cpython-314.pyc
+│       │   ├── base.py
+│       │   ├── dpkt_backend.py
+│       │   ├── remote_backend.py
+│       │   └── scapy_backend.py
+│       ├── cli
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-311.pyc
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── main.cpython-311.pyc
+│       │   │   └── main.cpython-314.pyc
+│       │   └── main.py
+│       ├── core
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-311.pyc
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── config.cpython-311.pyc
+│       │   │   ├── config.cpython-314.pyc
+│       │   │   ├── flow.cpython-311.pyc
+│       │   │   ├── flow.cpython-314.pyc
+│       │   │   ├── packet.cpython-311.pyc
+│       │   │   ├── packet.cpython-314.pyc
+│       │   │   ├── pipeline.cpython-311.pyc
+│       │   │   └── pipeline.cpython-314.pyc
+│       │   ├── config.py
+│       │   ├── flow.py
+│       │   ├── packet.py
+│       │   └── pipeline.py
+│       ├── determinism
+│       │   ├── __init__.py
+│       │   ├── direction.py
+│       │   ├── key.py
+│       │   └── rounding.py
+│       ├── extensions
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   └── __init__.cpython-314.pyc
+│       │   ├── _fast_entropy.c
+│       │   ├── _fast_entropy.cpython-314-darwin.so
+│       │   ├── _fast_entropy.html
+│       │   ├── _fast_entropy.pyx
+│       │   ├── _fast_stats.c
+│       │   ├── _fast_stats.cpython-314-darwin.so
+│       │   ├── _fast_stats.html
+│       │   ├── _fast_stats.pyx
+│       │   ├── build
+│       │   │   ├── lib.macosx-26.0-arm64-cpython-314
+│       │   │   │   ├── _fast_entropy.cpython-314-darwin.so
+│       │   │   │   └── _fast_stats.cpython-314-darwin.so
+│       │   │   └── temp.macosx-26.0-arm64-cpython-314
+│       │   │       ├── _fast_entropy.o
+│       │   │       └── _fast_stats.o
+│       │   └── build_extensions.py
+│       ├── extractors
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-311.pyc
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── base.cpython-311.pyc
+│       │   │   ├── base.cpython-314.pyc
+│       │   │   ├── connection.cpython-314.pyc
+│       │   │   ├── dns.cpython-311.pyc
+│       │   │   ├── dns.cpython-314.pyc
+│       │   │   ├── entropy.cpython-311.pyc
+│       │   │   ├── entropy.cpython-314.pyc
+│       │   │   ├── fingerprint.cpython-311.pyc
+│       │   │   ├── fingerprint.cpython-314.pyc
+│       │   │   ├── flow_meta.cpython-311.pyc
+│       │   │   ├── flow_meta.cpython-314.pyc
+│       │   │   ├── http2.cpython-314.pyc
+│       │   │   ├── icmp.cpython-314.pyc
+│       │   │   ├── ip_extended.cpython-314.pyc
+│       │   │   ├── ipv6_options.cpython-314.pyc
+│       │   │   ├── mac.cpython-314.pyc
+│       │   │   ├── padding.cpython-311.pyc
+│       │   │   ├── padding.cpython-314.pyc
+│       │   │   ├── quic.cpython-311.pyc
+│       │   │   ├── quic.cpython-314.pyc
+│       │   │   ├── size.cpython-311.pyc
+│       │   │   ├── size.cpython-314.pyc
+│       │   │   ├── ssh.cpython-311.pyc
+│       │   │   ├── ssh.cpython-314.pyc
+│       │   │   ├── tcp_fingerprint.cpython-314.pyc
+│       │   │   ├── tcp_mptcp.cpython-314.pyc
+│       │   │   ├── tcp_options.cpython-314.pyc
+│       │   │   ├── tcp_rtt.cpython-314.pyc
+│       │   │   ├── tcp_sequence.cpython-314.pyc
+│       │   │   ├── tcp_window.cpython-314.pyc
+│       │   │   ├── tcp.cpython-311.pyc
+│       │   │   ├── tcp.cpython-314.pyc
+│       │   │   ├── timing.cpython-311.pyc
+│       │   │   ├── timing.cpython-314.pyc
+│       │   │   ├── tls.cpython-311.pyc
+│       │   │   └── tls.cpython-314.pyc
+│       │   ├── base.py
+│       │   ├── connection.py
+│       │   ├── dns.py
+│       │   ├── entropy.py
+│       │   ├── fingerprint.py
+│       │   ├── flow_meta.py
+│       │   ├── http2.py
+│       │   ├── icmp.py
+│       │   ├── ip_extended.py
+│       │   ├── ipv6_options.py
+│       │   ├── mac.py
+│       │   ├── padding.py
+│       │   ├── quic.py
+│       │   ├── size.py
+│       │   ├── ssh.py
+│       │   ├── tcp_fingerprint.py
+│       │   ├── tcp_mptcp.py
+│       │   ├── tcp_options.py
+│       │   ├── tcp_rtt.py
+│       │   ├── tcp_sequence.py
+│       │   ├── tcp_window.py
+│       │   ├── tcp.py
+│       │   ├── timing.py
+│       │   └── tls.py
+│       ├── jupyter
+│       │   ├── __init__.py
+│       │   └── widgets.py
+│       ├── monitoring
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── base.cpython-314.pyc
+│       │   │   ├── grafana.cpython-314.pyc
+│       │   │   └── prometheus.cpython-314.pyc
+│       │   ├── base.py
+│       │   ├── grafana.py
+│       │   └── prometheus.py
+│       ├── output
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-311.pyc
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── database.cpython-314.pyc
+│       │   │   ├── formats.cpython-311.pyc
+│       │   │   ├── formats.cpython-314.pyc
+│       │   │   ├── kafka.cpython-314.pyc
+│       │   │   ├── schema.cpython-311.pyc
+│       │   │   └── schema.cpython-314.pyc
+│       │   ├── database.py
+│       │   ├── formats.py
+│       │   ├── kafka.py
+│       │   └── schema.py
+│       ├── provenance.py
+│       ├── py.typed
+│       ├── remote
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-311.pyc
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── discovery.cpython-314.pyc
+│       │   │   ├── protocol.cpython-311.pyc
+│       │   │   ├── protocol.cpython-314.pyc
+│       │   │   ├── server.cpython-311.pyc
+│       │   │   └── server.cpython-314.pyc
+│       │   ├── discovery.py
+│       │   ├── protocol.py
+│       │   └── server.py
+│       ├── repl
+│       │   ├── __init__.py
+│       │   └── interactive.py
+│       ├── schema
+│       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   ├── __init__.cpython-314.pyc
+│       │   │   ├── generate.cpython-314.pyc
+│       │   │   ├── profiles.cpython-314.pyc
+│       │   │   ├── registry.cpython-314.pyc
+│       │   │   └── tiering.cpython-314.pyc
+│       │   ├── generate.py
+│       │   ├── profiles.py
+│       │   ├── registry.py
+│       │   ├── tiering.py
+│       │   └── v1.0
+│       │       └── feature_schema.json
+│       └── utils
+│           ├── __init__.py
+│           ├── __pycache__
+│           │   ├── __init__.cpython-311.pyc
+│           │   ├── __init__.cpython-314.pyc
+│           │   ├── bidir_split.cpython-314.pyc
+│           │   ├── certificate_parser.cpython-314.pyc
+│           │   ├── entropy.cpython-311.pyc
+│           │   ├── entropy.cpython-314.pyc
+│           │   ├── file_watcher.cpython-314.pyc
+│           │   ├── hashing.cpython-311.pyc
+│           │   ├── hashing.cpython-314.pyc
+│           │   ├── label_loader.cpython-314.pyc
+│           │   ├── port_classifier.cpython-311.pyc
+│           │   ├── port_classifier.cpython-314.pyc
+│           │   ├── progress.cpython-311.pyc
+│           │   ├── progress.cpython-314.pyc
+│           │   ├── stats.cpython-311.pyc
+│           │   └── stats.cpython-314.pyc
+│           ├── bidir_split.py
+│           ├── certificate_parser.py
+│           ├── entropy.py
+│           ├── file_watcher.py
+│           ├── hashing.py
+│           ├── label_loader.py
+│           ├── pid_filter
+│           │   ├── __init__.py
+│           │   ├── __pycache__
+│           │   │   ├── __init__.cpython-314.pyc
+│           │   │   ├── base.cpython-314.pyc
+│           │   │   ├── cache.cpython-314.pyc
+│           │   │   ├── factory.cpython-314.pyc
+│           │   │   └── macos.cpython-314.pyc
+│           │   ├── android.py
+│           │   ├── base.py
+│           │   ├── cache.py
+│           │   ├── factory.py
+│           │   ├── linux.py
+│           │   ├── macos.py
+│           │   └── windows.py
+│           ├── port_classifier.py
+│           ├── progress.py
+│           └── stats.py
+└── tests
+    ├── __init__.py
+    ├── __pycache__
+    │   ├── __init__.cpython-311.pyc
+    │   ├── __init__.cpython-314.pyc
+    │   ├── conftest.cpython-311-pytest-8.3.3.pyc
+    │   └── conftest.cpython-314-pytest-9.0.2.pyc
+    ├── conftest.py
+    ├── data
+    │   └── sample.pcap
+    ├── fixtures
+    │   ├── __init__.py
+    │   ├── __pycache__
+    │   │   ├── __init__.cpython-311.pyc
+    │   │   ├── __init__.cpython-314.pyc
+    │   │   ├── packets.cpython-311.pyc
+    │   │   ├── packets.cpython-314.pyc
+    │   │   └── tranalyzer_packets.cpython-314.pyc
+    │   ├── packets.py
+    │   └── tranalyzer_packets.py
+    ├── fuzz
+    │   ├── __init__.py
+    │   ├── __pycache__
+    │   │   ├── __init__.cpython-314.pyc
+    │   │   └── test_extractors_fuzz.cpython-314-pytest-9.0.2.pyc
+    │   └── test_extractors_fuzz.py
+    ├── integration
+    │   ├── __init__.py
+    │   ├── __pycache__
+    │   │   ├── __init__.cpython-311.pyc
+    │   │   ├── __init__.cpython-314.pyc
+    │   │   ├── test_e2e_extraction.cpython-311-pytest-8.3.3.pyc
+    │   │   ├── test_e2e_extraction.cpython-314-pytest-9.0.2.pyc
+    │   │   └── test_tranalyzer_e2e.cpython-314-pytest-9.0.2.pyc
+    │   ├── test_e2e_extraction.py
+    │   └── test_tranalyzer_e2e.py
+    └── unit
+        ├── __init__.py
+        ├── __pycache__
+        │   ├── __init__.cpython-311.pyc
+        │   ├── __init__.cpython-314.pyc
+        │   ├── test_bidir_split.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_certificate_parser.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_cli.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_connection_graph.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_discovery.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_entropy_property.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_extensions.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_file_watcher.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_flow.cpython-311-pytest-8.3.3.pyc
+        │   ├── test_flow.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_grafana.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_label_loader.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_output_database.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_output_kafka.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_packet.cpython-311-pytest-8.3.3.pyc
+        │   ├── test_packet.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_pid_filter.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_port_classifier.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_prometheus_metrics.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_remote_backend.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_remote_protocol.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_schema.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_size.cpython-311-pytest-8.3.3.pyc
+        │   ├── test_size.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_stats_property.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_stats.cpython-311-pytest-8.3.3.pyc
+        │   ├── test_stats.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_timing.cpython-311-pytest-8.3.3.pyc
+        │   └── test_timing.cpython-314-pytest-9.0.2.pyc
+        ├── extractors
+        │   ├── __init__.py
+        │   ├── __pycache__
+        │   │   ├── __init__.cpython-311.pyc
+        │   │   ├── __init__.cpython-314.pyc
+        │   │   ├── test_connection.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_dns.cpython-311-pytest-8.3.3.pyc
+        │   │   ├── test_dns.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_entropy.cpython-311-pytest-8.3.3.pyc
+        │   │   ├── test_entropy.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_fingerprint.cpython-311-pytest-8.3.3.pyc
+        │   │   ├── test_fingerprint.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_flow_meta_enhanced.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_http2.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_icmp.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_ip_extended.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_ipv6_options.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_mac.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_padding.cpython-311-pytest-8.3.3.pyc
+        │   │   ├── test_padding.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_quic.cpython-311-pytest-8.3.3.pyc
+        │   │   ├── test_quic.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_ssh.cpython-311-pytest-8.3.3.pyc
+        │   │   ├── test_ssh.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_tcp_enhanced.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_tcp_fingerprint.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_tcp_mptcp.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_tcp_options.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_tcp_rtt.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_tcp_sequence.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_tcp_window.cpython-314-pytest-9.0.2.pyc
+        │   │   ├── test_tls.cpython-311-pytest-8.3.3.pyc
+        │   │   └── test_tls.cpython-314-pytest-9.0.2.pyc
+        │   ├── test_connection.py
+        │   ├── test_dns.py
+        │   ├── test_entropy.py
+        │   ├── test_fingerprint.py
+        │   ├── test_flow_meta_enhanced.py
+        │   ├── test_http2.py
+        │   ├── test_icmp.py
+        │   ├── test_ip_extended.py
+        │   ├── test_ipv6_options.py
+        │   ├── test_mac.py
+        │   ├── test_padding.py
+        │   ├── test_quic.py
+        │   ├── test_ssh.py
+        │   ├── test_tcp_enhanced.py
+        │   ├── test_tcp_fingerprint.py
+        │   ├── test_tcp_mptcp.py
+        │   ├── test_tcp_options.py
+        │   ├── test_tcp_rtt.py
+        │   ├── test_tcp_sequence.py
+        │   ├── test_tcp_window.py
+        │   └── test_tls.py
+        ├── test_bidir_split.py
+        ├── test_certificate_parser.py
+        ├── test_cli.py
+        ├── test_connection_graph.py
+        ├── test_discovery.py
+        ├── test_entropy_property.py
+        ├── test_extensions.py
+        ├── test_file_watcher.py
+        ├── test_flow.py
+        ├── test_grafana.py
+        ├── test_label_loader.py
+        ├── test_output_database.py
+        ├── test_output_kafka.py
+        ├── test_packet.py
+        ├── test_pid_filter.py
+        ├── test_port_classifier.py
+        ├── test_prometheus_metrics.py
+        ├── test_remote_backend.py
+        ├── test_remote_protocol.py
+        ├── test_schema.py
+        ├── test_size.py
+        ├── test_stats_property.py
+        ├── test_stats.py
+        └── test_timing.py
+
+80 directories, 947 files

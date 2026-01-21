@@ -9,6 +9,7 @@ from .base import FeatureExtractor
 
 if TYPE_CHECKING:
     from ..core.flow import Flow
+    from ..schema.registry import FeatureMeta
 
 
 class TCPFingerprintExtractor(FeatureExtractor):
@@ -270,6 +271,230 @@ class TCPFingerprintExtractor(FeatureExtractor):
             "tcp_fp_bwd_mss",
             "tcp_fp_bwd_ws",
         ]
+
+    @property
+    def extractor_id(self) -> str:
+        """Get the stable identifier for this extractor."""
+        return "tcp_fingerprint"
+
+    def feature_meta(self) -> dict[str, FeatureMeta]:
+        """Get metadata for all features produced by this extractor."""
+        from ..schema.registry import FeatureMeta
+
+        meta: dict[str, FeatureMeta] = {}
+        prefix = self.extractor_id
+
+        # Define metadata for each feature
+        feature_definitions = {
+            # Fingerprints
+            "tcp_fp_fwd": FeatureMeta(
+                id=f"{prefix}.tcp_fp_fwd",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="JA4T-style TCP fingerprint from forward SYN packet",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="JA4T-style TCP fingerprint for forward direction (from SYN)",
+            ),
+            "tcp_fp_bwd": FeatureMeta(
+                id=f"{prefix}.tcp_fp_bwd",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="JA4T-style TCP fingerprint from backward SYN-ACK packet",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="JA4T-style TCP fingerprint for backward direction (from SYN-ACK)",
+            ),
+            # OS hints
+            "tcp_os_hint_fwd": FeatureMeta(
+                id=f"{prefix}.tcp_os_hint_fwd",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="OS guess based on forward SYN TCP parameters",
+                missing_policy="sentinel",
+                missing_sentinel="unknown",
+                dependencies=["tcp"],
+                privacy_level="sensitive",
+                description="Operating system hint inferred from forward TCP parameters",
+            ),
+            "tcp_os_hint_bwd": FeatureMeta(
+                id=f"{prefix}.tcp_os_hint_bwd",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="OS guess based on backward SYN-ACK TCP parameters",
+                missing_policy="sentinel",
+                missing_sentinel="unknown",
+                dependencies=["tcp"],
+                privacy_level="sensitive",
+                description="Operating system hint inferred from backward TCP parameters",
+            ),
+            # Uptime estimates
+            "tcp_uptime_fwd": FeatureMeta(
+                id=f"{prefix}.tcp_uptime_fwd",
+                dtype="float64",
+                shape=[1],
+                units="hours",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="Estimated uptime of forward host from TCP timestamps",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="sensitive",
+                description="Estimated uptime of initiator host in hours (from TCP timestamps)",
+            ),
+            "tcp_uptime_bwd": FeatureMeta(
+                id=f"{prefix}.tcp_uptime_bwd",
+                dtype="float64",
+                shape=[1],
+                units="hours",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="Estimated uptime of backward host from TCP timestamps",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="sensitive",
+                description="Estimated uptime of responder host in hours (from TCP timestamps)",
+            ),
+            # Raw components - Forward
+            "tcp_fp_fwd_window": FeatureMeta(
+                id=f"{prefix}.tcp_fp_fwd_window",
+                dtype="int64",
+                shape=[1],
+                units="bytes",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="TCP window size from forward SYN packet",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="TCP window size from forward SYN packet",
+            ),
+            "tcp_fp_fwd_ttl": FeatureMeta(
+                id=f"{prefix}.tcp_fp_fwd_ttl",
+                dtype="int64",
+                shape=[1],
+                units="hops",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="IP TTL from forward SYN packet",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="IP TTL value from forward SYN packet",
+            ),
+            "tcp_fp_fwd_mss": FeatureMeta(
+                id=f"{prefix}.tcp_fp_fwd_mss",
+                dtype="int64",
+                shape=[1],
+                units="bytes",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="TCP MSS option from forward SYN packet",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="TCP Maximum Segment Size from forward SYN packet",
+            ),
+            "tcp_fp_fwd_ws": FeatureMeta(
+                id=f"{prefix}.tcp_fp_fwd_ws",
+                dtype="int64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="TCP window scale option from forward SYN packet",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="TCP window scale factor from forward SYN packet",
+            ),
+            # Raw components - Backward
+            "tcp_fp_bwd_window": FeatureMeta(
+                id=f"{prefix}.tcp_fp_bwd_window",
+                dtype="int64",
+                shape=[1],
+                units="bytes",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="TCP window size from backward SYN-ACK packet",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="TCP window size from backward SYN-ACK packet",
+            ),
+            "tcp_fp_bwd_ttl": FeatureMeta(
+                id=f"{prefix}.tcp_fp_bwd_ttl",
+                dtype="int64",
+                shape=[1],
+                units="hops",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="IP TTL from backward SYN-ACK packet",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="IP TTL value from backward SYN-ACK packet",
+            ),
+            "tcp_fp_bwd_mss": FeatureMeta(
+                id=f"{prefix}.tcp_fp_bwd_mss",
+                dtype="int64",
+                shape=[1],
+                units="bytes",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="TCP MSS option from backward SYN-ACK packet",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="TCP Maximum Segment Size from backward SYN-ACK packet",
+            ),
+            "tcp_fp_bwd_ws": FeatureMeta(
+                id=f"{prefix}.tcp_fp_bwd_ws",
+                dtype="int64",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="TCP window scale option from backward SYN-ACK packet",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp"],
+                privacy_level="safe",
+                description="TCP window scale factor from backward SYN-ACK packet",
+            ),
+        }
+
+        # Only include metadata for features we actually produce
+        for name in self.feature_names:
+            if name in feature_definitions:
+                meta[f"{prefix}.{name}"] = feature_definitions[name]
+
+        return meta
 
     @property
     def name(self) -> str:

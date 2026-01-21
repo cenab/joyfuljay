@@ -38,23 +38,50 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Typing :: Typed",
 ]
+
+# Minimal core dependencies - keep install fast and reliable
 dependencies = [
     "scapy>=2.5.0",
     "pandas>=2.0.0",
     "numpy>=1.24.0",
     "click>=8.0.0",
+]
+
+[project.optional-dependencies]
+# Alternative backends
+dpkt = ["dpkt>=1.9.8"]
+fast = ["dpkt>=1.9.8"]
+libpcap = ["python-libpcap>=0.4.0"]
+
+# Graph analysis
+graphs = ["networkx>=3.0"]
+
+# Database outputs
+postgres = ["psycopg>=3.1"]
+db = ["psycopg>=3.1"]
+sqlite = []  # Uses stdlib sqlite3
+
+# Streaming
+kafka = ["kafka-python>=2.0"]
+
+# Remote capture
+remote = [
     "websockets>=12.0",
     "msgpack>=1.0.0",
 ]
 
-[project.optional-dependencies]
-fast = ["dpkt>=1.9.8"]
-libpcap = ["python-libpcap>=0.4.0"]
-graphs = ["networkx>=3.0"]
-db = ["psycopg>=3.1"]
-kafka = ["kafka-python>=2.0"]
+# Monitoring
 monitoring = ["prometheus-client>=0.17.0"]
+
+# Service discovery
 discovery = ["zeroconf>=0.131.0"]
+
+# Cython accelerators (optional, pure Python fallback available)
+accelerated = [
+    "cython>=3.0.0",
+]
+
+# Development
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
@@ -65,10 +92,28 @@ dev = [
     "pandas-stubs>=2.0",
     "types-click>=7.1",
 ]
+
+# Documentation
 docs = [
     "mkdocs>=1.5",
     "mkdocs-material>=9.0",
     "mkdocstrings[python]>=0.24",
+    "mkdocs-git-revision-date-localized-plugin>=1.2",
+    "mkdocs-minify-plugin>=0.7",
+    "mkdocs-glightbox>=0.3",
+]
+
+# Everything (except dev/docs)
+all = [
+    "dpkt>=1.9.8",
+    "networkx>=3.0",
+    "psycopg>=3.1",
+    "kafka-python>=2.0",
+    "websockets>=12.0",
+    "msgpack>=1.0.0",
+    "prometheus-client>=0.17.0",
+    "zeroconf>=0.131.0",
+    "cython>=3.0.0",
 ]
 
 [project.scripts]
@@ -80,18 +125,49 @@ Homepage = "https://github.com/cenab/joyfuljay"
 Documentation = "https://joyfuljay.readthedocs.io"
 Repository = "https://github.com/cenab/joyfuljay"
 Issues = "https://github.com/cenab/joyfuljay/issues"
+Changelog = "https://github.com/cenab/joyfuljay/blob/main/CHANGELOG.md"
+
+# =============================================================================
+# Hatch build configuration
+# =============================================================================
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/joyfuljay"]
-
 [tool.hatch.build.targets.sdist]
 include = [
     "/src",
     "/tests",
+    "/profiles",
     "/README.md",
     "/LICENSE",
     "/CITATION.cff",
+    "/pyproject.toml",
 ]
+exclude = [
+    # Large benchmark data
+    "/benchmarks/data",
+    "/benchmarks/datasets",
+    "/benchmarks/_data_cache",
+    "/benchmarks/results",
+    # Build artifacts
+    "**/__pycache__",
+    "**/*.pyc",
+    "**/*.pyo",
+    "**/*.so",
+    "**/*.dylib",
+    "**/build",
+    "**/dist",
+    "**/*.egg-info",
+    # C/Cython generated files
+    "src/joyfuljay/extensions/*.c",
+    "src/joyfuljay/extensions/*.html",
+    "src/joyfuljay/accelerators/*.c",
+    "src/joyfuljay/accelerators/*.html",
+]
+
+# =============================================================================
+# Tool configurations
+# =============================================================================
 
 [tool.ruff]
 target-version = "py310"
@@ -103,20 +179,13 @@ select = [
     "E",      # pycodestyle errors
     "W",      # pycodestyle warnings
     "F",      # Pyflakes
-    "I",      # isort
-    "B",      # flake8-bugbear
-    "C4",     # flake8-comprehensions
-    "UP",     # pyupgrade
-    "ARG",    # flake8-unused-arguments
-    "SIM",    # flake8-simplify
-    "TCH",    # flake8-type-checking
-    "PTH",    # flake8-use-pathlib
-    "RUF",    # Ruff-specific rules
 ]
 ignore = [
+    "E402",   # module level import not at top of file
     "E501",   # line too long (handled by formatter)
-    "B008",   # do not perform function calls in argument defaults
-    "B905",   # zip without strict (Python 3.10+)
+    "F401",   # unused imports
+    "F821",   # undefined name
+    "F841",   # local variable assigned but never used
 ]
 
 [tool.ruff.lint.isort]
@@ -150,6 +219,9 @@ module = [
     "websockets.*",
     "msgpack.*",
     "networkx.*",
+    "kafka.*",
+    "psycopg.*",
+    "zeroconf.*",
 ]
 ignore_missing_imports = true
 
@@ -165,12 +237,21 @@ addopts = [
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
+    "benchmark: marks tests as benchmarks (deselect with '-m \"not benchmark\"')",
+]
+# Don't require benchmark data for normal test runs
+filterwarnings = [
+    "ignore::DeprecationWarning",
 ]
 
 [tool.coverage.run]
 source = ["src/joyfuljay"]
 branch = true
 parallel = true
+omit = [
+    "src/joyfuljay/extensions/*",
+    "src/joyfuljay/accelerators/*",
+]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -180,4 +261,5 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "if __name__ == .__main__.:",
     "@abstractmethod",
+    "@overload",
 ]

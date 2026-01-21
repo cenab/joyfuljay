@@ -12,6 +12,7 @@ from .base import FeatureExtractor
 
 if TYPE_CHECKING:
     from ..core.flow import Flow
+    from ..schema.registry import FeatureMeta
 
 # HTTP/2 connection preface (client magic)
 HTTP2_PREFACE = b"PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n"
@@ -266,3 +267,221 @@ class HTTP2Extractor(FeatureExtractor):
             "http2_multiplexed",
             "http_version",
         ]
+
+    @property
+    def extractor_id(self) -> str:
+        """Get the stable identifier for this extractor."""
+        return "http2"
+
+    def feature_meta(self) -> dict[str, FeatureMeta]:
+        """Get metadata for all features produced by this extractor."""
+        from ..schema.registry import FeatureMeta
+
+        meta: dict[str, FeatureMeta] = {}
+        prefix = self.extractor_id
+
+        feature_definitions = {
+            "http2_detected": FeatureMeta(
+                id=f"{prefix}.http2_detected",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="HTTP/2 detected in bidirectional flow",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Whether HTTP/2 protocol was detected in flow",
+            ),
+            "http3_detected": FeatureMeta(
+                id=f"{prefix}.http3_detected",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="HTTP/3 detected in bidirectional flow",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Whether HTTP/3 (QUIC-based) protocol was detected in flow",
+            ),
+            "http2_preface_seen": FeatureMeta(
+                id=f"{prefix}.http2_preface_seen",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="src_to_dst",
+                direction_semantics="HTTP/2 connection preface from client",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Whether HTTP/2 connection preface (client magic) was seen",
+            ),
+            "http2_frame_count": FeatureMeta(
+                id=f"{prefix}.http2_frame_count",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Total HTTP/2 frames in both directions",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Total number of HTTP/2 frames observed",
+            ),
+            "http2_data_frames": FeatureMeta(
+                id=f"{prefix}.http2_data_frames",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="HTTP/2 DATA frames in both directions",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Number of HTTP/2 DATA frames",
+            ),
+            "http2_headers_frames": FeatureMeta(
+                id=f"{prefix}.http2_headers_frames",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="HTTP/2 HEADERS frames in both directions",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Number of HTTP/2 HEADERS frames",
+            ),
+            "http2_settings_frames": FeatureMeta(
+                id=f"{prefix}.http2_settings_frames",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="HTTP/2 SETTINGS frames in both directions",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Number of HTTP/2 SETTINGS frames",
+            ),
+            "http2_push_promise_frames": FeatureMeta(
+                id=f"{prefix}.http2_push_promise_frames",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="HTTP/2 PUSH_PROMISE frames from server",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Number of HTTP/2 PUSH_PROMISE frames (server push)",
+            ),
+            "http2_goaway_frames": FeatureMeta(
+                id=f"{prefix}.http2_goaway_frames",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="HTTP/2 GOAWAY frames in both directions",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Number of HTTP/2 GOAWAY frames",
+            ),
+            "http2_window_update_frames": FeatureMeta(
+                id=f"{prefix}.http2_window_update_frames",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="HTTP/2 WINDOW_UPDATE frames in both directions",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Number of HTTP/2 WINDOW_UPDATE frames (flow control)",
+            ),
+            "http2_streams_estimate": FeatureMeta(
+                id=f"{prefix}.http2_streams_estimate",
+                dtype="int64",
+                shape=[1],
+                units="count",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Estimated HTTP/2 streams in both directions",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Estimated number of HTTP/2 streams (unique stream IDs)",
+            ),
+            "http2_server_push": FeatureMeta(
+                id=f"{prefix}.http2_server_push",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="dst_to_src",
+                direction_semantics="Server push detected from server",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Whether HTTP/2 server push was detected",
+            ),
+            "http2_multiplexed": FeatureMeta(
+                id=f"{prefix}.http2_multiplexed",
+                dtype="bool",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Multiple streams detected in bidirectional flow",
+                missing_policy="zero",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="Whether HTTP/2 stream multiplexing was detected",
+            ),
+            "http_version": FeatureMeta(
+                id=f"{prefix}.http_version",
+                dtype="string",
+                shape=[1],
+                units="",
+                scope="flow",
+                direction="bidir",
+                direction_semantics="Detected HTTP version string",
+                missing_policy="empty",
+                missing_sentinel=None,
+                dependencies=["tcp", "tls"],
+                privacy_level="safe",
+                description="HTTP version string (e.g., 'h2', 'h3')",
+            ),
+        }
+
+        # Build metadata dict for all feature names
+        for name in self.feature_names:
+            if name in feature_definitions:
+                meta[f"{prefix}.{name}"] = feature_definitions[name]
+
+        return meta
