@@ -113,7 +113,7 @@ Type 'help' for commands, 'quit' to exit.
             total_packets = sum(f.total_packets for f in self._flows)
             total_bytes = sum(f.total_bytes for f in self._flows)
 
-            protocols = {}
+            protocols: dict[int, int] = {}
             for flow in self._flows:
                 proto = flow.key.protocol
                 protocols[proto] = protocols.get(proto, 0) + 1
@@ -352,9 +352,9 @@ Type 'help' for commands, 'quit' to exit.
         print()
         return self.do_quit(arg)
 
-    def emptyline(self) -> None:
+    def emptyline(self) -> bool:
         """Do nothing on empty line."""
-        pass
+        return False
 
     def default(self, line: str) -> None:
         """Handle unknown commands."""

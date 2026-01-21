@@ -25,10 +25,9 @@ logger = logging.getLogger(__name__)
 # Optional NetworkX import
 try:
     import networkx as nx
-    NETWORKX_AVAILABLE = True
 except ImportError:
-    nx = None  # type: ignore
-    NETWORKX_AVAILABLE = False
+    nx = None
+NETWORKX_AVAILABLE = nx is not None
 
 
 def is_networkx_available() -> bool:
@@ -221,13 +220,13 @@ class ConnectionGraph:
             )
 
         # Add edges with weights
-        for (src, dst), stats in self._edge_stats.items():
+        for (src, dst), edge_stats in self._edge_stats.items():
             self._graph.add_edge(
                 src, dst,
-                flow_count=stats.flow_count,
-                packets=stats.total_packets,
-                bytes=stats.total_bytes,
-                weight=stats.flow_count,  # Weight for algorithms
+                flow_count=edge_stats.flow_count,
+                packets=edge_stats.total_packets,
+                bytes=edge_stats.total_bytes,
+                weight=edge_stats.flow_count,  # Weight for algorithms
             )
 
         # Compute cached metrics

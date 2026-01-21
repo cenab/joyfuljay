@@ -5,8 +5,9 @@ from __future__ import annotations
 import json
 import sqlite3
 from dataclasses import dataclass
+from types import TracebackType
 from typing import Any, Iterable, Literal, Sequence
-from urllib.parse import unquote, urlparse
+from urllib.parse import ParseResult, unquote, urlparse
 
 import numpy as np
 
@@ -45,7 +46,7 @@ def detect_database_backend(dsn: str) -> DatabaseInfo:
     return DatabaseInfo(backend="sqlite", dsn=dsn)
 
 
-def _normalize_sqlite_path(parsed) -> str:
+def _normalize_sqlite_path(parsed: ParseResult) -> str:
     """Normalize a sqlite:// URL into a filesystem path or :memory:."""
     path = unquote(parsed.path)
 
@@ -120,10 +121,15 @@ class DatabaseWriter:
     def __enter__(self) -> "DatabaseWriter":
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         self.close()
 
-    def _connect(self):
+    def _connect(self) -> Any:
         if self.backend == "sqlite":
             return sqlite3.connect(self.dsn)
 

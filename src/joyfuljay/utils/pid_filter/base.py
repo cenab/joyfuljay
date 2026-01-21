@@ -147,7 +147,7 @@ class PIDFilterBase(ABC):
         self.on_connection_added = on_connection_added
         self.on_connection_removed = on_connection_removed
 
-        self._connections: dict[tuple, ConnectionInfo] = {}
+        self._connections: dict[tuple[str, int, str, int, int], ConnectionInfo] = {}
         self._lock = threading.RLock()
         self._stop_event = threading.Event()
         self._running = False

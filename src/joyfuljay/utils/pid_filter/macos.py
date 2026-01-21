@@ -14,13 +14,14 @@ import shutil
 import subprocess
 import threading
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .base import ConnectionInfo, FilterMethod, PIDFilterBase
 from .cache import ConnectionCache
 
 if TYPE_CHECKING:
     from typing import Callable
+    from ...core.packet import Packet
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,8 @@ class MacOSLsofFilter(PIDFilterBase):
 
     def refresh_connections(self) -> None:
         """Refresh connections using lsof."""
+        if not self._lsof_path:
+            return
         try:
             # Use -n for no DNS resolution, -P for numeric ports
             # -a -p for AND with PID filter
@@ -138,7 +141,7 @@ class MacOSLsofFilter(PIDFilterBase):
         Returns:
             Set of ConnectionInfo objects.
         """
-        connections = set()
+        connections: set[ConnectionInfo] = set()
 
         for line in output.split("\n")[1:]:  # Skip header
             if not line.strip():
@@ -192,7 +195,7 @@ class MacOSLsofFilter(PIDFilterBase):
                 remote_ip = "0.0.0.0"
                 remote_port = 0
 
-            if local_ip is None:
+            if local_ip is None or local_port is None:
                 continue
 
             conn = ConnectionInfo(
@@ -263,7 +266,7 @@ class MacOSNettopFilter(PIDFilterBase):
         super().__init__(pid, refresh_interval, on_connection_added, on_connection_removed)
         self._method = FilterMethod.NETTOP
         self._cache = ConnectionCache(max_size=10000, ttl_seconds=300.0)
-        self._nettop_process: subprocess.Popen | None = None
+        self._nettop_process: subprocess.Popen[str] | None = None
         self._reader_thread: threading.Thread | None = None
         self._nettop_path = shutil.which("nettop")
 
@@ -396,7 +399,7 @@ class MacOSNettopFilter(PIDFilterBase):
             local_ip, local_port = self._parse_nettop_addr(local_addr)
             remote_ip, remote_port = self._parse_nettop_addr(remote_addr)
 
-            if local_ip is None:
+            if local_ip is None or local_port is None:
                 return None
 
             return ConnectionInfo(
@@ -491,7 +494,7 @@ class MacOSNetstatFilter(PIDFilterBase):
         with self._lock:
             self._connections = self._lsof_filter._connections.copy()
 
-    def matches_packet(self, packet) -> bool:
+    def matches_packet(self, packet: "Packet") -> bool:
         """Check if packet belongs to the monitored PID."""
         return self._lsof_filter.matches_packet(packet)
 
@@ -500,7 +503,7 @@ class MacOSNetstatFilter(PIDFilterBase):
         return self._lsof_filter.get_connections()
 
     @property
-    def stats(self) -> dict:
+    def stats(self) -> dict[str, Any]:
         """Get statistics."""
         return self._lsof_filter.stats
 

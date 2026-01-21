@@ -204,7 +204,7 @@ class ICMPExtractor(FeatureExtractor):
         meta: dict[str, FeatureMeta] = {
             f"{prefix}.icmp_packet_count": FeatureMeta(
                 id=f"{prefix}.icmp_packet_count",
-                dtype="uint32",
+                dtype="int64",
                 shape=[1],
                 units="packets",
                 scope="flow",
@@ -218,7 +218,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_echo_request_count": FeatureMeta(
                 id=f"{prefix}.icmp_echo_request_count",
-                dtype="uint32",
+                dtype="int64",
                 shape=[1],
                 units="packets",
                 scope="flow",
@@ -232,7 +232,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_echo_reply_count": FeatureMeta(
                 id=f"{prefix}.icmp_echo_reply_count",
-                dtype="uint32",
+                dtype="int64",
                 shape=[1],
                 units="packets",
                 scope="flow",
@@ -246,7 +246,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_dest_unreachable_count": FeatureMeta(
                 id=f"{prefix}.icmp_dest_unreachable_count",
-                dtype="uint32",
+                dtype="int64",
                 shape=[1],
                 units="packets",
                 scope="flow",
@@ -260,7 +260,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_time_exceeded_count": FeatureMeta(
                 id=f"{prefix}.icmp_time_exceeded_count",
-                dtype="uint32",
+                dtype="int64",
                 shape=[1],
                 units="packets",
                 scope="flow",
@@ -274,7 +274,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_unique_type_codes": FeatureMeta(
                 id=f"{prefix}.icmp_unique_type_codes",
-                dtype="uint32",
+                dtype="int64",
                 shape=[1],
                 units="",
                 scope="flow",
@@ -288,7 +288,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_dominant_type": FeatureMeta(
                 id=f"{prefix}.icmp_dominant_type",
-                dtype="int32",
+                dtype="int64",
                 shape=[1],
                 units="",
                 scope="flow",
@@ -302,7 +302,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_dominant_type_count": FeatureMeta(
                 id=f"{prefix}.icmp_dominant_type_count",
-                dtype="uint32",
+                dtype="int64",
                 shape=[1],
                 units="packets",
                 scope="flow",
@@ -330,7 +330,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_unique_ids": FeatureMeta(
                 id=f"{prefix}.icmp_unique_ids",
-                dtype="uint32",
+                dtype="int64",
                 shape=[1],
                 units="",
                 scope="flow",
@@ -344,7 +344,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_seq_min": FeatureMeta(
                 id=f"{prefix}.icmp_seq_min",
-                dtype="uint32",
+                dtype="int64",
                 shape=[1],
                 units="",
                 scope="flow",
@@ -358,7 +358,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_seq_max": FeatureMeta(
                 id=f"{prefix}.icmp_seq_max",
-                dtype="uint32",
+                dtype="int64",
                 shape=[1],
                 units="",
                 scope="flow",
@@ -372,7 +372,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_seq_gaps": FeatureMeta(
                 id=f"{prefix}.icmp_seq_gaps",
-                dtype="uint32",
+                dtype="int64",
                 shape=[1],
                 units="",
                 scope="flow",
@@ -386,7 +386,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.icmp_stat": FeatureMeta(
                 id=f"{prefix}.icmp_stat",
-                dtype="uint8",
+                dtype="int64",
                 shape=[1],
                 units="",
                 scope="flow",
@@ -414,7 +414,7 @@ class ICMPExtractor(FeatureExtractor):
             ),
             f"{prefix}.is_icmp_only": FeatureMeta(
                 id=f"{prefix}.is_icmp_only",
-                dtype="uint8",
+                dtype="bool",
                 shape=[1],
                 units="",
                 scope="flow",

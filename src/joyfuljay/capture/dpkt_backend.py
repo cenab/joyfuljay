@@ -234,6 +234,8 @@ class DpktBackend(CaptureBackend):
                 transport_data = ip.data
             else:
                 # IPv6
+                if ip6 is None:
+                    return None
                 src_ip = self._ip_to_str(ip6.src)
                 dst_ip = self._ip_to_str(ip6.dst)
                 protocol = ip6.nxt  # Next header

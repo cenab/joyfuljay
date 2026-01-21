@@ -70,6 +70,35 @@ remote = [
     "msgpack>=1.0.0",
 ]
 
+# Console/UI helpers
+progress = ["rich>=13.0"]
+
+# Filesystem watching
+watch = ["watchdog>=3.0"]
+
+# Compression
+compression = ["lz4>=4.0"]
+
+# Certificate parsing
+crypto = ["cryptography>=41.0"]
+
+# Parquet output
+arrow = ["pyarrow>=12.0"]
+
+# Jupyter widgets/plots
+jupyter = [
+    "ipython>=8.0",
+    "ipywidgets>=8.0",
+    "plotly>=5.0",
+    "matplotlib>=3.7",
+]
+
+# PID discovery helpers
+pid = ["psutil>=5.9"]
+
+# YAML config support
+yaml = ["PyYAML>=6.0"]
+
 # Monitoring
 monitoring = ["prometheus-client>=0.17.0"]
 
@@ -87,10 +116,28 @@ dev = [
     "pytest-cov>=4.0",
     "hypothesis>=6.0",
     "prometheus-client>=0.17.0",
+    "msgpack>=1.0.0",
+    "websockets>=12.0",
+    "rich>=13.0",
+    "watchdog>=3.0",
+    "lz4>=4.0",
+    "cryptography>=41.0",
+    "pyarrow>=12.0",
+    "ipython>=8.0",
+    "ipywidgets>=8.0",
+    "plotly>=5.0",
+    "matplotlib>=3.7",
+    "psutil>=5.9",
+    "PyYAML>=6.0",
+    "cython>=3.0.0",
+    "setuptools>=65.0",
     "mypy>=1.0",
     "ruff>=0.1.0",
     "pandas-stubs>=2.0",
     "types-click>=7.1",
+    "types-psutil>=5.9.0",
+    "types-PyYAML>=6.0.0",
+    "types-setuptools>=65.0.0",
 ]
 
 # Documentation
@@ -111,6 +158,17 @@ all = [
     "kafka-python>=2.0",
     "websockets>=12.0",
     "msgpack>=1.0.0",
+    "rich>=13.0",
+    "watchdog>=3.0",
+    "lz4>=4.0",
+    "cryptography>=41.0",
+    "pyarrow>=12.0",
+    "ipython>=8.0",
+    "ipywidgets>=8.0",
+    "plotly>=5.0",
+    "matplotlib>=3.7",
+    "psutil>=5.9",
+    "PyYAML>=6.0",
     "prometheus-client>=0.17.0",
     "zeroconf>=0.131.0",
     "cython>=3.0.0",
@@ -214,6 +272,7 @@ show_error_codes = true
 
 [[tool.mypy.overrides]]
 module = [
+    "Cython.*",
     "scapy.*",
     "dpkt.*",
     "websockets.*",
@@ -222,6 +281,20 @@ module = [
     "kafka.*",
     "psycopg.*",
     "zeroconf.*",
+    "watchdog.*",
+    "lz4.*",
+    "pyarrow.*",
+    "ipywidgets.*",
+    "plotly.*",
+    "IPython.*",
+    "matplotlib.*",
+    "cryptography",
+    "cryptography.*",
+    "yaml",
+    "psutil",
+    "psutil.*",
+    "setuptools",
+    "setuptools.*",
 ]
 ignore_missing_imports = true
 

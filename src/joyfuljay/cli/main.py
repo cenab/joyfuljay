@@ -6,15 +6,19 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import TextIO
+from typing import Any, Iterable, Protocol, TYPE_CHECKING, TextIO, cast
 
 import click
 
 from .. import __version__
-from ..core.config import Config
+from ..core.config import Config, ProfileType
 from ..core.pipeline import Pipeline
 from ..output.formats import to_csv_stream, to_json_stream
 from ..utils.progress import create_progress, is_rich_available
+
+if TYPE_CHECKING:
+    from ..monitoring.prometheus import PrometheusMetrics
+    from ..output.database import IfExistsMode
 
 # ASCII art splash screen
 SPLASH = r"""
@@ -47,6 +51,19 @@ def _start_prometheus_metrics(port: int | None, addr: str) -> "PrometheusMetrics
     start_prometheus_server(port, addr=addr, registry=metrics.registry)
     click.echo(f"Prometheus metrics available at http://{addr}:{port}", err=True)
     return metrics
+
+
+class FeatureSink(Protocol):
+    """Minimal interface for sinks used by the CLI."""
+
+    def write(self, features: dict[str, Any]) -> None:
+        ...
+
+    def write_many(self, rows: Iterable[dict[str, Any]]) -> int:
+        ...
+
+    def close(self) -> None:
+        ...
 
 
 class SplashGroup(click.Group):
@@ -231,7 +248,7 @@ def extract(
     prometheus_port: int | None,
     prometheus_addr: str,
     db_table: str,
-    db_if_exists: str,
+    db_if_exists: "IfExistsMode",
     db_batch_size: int,
     kafka_brokers: str | None,
     kafka_topic: str | None,
@@ -281,7 +298,7 @@ def extract(
         if specific_features:
             config.specific_features = list(specific_features)
         if profile:
-            config.profile = profile  # type: ignore[assignment]
+            config.profile = cast(ProfileType, profile)
         if bidir_split:
             config.bidirectional_split = True
         if no_ips:
@@ -297,7 +314,7 @@ def extract(
             flow_timeout=timeout if timeout is not None else 60.0,
             features=list(features) if features else ["all"],
             specific_features=list(specific_features) if specific_features else None,
-            profile=profile,  # type: ignore[arg-type]
+            profile=cast(ProfileType, profile) if profile else None,
             bidirectional_split=bidir_split,
             include_ip_addresses=not no_ips,
             include_ports=not no_ports,
@@ -311,6 +328,7 @@ def extract(
     pipeline = Pipeline(config, metrics=metrics)
 
     if output_format in {"sqlite", "postgres", "kafka"}:
+        sink: FeatureSink
         if output_format in {"sqlite", "postgres"}:
             if not output:
                 raise click.ClickException(
@@ -361,15 +379,15 @@ def extract(
                         use_rich=is_rich_available(),
                     ) as prog:
                         for pcap_file in pcap_files:
-                            for features in pipeline.iter_features(str(pcap_file)):
-                                sink.write(features)
+                            for feature_row in pipeline.iter_features(str(pcap_file)):
+                                sink.write(feature_row)
                                 flow_count += 1
                             prog.update(1)
                 else:
                     for pcap_file in pcap_files:
                         click.echo(f"Processing: {pcap_file}", err=True)
-                        for features in pipeline.iter_features(str(pcap_file)):
-                            sink.write(features)
+                        for feature_row in pipeline.iter_features(str(pcap_file)):
+                            sink.write(feature_row)
                             flow_count += 1
             else:
                 if len(pcap_files) > 1 and workers > 1:
@@ -420,7 +438,7 @@ def extract(
         return
 
     # Process files with optional progress bar
-    all_features: list = []
+    all_features: list[dict[str, Any]] = []
 
     # Disable progress if outputting to stdout (would interfere with output)
     show_progress = progress and output is not None
@@ -610,7 +628,7 @@ def live(
     prometheus_port: int | None,
     prometheus_addr: str,
     db_table: str,
-    db_if_exists: str,
+    db_if_exists: "IfExistsMode",
     db_batch_size: int,
     kafka_brokers: str | None,
     kafka_topic: str | None,
@@ -674,6 +692,7 @@ def live(
 
     try:
         if output_format in {"sqlite", "postgres", "kafka"}:
+            sink: FeatureSink
             if output_format in {"sqlite", "postgres"}:
                 if not output:
                     raise click.ClickException(
@@ -713,14 +732,14 @@ def live(
 
             flow_count = 0
             try:
-                for features in pipeline.process_live(
+                for feature_row in pipeline.process_live(
                     interface,
                     duration=duration,
                     output_format="stream",
                     save_pcap=save_pcap,
                     pid=target_pid,
                 ):
-                    sink.write(features)
+                    sink.write(feature_row)
                     flow_count += 1
             finally:
                 sink.close()
@@ -742,8 +761,10 @@ def live(
         )
 
         # Convert to list of dicts for output
-        if hasattr(features_list, "to_dict"):
-            all_features = features_list.to_dict("records")
+        import pandas as pd
+
+        if isinstance(features_list, pd.DataFrame):
+            all_features = cast(list[dict[str, Any]], features_list.to_dict("records"))
         else:
             all_features = list(features_list)
 
@@ -1301,7 +1322,7 @@ def connect(
     prometheus_port: int | None,
     prometheus_addr: str,
     db_table: str,
-    db_if_exists: str,
+    db_if_exists: "IfExistsMode",
     db_batch_size: int,
     kafka_brokers: str | None,
     kafka_topic: str | None,
@@ -1342,6 +1363,7 @@ def connect(
 
     try:
         if output_format in {"sqlite", "postgres", "kafka"}:
+            sink: FeatureSink
             if output_format in {"sqlite", "postgres"}:
                 if not output:
                     raise click.ClickException(
@@ -1381,13 +1403,13 @@ def connect(
 
             flow_count = 0
             try:
-                for features in pipeline.process_live(
+                for feature_row in pipeline.process_live(
                     interface="",  # Not used for remote
                     duration=duration,
                     output_format="stream",
                     save_pcap=save_pcap,
                 ):
-                    sink.write(features)
+                    sink.write(feature_row)
                     flow_count += 1
             finally:
                 sink.close()
@@ -1407,8 +1429,10 @@ def connect(
         )
 
         # Convert to list of dicts for output
-        if hasattr(features_list, "to_dict"):
-            all_features = features_list.to_dict("records")
+        import pandas as pd
+
+        if isinstance(features_list, pd.DataFrame):
+            all_features = cast(list[dict[str, Any]], features_list.to_dict("records"))
         else:
             all_features = list(features_list)
 
@@ -1516,7 +1540,10 @@ def watch(
             output_file = out_dir / f"{pcap_path.stem}.{output_format}"
 
             # Process
-            features = pipeline.process_pcap(str(pcap_path), output_format="dict")
+            features = cast(
+                list[dict[str, Any]],
+                pipeline.process_pcap(str(pcap_path), output_format="dict"),
+            )
 
             if not features:
                 click.echo(f"  No flows found in {pcap_path.name}", err=True)
@@ -1824,7 +1851,7 @@ def validate_golden(
         raise click.ClickException(f"Failed to load expected output: {e}")
 
     # Extract features
-    config = Config(profile=profile)  # type: ignore[arg-type]
+    config = Config(profile=cast(ProfileType, profile) if profile else None)
     pipeline = Pipeline(config)
 
     click.echo(f"Extracting features from: {pcap_path}", err=True)
@@ -1833,7 +1860,7 @@ def validate_golden(
     try:
         features_result = pipeline.process_pcap(pcap_path, output_format="dict")
         if hasattr(features_result, "to_dict"):
-            actual_flows = features_result.to_dict(orient="records")
+            actual_flows = cast(list[dict[str, Any]], features_result.to_dict(orient="records"))
         else:
             actual_flows = list(features_result)
     except Exception as e:

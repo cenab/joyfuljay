@@ -65,7 +65,7 @@ class ConnectionCache:
         self.ttl_seconds = ttl_seconds
         self.cleanup_interval = cleanup_interval
 
-        self._cache: dict[tuple, CacheEntry] = {}
+        self._cache: dict[tuple[str, int, str, int, int], CacheEntry] = {}
         self._lock = threading.RLock()
         self._stats = CacheStats()
         self._last_cleanup = time.time()
@@ -120,7 +120,7 @@ class ConnectionCache:
                 return True
             return False
 
-    def get(self, key: tuple) -> ConnectionInfo | None:
+    def get(self, key: tuple[str, int, str, int, int]) -> ConnectionInfo | None:
         """Get a connection by key.
 
         Args:

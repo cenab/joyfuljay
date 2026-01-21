@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import re
 import struct
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Sequence
 
 from .base import FeatureExtractor
 
 if TYPE_CHECKING:
     from ..core.flow import Flow
+    from ..core.packet import Packet
     from ..schema.registry import FeatureMeta
 
 # SSH message types
@@ -94,7 +95,7 @@ class SSHExtractor(FeatureExtractor):
 
         return features
 
-    def _find_ssh_banner(self, packets: list) -> bytes | None:
+    def _find_ssh_banner(self, packets: Sequence["Packet"]) -> bytes | None:
         """Find SSH version banner in packets."""
         for packet in packets:
             if packet.raw_payload:
@@ -127,7 +128,7 @@ class SSHExtractor(FeatureExtractor):
             return version, software
         return "", ""
 
-    def _find_kexinit(self, packets: list) -> bytes | None:
+    def _find_kexinit(self, packets: Sequence["Packet"]) -> bytes | None:
         """Find SSH_MSG_KEXINIT message in packets."""
         for packet in packets:
             if packet.raw_payload and len(packet.raw_payload) > 5:

@@ -253,12 +253,14 @@ class SizeExtractor(FeatureExtractor):
         Returns:
             Dictionary mapping feature IDs to FeatureMeta objects.
         """
-        from ..schema.registry import FeatureMeta
+        from ..schema.registry import DType, FeatureMeta
+
+        StatsSpec = tuple[str, str, DType]
 
         meta: dict[str, FeatureMeta] = {}
 
         # Overall packet size statistics (bidir)
-        bidir_pkt_stats = [
+        bidir_pkt_stats: list[StatsSpec] = [
             ("pkt_len_min", "Minimum packet length", "float64"),
             ("pkt_len_max", "Maximum packet length", "float64"),
             ("pkt_len_mean", "Mean packet length", "float64"),
@@ -285,7 +287,7 @@ class SizeExtractor(FeatureExtractor):
             )
 
         # Forward packet size statistics (src_to_dst)
-        fwd_pkt_stats = [
+        fwd_pkt_stats: list[StatsSpec] = [
             ("pkt_len_fwd_min", "Minimum forward packet length", "float64"),
             ("pkt_len_fwd_max", "Maximum forward packet length", "float64"),
             ("pkt_len_fwd_mean", "Mean forward packet length", "float64"),
@@ -309,7 +311,7 @@ class SizeExtractor(FeatureExtractor):
             )
 
         # Backward packet size statistics (dst_to_src)
-        bwd_pkt_stats = [
+        bwd_pkt_stats: list[StatsSpec] = [
             ("pkt_len_bwd_min", "Minimum backward packet length", "float64"),
             ("pkt_len_bwd_max", "Maximum backward packet length", "float64"),
             ("pkt_len_bwd_mean", "Mean backward packet length", "float64"),
@@ -333,7 +335,7 @@ class SizeExtractor(FeatureExtractor):
             )
 
         # Overall payload size statistics (bidir)
-        bidir_payload_stats = [
+        bidir_payload_stats: list[StatsSpec] = [
             ("payload_len_min", "Minimum payload length", "float64"),
             ("payload_len_max", "Maximum payload length", "float64"),
             ("payload_len_mean", "Mean payload length", "float64"),
@@ -356,7 +358,7 @@ class SizeExtractor(FeatureExtractor):
             )
 
         # Forward payload statistics (src_to_dst)
-        fwd_payload_stats = [
+        fwd_payload_stats: list[StatsSpec] = [
             ("payload_len_fwd_mean", "Mean forward payload length", "float64"),
             ("payload_len_fwd_std", "Standard deviation of forward payload length", "float64"),
         ]
@@ -377,7 +379,7 @@ class SizeExtractor(FeatureExtractor):
             )
 
         # Backward payload statistics (dst_to_src)
-        bwd_payload_stats = [
+        bwd_payload_stats: list[StatsSpec] = [
             ("payload_len_bwd_mean", "Mean backward payload length", "float64"),
             ("payload_len_bwd_std", "Standard deviation of backward payload length", "float64"),
         ]

@@ -6,7 +6,8 @@ import logging
 import os
 import platform
 import sys
-from typing import TYPE_CHECKING, Callable
+import threading
+from typing import TYPE_CHECKING, Any, Callable, cast
 
 from .base import (
     ConnectionInfo,
@@ -165,7 +166,11 @@ def get_filter_capabilities() -> FilterCapabilities:
         # Check for ETW (requires admin)
         try:
             import ctypes
-            is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+            windll = getattr(ctypes, "windll", None)
+            if windll is None:
+                is_admin = False
+            else:
+                is_admin = windll.shell32.IsUserAnAdmin() != 0
             if is_admin:
                 has_etw = True
                 available_methods.append(FilterMethod.ETW)
@@ -349,10 +354,16 @@ def _create_psutil_fallback(
     class PsutilFilter(PIDFilterBase):
         """psutil-based PID filtering fallback."""
 
-        def __init__(self, pid: int, refresh_interval: float, on_added, on_removed):
+        def __init__(
+            self,
+            pid: int,
+            refresh_interval: float,
+            on_added: Callable[[ConnectionInfo], None] | None,
+            on_removed: Callable[[ConnectionInfo], None] | None,
+        ) -> None:
             super().__init__(pid, refresh_interval, on_added, on_removed)
             self._method = FilterMethod.PSUTIL
-            self._refresh_thread = None
+            self._refresh_thread: threading.Thread | None = None
 
             try:
                 import psutil
@@ -369,13 +380,13 @@ def _create_psutil_fallback(
 
             self.refresh_connections()
 
-            import threading
-            self._refresh_thread = threading.Thread(
+            thread = threading.Thread(
                 target=self._refresh_loop,
                 daemon=True,
                 name=f"psutil-filter-{self.pid}",
             )
-            self._refresh_thread.start()
+            self._refresh_thread = thread
+            thread.start()
 
         def stop(self) -> None:
             if not self._running:
@@ -399,8 +410,9 @@ def _create_psutil_fallback(
                 self._stop_event.wait(self.refresh_interval)
 
         def refresh_connections(self) -> None:
+            import socket
             import time
-            connections = set()
+            connections: set[ConnectionInfo] = set()
 
             try:
                 proc = self._psutil.Process(self.pid)
@@ -412,8 +424,8 @@ def _create_psutil_fallback(
 
                     # Map psutil type to protocol number
                     proto_map = {
-                        self._psutil.SOCK_STREAM: 6,  # TCP
-                        self._psutil.SOCK_DGRAM: 17,  # UDP
+                        socket.SOCK_STREAM: 6,  # TCP
+                        socket.SOCK_DGRAM: 17,  # UDP
                     }
                     protocol = proto_map.get(conn.type, 0)
 

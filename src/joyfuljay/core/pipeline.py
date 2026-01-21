@@ -8,7 +8,7 @@ import os
 import random
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import TYPE_CHECKING, Any, Iterator
+from typing import TYPE_CHECKING, Any, Iterator, Literal, cast, overload
 
 import pandas as pd
 
@@ -475,6 +475,28 @@ class Pipeline:
 
         return self._format_output(features_list, output_format)
 
+    @overload
+    def process_live(
+        self,
+        interface: str,
+        duration: float | None = None,
+        output_format: Literal["stream"] = "stream",
+        save_pcap: str | None = None,
+        pid: int | None = None,
+    ) -> Iterator[dict[str, Any]]:
+        ...
+
+    @overload
+    def process_live(
+        self,
+        interface: str,
+        duration: float | None = None,
+        output_format: Literal["dataframe"] = "dataframe",
+        save_pcap: str | None = None,
+        pid: int | None = None,
+    ) -> pd.DataFrame:
+        ...
+
     def process_live(
         self,
         interface: str,
@@ -625,7 +647,8 @@ class Pipeline:
         if output_format == "dict":
             return features_list
         elif output_format == "numpy":
-            return to_numpy(features_list)
+            array, _ = to_numpy(features_list)
+            return array
         else:
             return to_dataframe(features_list)
 
@@ -893,7 +916,7 @@ def _process_single_pcap(path: str, config: Config) -> list[dict[str, Any]]:
 # Convenience functions for TensorFlow-style API
 def extract(
     path: str,
-    output_format: str = "dataframe",
+    output_format: Literal["dataframe", "dict"] = "dataframe",
     **config_kwargs: Any,
 ) -> pd.DataFrame | list[dict[str, Any]]:
     """Extract features from a PCAP file.
@@ -913,17 +936,20 @@ def extract(
         >>> features = jj.extract("capture.pcap")
         >>> features = jj.extract("capture.pcap", flow_timeout=30)
     """
-    config = Config(**config_kwargs)  # type: ignore[arg-type]
+    config = Config(**config_kwargs)
     pipeline = Pipeline(config)
-    return pipeline.process_pcap(path, output_format=output_format)
+    return cast(
+        pd.DataFrame | list[dict[str, Any]],
+        pipeline.process_pcap(path, output_format=output_format),
+    )
 
 
 def extract_live(
     interface: str,
     duration: float | None = None,
-    output_format: str = "dataframe",
+    output_format: Literal["dataframe", "stream"] = "dataframe",
     **config_kwargs: Any,
-) -> pd.DataFrame | list[dict[str, Any]]:
+) -> pd.DataFrame | Iterator[dict[str, Any]]:
     """Extract features from live network traffic.
 
     This is a convenience function for quick live capture.
@@ -941,6 +967,6 @@ def extract_live(
         >>> import joyfuljay as jj
         >>> features = jj.extract_live("eth0", duration=60)
     """
-    config = Config(**config_kwargs)  # type: ignore[arg-type]
+    config = Config(**config_kwargs)
     pipeline = Pipeline(config)
     return pipeline.process_live(interface, duration=duration, output_format=output_format)

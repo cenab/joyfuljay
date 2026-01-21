@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from prometheus_client import CollectorRegistry
+    from ..core.flow import Flow
+    from ..core.packet import Packet
 
 from .base import MetricsSink
 
@@ -13,7 +18,7 @@ class PrometheusMetrics(MetricsSink):
     def __init__(
         self,
         namespace: str = "joyfuljay",
-        registry: Any | None = None,
+        registry: "CollectorRegistry | None" = None,
     ) -> None:
         """Initialize Prometheus metrics.
 
@@ -71,11 +76,11 @@ class PrometheusMetrics(MetricsSink):
             registry=self.registry,
         )
 
-    def observe_packet(self, packet) -> None:
+    def observe_packet(self, packet: "Packet") -> None:
         self.packets_total.inc()
         self.bytes_total.inc(packet.total_len)
 
-    def observe_flow(self, flow, reason: str) -> None:
+    def observe_flow(self, flow: "Flow", reason: str) -> None:
         self.flows_total.labels(reason=reason).inc()
 
     def observe_processing_time(self, mode: str, seconds: float) -> None:
@@ -91,7 +96,7 @@ class PrometheusMetrics(MetricsSink):
 def start_prometheus_server(
     port: int,
     addr: str = "0.0.0.0",
-    registry: Any | None = None,
+    registry: "CollectorRegistry | None" = None,
 ) -> None:
     """Start a Prometheus HTTP metrics server."""
     try:
@@ -102,4 +107,7 @@ def start_prometheus_server(
             "Install with: pip install prometheus-client"
         ) from exc
 
-    start_http_server(port, addr=addr, registry=registry)
+    if registry is None:
+        start_http_server(port, addr=addr)
+    else:
+        start_http_server(port, addr=addr, registry=registry)

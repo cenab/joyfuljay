@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import zlib
-from typing import Any
+from typing import Any, cast
 
 import msgpack
 
@@ -23,11 +23,14 @@ COMPRESSION_THRESHOLD = 256  # Only compress if data is larger than this
 COMPRESSION_LEVEL = 6  # zlib compression level (1-9, higher = more compression)
 
 # Try to use lz4 for faster compression (optional dependency)
+lz4_frame: Any | None
 try:
-    import lz4.frame as lz4
+    import lz4.frame as _lz4_frame
 
+    lz4_frame = _lz4_frame
     LZ4_AVAILABLE = True
 except ImportError:
+    lz4_frame = None
     LZ4_AVAILABLE = False
 
 
@@ -41,7 +44,7 @@ def serialize_message(msg_type: int, data: Any = None) -> bytes:
     Returns:
         MessagePack-encoded bytes.
     """
-    return msgpack.packb({"type": msg_type, "data": data})
+    return cast(bytes, msgpack.packb({"type": msg_type, "data": data}))
 
 
 def deserialize_message(data: bytes) -> dict[str, Any]:
@@ -53,7 +56,7 @@ def deserialize_message(data: bytes) -> dict[str, Any]:
     Returns:
         Dictionary with 'type' and optional 'data' keys.
     """
-    return msgpack.unpackb(data, raw=False)
+    return cast(dict[str, Any], msgpack.unpackb(data, raw=False))
 
 
 def serialize_auth(token: str) -> bytes:
@@ -89,7 +92,7 @@ def serialize_packet(packet: Packet) -> bytes:
         "tcp_flags": packet.tcp_flags,
         "raw_payload": packet.raw_payload,
     }
-    return msgpack.packb({"type": MSG_PACKET, "data": data})
+    return cast(bytes, msgpack.packb({"type": MSG_PACKET, "data": data}))
 
 
 def deserialize_packet(data: bytes) -> Packet:
@@ -101,7 +104,7 @@ def deserialize_packet(data: bytes) -> Packet:
     Returns:
         Reconstructed Packet object.
     """
-    msg = msgpack.unpackb(data, raw=False)
+    msg = cast(dict[str, Any], msgpack.unpackb(data, raw=False))
     d = msg["data"]
     return Packet(
         timestamp=d["ts"],
@@ -144,8 +147,8 @@ def compress_data(data: bytes, use_lz4: bool = True) -> tuple[bytes, str]:
     if len(data) < COMPRESSION_THRESHOLD:
         return data, "none"
 
-    if use_lz4 and LZ4_AVAILABLE:
-        compressed = lz4.compress(data)
+    if use_lz4 and LZ4_AVAILABLE and lz4_frame is not None:
+        compressed = cast(bytes, lz4_frame.compress(data))
         return compressed, "lz4"
 
     compressed = zlib.compress(data, COMPRESSION_LEVEL)
@@ -167,7 +170,9 @@ def decompress_data(data: bytes, compression_type: str) -> bytes:
     elif compression_type == "lz4":
         if not LZ4_AVAILABLE:
             raise RuntimeError("lz4 compression not available")
-        return lz4.decompress(data)
+        if lz4_frame is None:
+            raise RuntimeError("lz4 compression not available")
+        return cast(bytes, lz4_frame.decompress(data))
     elif compression_type == "zlib":
         return zlib.decompress(data)
     else:
@@ -196,7 +201,7 @@ def serialize_packet_compressed(packet: Packet, compress: bool = True) -> bytes:
         "tcp_flags": packet.tcp_flags,
         "raw_payload": packet.raw_payload,
     }
-    raw = msgpack.packb({"type": MSG_PACKET, "data": data})
+    raw = cast(bytes, msgpack.packb({"type": MSG_PACKET, "data": data}))
 
     if not compress:
         return raw
@@ -207,11 +212,11 @@ def serialize_packet_compressed(packet: Packet, compress: bool = True) -> bytes:
         return raw
 
     # Wrap compressed data
-    return msgpack.packb({
+    return cast(bytes, msgpack.packb({
         "type": MSG_COMPRESSED,
         "compression": comp_type,
         "data": compressed,
-    })
+    }))
 
 
 def deserialize_packet_compressed(data: bytes) -> Packet:
@@ -223,13 +228,13 @@ def deserialize_packet_compressed(data: bytes) -> Packet:
     Returns:
         Reconstructed Packet object.
     """
-    msg = msgpack.unpackb(data, raw=False)
+    msg = cast(dict[str, Any], msgpack.unpackb(data, raw=False))
 
     # Check if compressed
     if msg.get("type") == MSG_COMPRESSED:
         comp_type = msg.get("compression", "none")
         inner_data = decompress_data(msg["data"], comp_type)
-        msg = msgpack.unpackb(inner_data, raw=False)
+        msg = cast(dict[str, Any], msgpack.unpackb(inner_data, raw=False))
 
     d = msg["data"]
     return Packet(

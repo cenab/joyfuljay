@@ -7,8 +7,9 @@ network traffic data in Jupyter notebooks.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,14 @@ def _check_plotly() -> bool:
         return True
     except ImportError:
         return False
+
+
+def _display(obj: Any) -> None:
+    """Display an object in Jupyter without strict typing errors."""
+    from IPython.display import display as ipy_display
+
+    display_fn = cast(Callable[[Any], Any], ipy_display)
+    display_fn(obj)
 
 
 class FlowExplorer:
@@ -112,8 +121,6 @@ class FlowExplorer:
             IPython widget for display.
         """
         import ipywidgets as widgets
-        from IPython.display import display
-
         df = self.to_dataframe()
 
         # Create filter widgets
@@ -148,7 +155,7 @@ class FlowExplorer:
                     )
                     filtered = filtered[mask]
 
-                display(filtered.head(50))
+                _display(filtered.head(50))
                 print(f"Showing {min(50, len(filtered))} of {len(filtered)} flows")
 
         protocol_filter.observe(update_display, names="value")
@@ -186,8 +193,6 @@ class FeatureVisualizer:
             IPython widget for display.
         """
         import ipywidgets as widgets
-        from IPython.display import display
-
         # Get numeric columns
         numeric_cols = self.df.select_dtypes(include=["number"]).columns.tolist()
 
@@ -283,8 +288,6 @@ def display_flow_table(flows: list[Any], limit: int = 50) -> None:
         limit: Maximum rows to display.
     """
     import pandas as pd
-    from IPython.display import display
-
     data = []
     for i, flow in enumerate(flows[:limit]):
         data.append({
@@ -298,7 +301,7 @@ def display_flow_table(flows: list[Any], limit: int = 50) -> None:
         })
 
     df = pd.DataFrame(data)
-    display(df)
+    _display(df)
 
     if len(flows) > limit:
         print(f"Showing {limit} of {len(flows)} flows")
@@ -311,8 +314,6 @@ def display_feature_summary(features: list[dict[str, Any]] | pd.DataFrame) -> No
         features: Feature data.
     """
     import pandas as pd
-    from IPython.display import display
-
     if isinstance(features, list):
         df = pd.DataFrame(features)
     else:
@@ -320,7 +321,7 @@ def display_feature_summary(features: list[dict[str, Any]] | pd.DataFrame) -> No
 
     # Numeric summary
     print("Numeric Feature Summary:")
-    display(df.describe())
+    _display(df.describe())
 
     # Non-numeric
     non_numeric = df.select_dtypes(exclude=["number"])

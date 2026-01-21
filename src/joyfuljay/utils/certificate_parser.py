@@ -10,7 +10,7 @@ import hashlib
 import logging
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
@@ -81,25 +81,30 @@ def parse_certificate(cert_bytes: bytes) -> CertificateInfo | None:
 
     info = CertificateInfo(raw_length=len(cert_bytes))
 
+    def _as_str(value: str | bytes) -> str:
+        if isinstance(value, bytes):
+            return value.decode("utf-8", errors="replace")
+        return value
+
     # Subject and Issuer
     try:
         cn_attrs = cert.subject.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)
         if cn_attrs:
-            info.subject_cn = cn_attrs[0].value
+            info.subject_cn = _as_str(cn_attrs[0].value)
     except Exception:
         pass
 
     try:
         cn_attrs = cert.issuer.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)
         if cn_attrs:
-            info.issuer_cn = cn_attrs[0].value
+            info.issuer_cn = _as_str(cn_attrs[0].value)
     except Exception:
         pass
 
     try:
         org_attrs = cert.issuer.get_attributes_for_oid(x509.oid.NameOID.ORGANIZATION_NAME)
         if org_attrs:
-            info.issuer_org = org_attrs[0].value
+            info.issuer_org = _as_str(org_attrs[0].value)
     except Exception:
         pass
 
@@ -138,10 +143,12 @@ def parse_certificate(cert_bytes: bytes) -> CertificateInfo | None:
         san_ext = cert.extensions.get_extension_for_oid(
             x509.oid.ExtensionOID.SUBJECT_ALTERNATIVE_NAME
         )
-        san = san_ext.value
-        info.san_dns_names = [name.value for name in san.get_values_for_type(x509.DNSName)]
+        san = cast("x509.SubjectAlternativeName", san_ext.value)
+        info.san_dns_names = [
+            str(name) for name in san.get_values_for_type(x509.DNSName)
+        ]
         info.san_ip_addresses = [
-            str(ip.value) for ip in san.get_values_for_type(x509.IPAddress)
+            str(ip) for ip in san.get_values_for_type(x509.IPAddress)
         ]
     except x509.ExtensionNotFound:
         info.san_dns_names = []
@@ -155,7 +162,8 @@ def parse_certificate(cert_bytes: bytes) -> CertificateInfo | None:
         basic_constraints = cert.extensions.get_extension_for_oid(
             x509.oid.ExtensionOID.BASIC_CONSTRAINTS
         )
-        info.is_ca = basic_constraints.value.ca
+        constraints = cast("x509.BasicConstraints", basic_constraints.value)
+        info.is_ca = constraints.ca
     except x509.ExtensionNotFound:
         info.is_ca = False
 

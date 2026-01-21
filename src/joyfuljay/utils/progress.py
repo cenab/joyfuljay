@@ -106,11 +106,11 @@ def create_progress(
 
             yield RichProgressWrapper()
     else:
-        progress = SimpleProgress(description, total)
+        simple_progress = SimpleProgress(description, total)
         try:
-            yield progress
+            yield simple_progress
         finally:
-            progress.finish()
+            simple_progress.finish()
 
 
 @contextmanager

@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import json
 from pathlib import Path
+from types import TracebackType
 from typing import Any, Iterator, TextIO
 
 import numpy as np
@@ -45,14 +46,14 @@ class StreamingWriter:
         self.compression = compression or ("snappy" if format == "parquet" else None)
 
         self._file: TextIO | None = None
-        self._csv_writer: csv.DictWriter | None = None
+        self._csv_writer: csv.DictWriter[Any] | None = None
         self._header_written = False
         self._fieldnames: list[str] | None = None
         self._row_count = 0
 
         # For Parquet buffering
         self._parquet_buffer: list[dict[str, Any]] = []
-        self._parquet_writer = None
+        self._parquet_writer: Any | None = None
 
     def __enter__(self) -> "StreamingWriter":
         """Open the output file."""
@@ -63,7 +64,12 @@ class StreamingWriter:
             self._file = self.path.open("w", newline="" if self.format == "csv" else None)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         """Close the output file and flush any remaining data."""
         self.close()
 
@@ -99,6 +105,8 @@ class StreamingWriter:
 
     def _write_csv(self, features: dict[str, Any]) -> None:
         """Write a row to CSV."""
+        if self._file is None:
+            raise RuntimeError("CSV writer is not opened")
         if self._csv_writer is None:
             self._fieldnames = list(features.keys())
             self._csv_writer = csv.DictWriter(self._file, fieldnames=self._fieldnames)
@@ -106,7 +114,7 @@ class StreamingWriter:
             self._header_written = True
 
         # Convert lists to JSON strings
-        processed = {}
+        processed: dict[str, Any] = {}
         for key, value in features.items():
             if isinstance(value, list):
                 processed[key] = json.dumps(value)
@@ -118,6 +126,8 @@ class StreamingWriter:
 
     def _write_jsonl(self, features: dict[str, Any]) -> None:
         """Write a row to JSON Lines."""
+        if self._file is None:
+            raise RuntimeError("JSONL writer is not opened")
         self._file.write(json.dumps(_serialize_row(features)) + "\n")
 
     def _write_parquet(self, features: dict[str, Any]) -> None:
@@ -161,7 +171,10 @@ class StreamingWriter:
                 self.path, table.schema, compression=self.compression
             )
 
-        self._parquet_writer.write_table(table)
+        writer = self._parquet_writer
+        if writer is None:
+            raise RuntimeError("Parquet writer initialization failed")
+        writer.write_table(table)
         self._parquet_buffer = []
 
     def close(self) -> None:
@@ -202,7 +215,7 @@ def to_dataframe(features: list[dict[str, Any]]) -> pd.DataFrame:
                 # Check if it's a list column (sequences)
                 if isinstance(df[col].iloc[0], list):
                     continue  # Keep as object
-                df[col] = pd.to_numeric(df[col], errors="ignore")
+                df[col] = pd.to_numeric(df[col])
             except (ValueError, TypeError, IndexError):
                 pass
 

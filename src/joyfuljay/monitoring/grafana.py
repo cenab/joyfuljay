@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
-# Path to bundled dashboard
-DASHBOARD_PATH = Path(__file__).parent.parent.parent.parent.parent / "dashboards"
+# Path to bundled dashboard (repo root /dashboards)
+DASHBOARD_PATH = Path(__file__).resolve().parents[3] / "dashboards"
 OVERVIEW_DASHBOARD = DASHBOARD_PATH / "joyfuljay-overview.json"
 
 
@@ -36,7 +36,7 @@ def load_overview_dashboard() -> dict[str, Any]:
         )
 
     with open(OVERVIEW_DASHBOARD, encoding="utf-8") as f:
-        return json.load(f)
+        return cast(dict[str, Any], json.load(f))
 
 
 def export_dashboard(
@@ -101,7 +101,7 @@ def _substitute_datasource(dashboard: dict[str, Any], uid: str) -> dict[str, Any
         else:
             return obj
 
-    return _replace(dashboard)
+    return cast(dict[str, Any], _replace(dashboard))
 
 
 def generate_prometheus_config(

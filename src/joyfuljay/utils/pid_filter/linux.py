@@ -18,13 +18,14 @@ import subprocess
 import threading
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .base import ConnectionInfo, FilterMethod, PIDFilterBase
 from .cache import ConnectionCache
 
 if TYPE_CHECKING:
     from typing import Callable
+    from ...core.packet import Packet
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +106,7 @@ class LinuxProcFilter(PIDFilterBase):
                 return
 
             # Parse /proc/net/* files for connections
-            connections = set()
+            connections: set[ConnectionInfo] = set()
 
             for proto, path in [
                 (6, "/proc/net/tcp"),
@@ -133,7 +134,7 @@ class LinuxProcFilter(PIDFilterBase):
         Returns:
             Set of socket inode strings.
         """
-        inodes = set()
+        inodes: set[str] = set()
         fd_path = Path(f"/proc/{pid}/fd")
 
         if not fd_path.exists():
@@ -169,7 +170,7 @@ class LinuxProcFilter(PIDFilterBase):
         Returns:
             Set of ConnectionInfo objects.
         """
-        connections = set()
+        connections: set[ConnectionInfo] = set()
 
         try:
             with open(path, "r") as f:
@@ -331,7 +332,9 @@ class LinuxSSFilter(PIDFilterBase):
 
     def refresh_connections(self) -> None:
         """Refresh connections using ss command."""
-        connections = set()
+        if not self._ss_path:
+            return
+        connections: set[ConnectionInfo] = set()
 
         for proto, flag in [("tcp", "-t"), ("udp", "-u")]:
             try:
@@ -364,7 +367,7 @@ class LinuxSSFilter(PIDFilterBase):
         Returns:
             Set of ConnectionInfo objects for our PID.
         """
-        connections = set()
+        connections: set[ConnectionInfo] = set()
         protocol = 6 if proto == "tcp" else 17
 
         # Pattern to match PID in process info
@@ -390,7 +393,7 @@ class LinuxSSFilter(PIDFilterBase):
             local_ip, local_port = self._parse_ss_addr(local_addr)
             remote_ip, remote_port = self._parse_ss_addr(remote_addr)
 
-            if local_ip is None:
+            if local_ip is None or local_port is None:
                 continue
 
             conn = ConnectionInfo(
@@ -549,7 +552,7 @@ class LinuxEBPFFilter(PIDFilterBase):
             with self._lock:
                 self._connections = self._fallback._connections.copy()
 
-    def matches_packet(self, packet) -> bool:
+    def matches_packet(self, packet: "Packet") -> bool:
         """Check if packet belongs to the monitored PID."""
         if self._fallback:
             return self._fallback.matches_packet(packet)
@@ -562,7 +565,7 @@ class LinuxEBPFFilter(PIDFilterBase):
         return super().get_connections()
 
     @property
-    def stats(self) -> dict:
+    def stats(self) -> dict[str, Any]:
         """Get statistics."""
         if self._fallback:
             return self._fallback.stats

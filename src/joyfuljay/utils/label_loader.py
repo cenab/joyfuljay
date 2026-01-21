@@ -11,7 +11,7 @@ import json
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +155,7 @@ class LabelLoader:
                 else:
                     return self.load_csv(path)
 
-    def _verify_columns(self, columns: list[str]) -> None:
+    def _verify_columns(self, columns: Sequence[str]) -> None:
         """Verify required columns exist.
 
         Args:

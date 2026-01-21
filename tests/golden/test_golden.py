@@ -121,8 +121,14 @@ class TestGoldenDeterminism:
         pipeline = Pipeline(config)
         flows = pipeline.process_pcap(str(sample_pcap_path))
 
+        # Normalize to list of feature dicts
+        if hasattr(flows, "to_dict"):
+            flow_dicts = flows.to_dict(orient="records")
+        else:
+            flow_dicts = list(flows)
+
         # Compare each flow
-        for i, flow_features in enumerate(flows):
+        for i, flow_features in enumerate(flow_dicts):
             if i < len(expected.get("flows", [])):
                 expected_flow = expected["flows"][i]
                 differences = compare_feature_values(

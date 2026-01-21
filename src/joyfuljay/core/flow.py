@@ -344,6 +344,10 @@ class FlowTable:
         self._flows.clear()
         return flows
 
+    def get_all_flows(self) -> list[Flow]:
+        """Return a snapshot of all active flows without modifying state."""
+        return list(self._flows.values())
+
     @property
     def active_flow_count(self) -> int:
         """Number of currently active flows."""

@@ -6,6 +6,7 @@ automatically when files are added or modified.
 
 from __future__ import annotations
 
+import importlib.util
 import logging
 import threading
 import time
@@ -54,13 +55,13 @@ class FileWatcher:
         self._processed_files: set[str] = set()
         self._file_mtimes: dict[str, float] = {}
         self._pending_files: dict[str, float] = {}  # path -> detection time
+        self._observer: Any | None = None
 
         # Try to use watchdog for efficient watching
         self._use_watchdog = False
-        try:
-            import watchdog  # noqa: F401
+        if importlib.util.find_spec("watchdog") is not None:
             self._use_watchdog = True
-        except ImportError:
+        else:
             logger.info(
                 "watchdog not installed, using polling mode. "
                 "Install with: pip install watchdog"
@@ -81,21 +82,31 @@ class FileWatcher:
 
     def _start_watchdog(self) -> None:
         """Start watching using watchdog library."""
-        from watchdog.events import FileSystemEventHandler
-        from watchdog.observers import Observer
+        import importlib
 
         watcher = self
 
-        class PcapHandler(FileSystemEventHandler):
+        class PcapHandler:
+            def dispatch(self, event: Any) -> None:
+                if getattr(event, "is_directory", False):
+                    return
+                event_type = getattr(event, "event_type", "")
+                if event_type == "created":
+                    self.on_created(event)
+                elif event_type == "modified":
+                    self.on_modified(event)
+
             def on_created(self, event: Any) -> None:
-                if not event.is_directory:
-                    watcher._handle_file_event(Path(event.src_path))
+                if not getattr(event, "is_directory", False):
+                    watcher._handle_file_event(Path(getattr(event, "src_path", "")))
 
             def on_modified(self, event: Any) -> None:
-                if not event.is_directory:
-                    watcher._handle_file_event(Path(event.src_path))
+                if not getattr(event, "is_directory", False):
+                    watcher._handle_file_event(Path(getattr(event, "src_path", "")))
 
-        self._observer = Observer()
+        observers = importlib.import_module("watchdog.observers")
+        observer_cls = getattr(observers, "Observer")
+        self._observer = observer_cls()
         handler = PcapHandler()
 
         for path in self.paths:
@@ -217,7 +228,7 @@ class FileWatcher:
         """Stop watching for file changes."""
         self._stop_event.set()
 
-        if self._use_watchdog and hasattr(self, "_observer"):
+        if self._use_watchdog and self._observer is not None:
             self._observer.stop()
             self._observer.join(timeout=2.0)
 

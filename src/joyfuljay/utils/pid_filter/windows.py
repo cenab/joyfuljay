@@ -14,13 +14,14 @@ import shutil
 import subprocess
 import threading
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from .base import ConnectionInfo, FilterMethod, PIDFilterBase
 from .cache import ConnectionCache
 
 if TYPE_CHECKING:
     from typing import Callable
+    from ...core.packet import Packet
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +94,7 @@ class WindowsNetstatFilter(PIDFilterBase):
 
     def refresh_connections(self) -> None:
         """Refresh connections using netstat."""
-        connections = set()
+        connections: set[ConnectionInfo] = set()
 
         try:
             # Run netstat -ano for all connections with PIDs
@@ -134,7 +135,7 @@ class WindowsNetstatFilter(PIDFilterBase):
         Returns:
             Set of ConnectionInfo objects for our PID.
         """
-        connections = set()
+        connections: set[ConnectionInfo] = set()
 
         for line in output.split("\n"):
             line = line.strip()
@@ -172,7 +173,7 @@ class WindowsNetstatFilter(PIDFilterBase):
             if protocol == 6 and len(parts) >= 5:
                 state = parts[3]
 
-            if local_ip is None:
+            if local_ip is None or local_port is None:
                 continue
 
             conn = ConnectionInfo(
@@ -297,7 +298,9 @@ class WindowsPowerShellFilter(PIDFilterBase):
 
     def refresh_connections(self) -> None:
         """Refresh connections using PowerShell."""
-        connections = set()
+        if not self._powershell_path:
+            return
+        connections: set[ConnectionInfo] = set()
 
         # Get TCP connections
         tcp_script = f"""
@@ -362,7 +365,7 @@ class WindowsPowerShellFilter(PIDFilterBase):
         Returns:
             Set of ConnectionInfo objects.
         """
-        connections = set()
+        connections: set[ConnectionInfo] = set()
         lines = output.strip().split("\n")
 
         if len(lines) < 2:
@@ -408,7 +411,7 @@ class WindowsPowerShellFilter(PIDFilterBase):
         Returns:
             Set of ConnectionInfo objects.
         """
-        connections = set()
+        connections: set[ConnectionInfo] = set()
         lines = output.strip().split("\n")
 
         if len(lines) < 2:
@@ -502,18 +505,20 @@ class WindowsETWFilter(PIDFilterBase):
         try:
             # Check if we're running as administrator
             import ctypes
-            is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+            windll = getattr(ctypes, "windll", None)
+            if windll is None:
+                return False
+            is_admin = windll.shell32.IsUserAnAdmin() != 0
 
             if not is_admin:
                 logger.debug("ETW requires administrator privileges")
                 return False
 
             # Check for pyetw or similar library
-            try:
-                import pywintrace  # noqa: F401
+            import importlib.util
+
+            if importlib.util.find_spec("pywintrace") is not None:
                 return True
-            except ImportError:
-                pass
 
             # Could also check for other ETW libraries
             return False
@@ -566,7 +571,7 @@ class WindowsETWFilter(PIDFilterBase):
             with self._lock:
                 self._connections = self._fallback._connections.copy()
 
-    def matches_packet(self, packet) -> bool:
+    def matches_packet(self, packet: "Packet") -> bool:
         """Check if packet belongs to the monitored PID."""
         if self._fallback:
             return self._fallback.matches_packet(packet)
@@ -579,7 +584,7 @@ class WindowsETWFilter(PIDFilterBase):
         return super().get_connections()
 
     @property
-    def stats(self) -> dict:
+    def stats(self) -> dict[str, Any]:
         """Get statistics."""
         if self._fallback:
             return self._fallback.stats

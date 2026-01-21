@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Sequence
 
 from ..extensions import (
     byte_distribution_fast,
@@ -13,6 +13,7 @@ from .base import FeatureExtractor
 
 if TYPE_CHECKING:
     from ..core.flow import Flow
+    from ..core.packet import Packet
     from ..schema.registry import FeatureMeta
 
 
@@ -97,7 +98,7 @@ class EntropyExtractor(FeatureExtractor):
 
         return features
 
-    def _collect_payload_bytes(self, packets: list) -> bytes:
+    def _collect_payload_bytes(self, packets: Sequence["Packet"]) -> bytes:
         """Collect payload bytes from packets up to sample_size."""
         collected = bytearray()
         remaining = self.sample_size

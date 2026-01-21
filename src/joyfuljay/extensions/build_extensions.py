@@ -18,12 +18,13 @@ After building, restart Python to use the compiled extensions.
 import os
 import sys
 from pathlib import Path
+from typing import Any, cast
 
 
-def build_extensions():
+def build_extensions() -> int:
     """Build Cython extensions in-place."""
     try:
-        from Cython.Build import cythonize
+        from Cython.Build import cythonize as _cythonize
         import numpy as np
     except ImportError as e:
         print(f"Error: {e}")
@@ -57,6 +58,8 @@ def build_extensions():
             define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
         ),
     ]
+
+    cythonize = cast(Any, _cythonize)
 
     # Cythonize with optimizations
     ext_modules = cythonize(

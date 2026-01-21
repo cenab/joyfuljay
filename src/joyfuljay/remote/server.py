@@ -10,10 +10,9 @@ import socket
 import ssl
 import threading
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Protocol, cast
 
-import websockets
-from websockets.server import serve
+from websockets import serve
 
 from ..capture.scapy_backend import ScapyBackend
 from .protocol import (
@@ -27,7 +26,22 @@ from .protocol import (
 )
 
 if TYPE_CHECKING:
-    from websockets.server import WebSocketServerProtocol
+    from ..core.packet import Packet
+    from .discovery import MDNSAnnouncer
+
+
+class WebSocketProtocol(Protocol):
+    remote_address: Any
+    closed: bool
+
+    async def send(self, data: bytes) -> Any:
+        ...
+
+    async def recv(self) -> Any:
+        ...
+
+    async def ping(self) -> Any:
+        ...
 
 logger = logging.getLogger(__name__)
 
@@ -160,15 +174,15 @@ class Server:
         self.announce_properties = announce_properties or {}
         self.ssl_context = self._build_ssl_context(tls_cert, tls_key)
         self.backend = ScapyBackend(store_raw_payload=True)
-        self.clients: set[WebSocketServerProtocol] = set()
+        self.clients: set[WebSocketProtocol] = set()
         self._stop_event = asyncio.Event()
-        self._packet_queue: asyncio.Queue = asyncio.Queue(maxsize=10000)
-        self._client_rate_limiters: dict[WebSocketServerProtocol, TokenBucketRateLimiter] = {}
-        self._client_queues: dict[WebSocketServerProtocol, asyncio.Queue[bytes]] = {}
-        self._client_tasks: dict[WebSocketServerProtocol, asyncio.Task] = {}
+        self._packet_queue: asyncio.Queue[Packet] = asyncio.Queue(maxsize=10000)
+        self._client_rate_limiters: dict[WebSocketProtocol, TokenBucketRateLimiter] = {}
+        self._client_queues: dict[WebSocketProtocol, asyncio.Queue[bytes]] = {}
+        self._client_tasks: dict[WebSocketProtocol, asyncio.Task[None]] = {}
         self._loop: asyncio.AbstractEventLoop | None = None
-        self._broadcast_task: asyncio.Task | None = None
-        self._announcer = None
+        self._broadcast_task: asyncio.Task[None] | None = None
+        self._announcer: MDNSAnnouncer | None = None
 
     def get_local_ip(self) -> str:
         """Get the local IP address for client connections.
@@ -182,7 +196,7 @@ class Server:
             s.connect(("8.8.8.8", 80))
             ip = s.getsockname()[0]
             s.close()
-            return ip
+            return str(ip)
         except Exception:
             return "127.0.0.1"
 
@@ -212,13 +226,14 @@ class Server:
         context.load_cert_chain(certfile=tls_cert, keyfile=tls_key)
         return context
 
-    async def handle_client(self, websocket: WebSocketServerProtocol) -> None:
+    async def handle_client(self, websocket: Any) -> None:
         """Handle a connected client.
 
         Args:
             websocket: The WebSocket connection.
         """
-        client_addr = websocket.remote_address
+        ws = cast(WebSocketProtocol, websocket)
+        client_addr = ws.remote_address
         logger.info(f"Client connecting from: {client_addr}")
 
         # Check max clients limit
@@ -226,43 +241,43 @@ class Server:
             logger.warning(
                 f"Rejecting client {client_addr}: max clients ({self.max_clients}) reached"
             )
-            await websocket.send(serialize_message(MSG_AUTH_FAIL, "Server at capacity"))
+            await ws.send(serialize_message(MSG_AUTH_FAIL, "Server at capacity"))
             return
 
         try:
             # First message must be authentication
-            auth_msg = await asyncio.wait_for(websocket.recv(), timeout=10.0)
+            auth_msg = await asyncio.wait_for(ws.recv(), timeout=10.0)
             msg = deserialize_message(auth_msg)
 
             if msg.get("type") != MSG_AUTH:
                 logger.warning(f"Invalid first message from {client_addr}")
-                await websocket.send(serialize_message(MSG_AUTH_FAIL, "Expected auth"))
+                await ws.send(serialize_message(MSG_AUTH_FAIL, "Expected auth"))
                 return
 
             # Verify token
             client_token = msg.get("data", {}).get("token", "")
             if not secrets.compare_digest(client_token, self.token):
                 logger.warning(f"Authentication failed from {client_addr}")
-                await websocket.send(serialize_message(MSG_AUTH_FAIL, "Invalid token"))
+                await ws.send(serialize_message(MSG_AUTH_FAIL, "Invalid token"))
                 return
 
             # Authentication successful
             logger.info(f"Client authenticated: {client_addr}")
-            await websocket.send(serialize_message(MSG_AUTH_OK))
-            self.clients.add(websocket)
+            await ws.send(serialize_message(MSG_AUTH_OK))
+            self.clients.add(ws)
 
             # Create rate limiter for this client if bandwidth limit is set
             rate_limiter = None
             if self.max_bandwidth:
                 rate_limiter = TokenBucketRateLimiter(self.max_bandwidth)
-                self._client_rate_limiters[websocket] = rate_limiter
+                self._client_rate_limiters[ws] = rate_limiter
 
             queue: asyncio.Queue[bytes] = asyncio.Queue(maxsize=self.client_queue_size)
-            self._client_queues[websocket] = queue
+            self._client_queues[ws] = queue
             task = asyncio.create_task(
-                self._client_send_loop(websocket, queue, rate_limiter)
+                self._client_send_loop(ws, queue, rate_limiter)
             )
-            self._client_tasks[websocket] = task
+            self._client_tasks[ws] = task
             await task
 
         except asyncio.TimeoutError:
@@ -270,17 +285,20 @@ class Server:
         except Exception as e:
             logger.error(f"Error handling client {client_addr}: {e}")
         finally:
-            self.clients.discard(websocket)
-            self._client_queues.pop(websocket, None)
-            task = self._client_tasks.pop(websocket, None)
-            if task and not task.done():
-                task.cancel()
-            self._client_rate_limiters.pop(websocket, None)
+            self.clients.discard(ws)
+            if ws in self._client_queues:
+                del self._client_queues[ws]
+            if ws in self._client_tasks:
+                task = self._client_tasks.pop(ws)
+                if not task.done():
+                    task.cancel()
+            if ws in self._client_rate_limiters:
+                del self._client_rate_limiters[ws]
             logger.info(f"Client disconnected: {client_addr}")
 
     async def _client_send_loop(
         self,
-        websocket: WebSocketServerProtocol,
+        websocket: WebSocketProtocol,
         queue: asyncio.Queue[bytes],
         rate_limiter: TokenBucketRateLimiter | None,
     ) -> None:
@@ -310,7 +328,7 @@ class Server:
             except Exception:
                 pass
 
-    def _enqueue_packet(self, packet) -> None:
+    def _enqueue_packet(self, packet: "Packet") -> None:
         try:
             self._packet_queue.put_nowait(packet)
         except asyncio.QueueFull:
@@ -383,13 +401,14 @@ class Server:
             }
             props.update(self.announce_properties)
             name = self.announce_name or f"JoyfulJay-{socket.gethostname()}-{self.port}"
-            self._announcer = MDNSAnnouncer(
+            announcer = MDNSAnnouncer(
                 name=name,
                 port=self.port,
                 address=self.get_local_ip(),
                 properties=props,
             )
-            self._announcer.start()
+            self._announcer = announcer
+            announcer.start()
 
         # Start capture thread
         capture_thread = threading.Thread(

@@ -204,16 +204,14 @@ class HTTP2Extractor(FeatureExtractor):
         Returns:
             Dictionary with frame analysis results.
         """
-        result = {
-            "frame_count": 0,
-            "data_frames": 0,
-            "headers_frames": 0,
-            "settings_frames": 0,
-            "push_promise_frames": 0,
-            "goaway_frames": 0,
-            "window_update_frames": 0,
-            "stream_ids": set(),
-        }
+        frame_count = 0
+        data_frames = 0
+        headers_frames = 0
+        settings_frames = 0
+        push_promise_frames = 0
+        goaway_frames = 0
+        window_update_frames = 0
+        stream_ids: set[int] = set()
 
         offset = 0
         while offset + 9 <= len(payload):
@@ -223,30 +221,39 @@ class HTTP2Extractor(FeatureExtractor):
             # flags = payload[offset + 4]
             stream_id = int.from_bytes(payload[offset + 5 : offset + 9], "big") & 0x7FFFFFFF
 
-            result["frame_count"] += 1
-            result["stream_ids"].add(stream_id)
+            frame_count += 1
+            stream_ids.add(stream_id)
 
             if frame_type == HTTP2_FRAME_DATA:
-                result["data_frames"] += 1
+                data_frames += 1
             elif frame_type == HTTP2_FRAME_HEADERS:
-                result["headers_frames"] += 1
+                headers_frames += 1
             elif frame_type == HTTP2_FRAME_SETTINGS:
-                result["settings_frames"] += 1
+                settings_frames += 1
             elif frame_type == HTTP2_FRAME_PUSH_PROMISE:
-                result["push_promise_frames"] += 1
+                push_promise_frames += 1
             elif frame_type == HTTP2_FRAME_GOAWAY:
-                result["goaway_frames"] += 1
+                goaway_frames += 1
             elif frame_type == HTTP2_FRAME_WINDOW_UPDATE:
-                result["window_update_frames"] += 1
+                window_update_frames += 1
 
             # Move to next frame
             offset += 9 + length
 
             # Safety limit
-            if result["frame_count"] > 100:
+            if frame_count > 100:
                 break
 
-        return result
+        return {
+            "frame_count": frame_count,
+            "data_frames": data_frames,
+            "headers_frames": headers_frames,
+            "settings_frames": settings_frames,
+            "push_promise_frames": push_promise_frames,
+            "goaway_frames": goaway_frames,
+            "window_update_frames": window_update_frames,
+            "stream_ids": stream_ids,
+        }
 
     @property
     def feature_names(self) -> list[str]:

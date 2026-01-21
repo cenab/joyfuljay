@@ -99,8 +99,8 @@ class TestMDNSAnnouncer:
         """Test that start() registers service with zeroconf."""
         zeroconf = pytest.importorskip("zeroconf")
 
-        with patch.object(zeroconf, "Zeroconf") as mock_zc_class:
-            with patch.object(zeroconf, "ServiceInfo"):
+        with patch("joyfuljay.remote.discovery.Zeroconf") as mock_zc_class:
+            with patch("joyfuljay.remote.discovery.ServiceInfo"):
                 mock_zc = MagicMock()
                 mock_zc_class.return_value = mock_zc
 
@@ -123,8 +123,8 @@ class TestMDNSAnnouncer:
         """Test that stop() unregisters service."""
         zeroconf = pytest.importorskip("zeroconf")
 
-        with patch.object(zeroconf, "Zeroconf") as mock_zc_class:
-            with patch.object(zeroconf, "ServiceInfo"):
+        with patch("joyfuljay.remote.discovery.Zeroconf") as mock_zc_class:
+            with patch("joyfuljay.remote.discovery.ServiceInfo"):
                 mock_zc = MagicMock()
                 mock_zc_class.return_value = mock_zc
 
@@ -174,8 +174,8 @@ class TestDiscoverServers:
         """Test that discovery uses correct mDNS service type."""
         zeroconf = pytest.importorskip("zeroconf")
 
-        with patch.object(zeroconf, "Zeroconf"):
-            with patch.object(zeroconf, "ServiceBrowser") as mock_browser:
+        with patch("joyfuljay.remote.discovery.Zeroconf"):
+            with patch("joyfuljay.remote.discovery.ServiceBrowser") as mock_browser:
                 with patch("time.sleep"):
                     discover_servers(timeout=0.1)
 
@@ -187,8 +187,8 @@ class TestDiscoverServers:
         """Test that discovery waits for specified timeout."""
         zeroconf = pytest.importorskip("zeroconf")
 
-        with patch.object(zeroconf, "Zeroconf"):
-            with patch.object(zeroconf, "ServiceBrowser"):
+        with patch("joyfuljay.remote.discovery.Zeroconf"):
+            with patch("joyfuljay.remote.discovery.ServiceBrowser"):
                 with patch("time.sleep") as mock_sleep:
                     discover_servers(timeout=2.5)
 
@@ -201,8 +201,8 @@ class TestDiscoverServers:
         zeroconf = pytest.importorskip("zeroconf")
 
         mock_zc = MagicMock()
-        with patch.object(zeroconf, "Zeroconf", return_value=mock_zc):
-            with patch.object(zeroconf, "ServiceBrowser"):
+        with patch("joyfuljay.remote.discovery.Zeroconf", return_value=mock_zc):
+            with patch("joyfuljay.remote.discovery.ServiceBrowser"):
                 with patch("time.sleep"):
                     discover_servers(timeout=0.1)
 

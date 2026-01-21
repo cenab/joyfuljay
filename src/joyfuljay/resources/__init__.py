@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 from importlib import resources
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 
 def get_profile_path(profile_name: str) -> Path:
@@ -126,7 +126,7 @@ def load_schema(version: str = "v1.0") -> dict[str, Any]:
         files = resources.files(f"joyfuljay.resources.schema.{version}")
         schema_file = files.joinpath("feature_schema.json")
         content = schema_file.read_text(encoding="utf-8")
-        return json.loads(content)
+        return cast(dict[str, Any], json.loads(content))
     except (TypeError, AttributeError, ModuleNotFoundError):
         raise FileNotFoundError(f"Schema not found: {version}")
 

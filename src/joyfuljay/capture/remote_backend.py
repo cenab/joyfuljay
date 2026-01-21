@@ -9,10 +9,13 @@ import ssl
 import threading
 import time
 from queue import Empty, Queue
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING, Any, Iterator
 from urllib.parse import parse_qs, urlparse
 
-import websockets
+try:
+    import websockets
+except ImportError:
+    websockets = None  # type: ignore[assignment]
 
 from ..core.packet import Packet
 from ..remote.protocol import (
@@ -37,6 +40,19 @@ DEFAULT_MAX_RETRIES = 5
 DEFAULT_BASE_DELAY = 1.0  # seconds
 DEFAULT_MAX_DELAY = 60.0  # seconds
 DEFAULT_JITTER = 0.1  # fraction of delay to randomize
+
+
+def _require_websockets() -> Any:
+    if websockets is None:
+        raise ImportError(
+            "Remote capture requires websockets. Install with: pip install joyfuljay[remote]"
+        )
+    return websockets
+
+
+def is_remote_available() -> bool:
+    """Check if remote capture dependencies are available."""
+    return websockets is not None
 
 
 class RemoteCaptureBackend(CaptureBackend):
@@ -251,10 +267,11 @@ class RemoteCaptureBackend(CaptureBackend):
 
         # Add jitter to avoid thundering herd
         jitter = delay * DEFAULT_JITTER * random.random()
-        return delay + jitter
+        return float(delay + jitter)
 
     async def _async_receive(self) -> None:
         """Async coroutine that receives packets from WebSocket with auto-reconnect."""
+        ws = _require_websockets()
         self._connection_attempts = 0
 
         while not self._stop_event.is_set():
@@ -270,8 +287,8 @@ class RemoteCaptureBackend(CaptureBackend):
 
             except (
                 ConnectionError,
-                websockets.exceptions.ConnectionClosed,
-                websockets.exceptions.InvalidURI,
+                ws.exceptions.ConnectionClosed,
+                ws.exceptions.InvalidURI,
                 OSError,
                 asyncio.TimeoutError,
             ) as e:
@@ -300,20 +317,21 @@ class RemoteCaptureBackend(CaptureBackend):
 
     async def _connect_and_receive(self) -> None:
         """Connect to server and receive packets until connection closes."""
+        ws = _require_websockets()
         logger.info(f"Connecting to {self.ws_url}")
 
         try:
-            async with websockets.connect(
+            async with ws.connect(
                 self.ws_url,
                 ping_interval=30,
                 ping_timeout=10,
                 ssl=self.ssl_context,
-            ) as ws:
+            ) as socket:
                 # Send authentication
-                await ws.send(serialize_auth(self.token))
+                await socket.send(serialize_auth(self.token))
 
                 # Wait for auth response
-                auth_response = await asyncio.wait_for(ws.recv(), timeout=10.0)
+                auth_response = await asyncio.wait_for(socket.recv(), timeout=10.0)
                 msg = deserialize_message(auth_response)
 
                 if msg.get("type") == MSG_AUTH_FAIL:
@@ -332,7 +350,7 @@ class RemoteCaptureBackend(CaptureBackend):
                 self._connection_attempts = 0
 
                 # Receive packets
-                async for message in ws:
+                async for message in socket:
                     if self._stop_event.is_set():
                         return
 
