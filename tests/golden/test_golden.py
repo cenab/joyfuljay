@@ -7,6 +7,7 @@ across multiple runs for the same input PCAP and configuration.
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -74,10 +75,31 @@ def compare_feature_values(
     if extra:
         differences.append(f"Extra features: {sorted(extra)}")
 
+    def _is_nan(value: Any) -> bool:
+        try:
+            return math.isnan(value)
+        except TypeError:
+            return False
+
     # Compare common keys
     for key in actual_keys & expected_keys:
         actual_val = actual[key]
         expected_val = expected[key]
+
+        if _is_nan(actual_val):
+            if expected_val in ("", None) or _is_nan(expected_val):
+                continue
+            differences.append(f"{key}: expected {expected_val!r}, got nan")
+            continue
+
+        if _is_nan(expected_val):
+            if actual_val in ("", None):
+                continue
+            differences.append(f"{key}: expected nan, got {actual_val!r}")
+            continue
+
+        if expected_val in ("", None) and actual_val in ("", None):
+            continue
 
         if isinstance(expected_val, float) and isinstance(actual_val, float):
             if abs(actual_val - expected_val) > tolerance:

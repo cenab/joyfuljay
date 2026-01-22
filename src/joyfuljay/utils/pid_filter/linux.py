@@ -102,21 +102,29 @@ class LinuxProcFilter(PIDFilterBase):
         try:
             # Get socket inodes for the target PID
             inodes = self._get_process_inodes(self.pid)
-            if not inodes:
-                return
 
             # Parse /proc/net/* files for connections
             connections: set[ConnectionInfo] = set()
 
-            for proto, path in [
-                (6, "/proc/net/tcp"),
-                (6, "/proc/net/tcp6"),
-                (17, "/proc/net/udp"),
-                (17, "/proc/net/udp6"),
-            ]:
-                if Path(path).exists():
-                    conns = self._parse_proc_net(path, proto, inodes)
-                    connections.update(conns)
+            if inodes:
+                for proto, path in [
+                    (6, "/proc/net/tcp"),
+                    (6, "/proc/net/tcp6"),
+                    (17, "/proc/net/udp"),
+                    (17, "/proc/net/udp6"),
+                ]:
+                    if Path(path).exists():
+                        conns = self._parse_proc_net(path, proto, inodes)
+                        connections.update(conns)
+
+            if not connections:
+                psutil_connections = self._get_psutil_connections()
+                if psutil_connections:
+                    self._method = FilterMethod.PSUTIL
+                    connections = psutil_connections
+
+            if not connections and not inodes:
+                return
 
             self._update_connections(connections)
             self._cache.update_from_connections(connections)
@@ -124,6 +132,53 @@ class LinuxProcFilter(PIDFilterBase):
         except Exception as e:
             logger.debug(f"Error refreshing connections: {e}")
             self._stats["errors"] += 1
+
+    def _get_psutil_connections(self) -> set[ConnectionInfo]:
+        """Fetch connections for the PID using psutil if available."""
+        try:
+            import psutil
+        except ImportError:
+            return set()
+
+        connections: set[ConnectionInfo] = set()
+
+        try:
+            proc = psutil.Process(self.pid)
+            for conn in proc.connections(kind="all"):
+                local_ip = conn.laddr.ip if conn.laddr else "0.0.0.0"
+                local_port = conn.laddr.port if conn.laddr else 0
+                remote_ip = conn.raddr.ip if conn.raddr else "0.0.0.0"
+                remote_port = conn.raddr.port if conn.raddr else 0
+
+                proto_map = {
+                    socket.SOCK_STREAM: 6,
+                    socket.SOCK_DGRAM: 17,
+                }
+                protocol = proto_map.get(conn.type, 0)
+
+                if protocol == 0:
+                    continue
+
+                conn_info = ConnectionInfo(
+                    local_ip=local_ip,
+                    local_port=local_port,
+                    remote_ip=remote_ip,
+                    remote_port=remote_port,
+                    protocol=protocol,
+                    pid=self.pid,
+                    state=conn.status if hasattr(conn, "status") else "",
+                    created_at=time.time(),
+                )
+                connections.add(conn_info)
+
+        except psutil.NoSuchProcess:
+            logger.debug(f"Process {self.pid} no longer exists")
+        except psutil.AccessDenied:
+            logger.debug(f"Access denied to process {self.pid}")
+        except Exception as e:
+            logger.debug(f"Error reading psutil connections: {e}")
+
+        return connections
 
     def _get_process_inodes(self, pid: int) -> set[str]:
         """Get socket inodes for a process.
