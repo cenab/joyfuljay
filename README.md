@@ -164,7 +164,7 @@ jj status
 
 ## Documentation
 
-Full documentation: [[https://joyfuljay.readthedocs.io](https://joyfuljay.readthedocs.io)](https://docs.joyfuljay.com/en/stable/)
+Full documentation: [docs.joyfuljay.com](https://docs.joyfuljay.com/en/stable/)
 
 ## Citation
 
