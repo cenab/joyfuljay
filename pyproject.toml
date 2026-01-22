@@ -133,6 +133,7 @@ dev = [
     "setuptools>=65.0",
     "mypy>=1.0",
     "ruff>=0.1.0",
+    "networkx>=3.0",
     "pandas-stubs>=2.0",
     "types-click>=7.1",
     "types-psutil>=5.9.0",

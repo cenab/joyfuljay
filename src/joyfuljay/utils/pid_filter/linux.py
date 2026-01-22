@@ -174,15 +174,15 @@ class LinuxProcFilter(PIDFilterBase):
 
         try:
             with open(path, "r") as f:
-                # Skip header line
-                next(f)
+                header = next(f).strip().split()
+                inode_idx = header.index("inode") if "inode" in header else 9
 
                 for line in f:
                     parts = line.split()
-                    if len(parts) < 10:
+                    if len(parts) <= inode_idx:
                         continue
 
-                    inode = parts[9]
+                    inode = parts[inode_idx]
                     if inode not in target_inodes:
                         continue
 
@@ -281,6 +281,7 @@ class LinuxSSFilter(PIDFilterBase):
         self._cache = ConnectionCache(max_size=10000, ttl_seconds=300.0)
         self._refresh_thread: threading.Thread | None = None
         self._ss_path = shutil.which("ss")
+        self._fallback: LinuxProcFilter | None = None
 
     def start(self) -> None:
         """Start the filter."""
@@ -332,9 +333,14 @@ class LinuxSSFilter(PIDFilterBase):
 
     def refresh_connections(self) -> None:
         """Refresh connections using ss command."""
+        if self._fallback is not None:
+            self._refresh_from_fallback()
+            return
         if not self._ss_path:
             return
         connections: set[ConnectionInfo] = set()
+        pid_pattern = re.compile(rf"pid={self.pid}\b")
+        pid_seen = False
 
         for proto, flag in [("tcp", "-t"), ("udp", "-u")]:
             try:
@@ -346,6 +352,8 @@ class LinuxSSFilter(PIDFilterBase):
                 )
 
                 if result.returncode == 0:
+                    if pid_pattern.search(result.stdout):
+                        pid_seen = True
                     conns = self._parse_ss_output(result.stdout, proto)
                     connections.update(conns)
 
@@ -354,8 +362,47 @@ class LinuxSSFilter(PIDFilterBase):
             except Exception as e:
                 logger.debug(f"Error running ss: {e}")
 
+        if not pid_seen or not connections:
+            logger.info("ss did not return PID details; falling back to /proc parsing")
+            self._fallback = LinuxProcFilter(
+                self.pid,
+                self.refresh_interval,
+                self.on_connection_added,
+                self.on_connection_removed,
+            )
+            self._method = FilterMethod.PROC_NET
+            self._refresh_from_fallback()
+            return
+
         self._update_connections(connections)
         self._cache.update_from_connections(connections)
+
+    def _refresh_from_fallback(self) -> None:
+        if self._fallback is None:
+            return
+        self._fallback.refresh_connections()
+        connections = set(self._fallback.get_connections())
+        self._update_connections(connections)
+        self._cache.update_from_connections(connections)
+
+    def matches_packet(self, packet: "Packet") -> bool:
+        """Check if packet belongs to the monitored PID."""
+        if self._fallback is not None:
+            return self._fallback.matches_packet(packet)
+        return super().matches_packet(packet)
+
+    def get_connections(self) -> list[ConnectionInfo]:
+        """Get current connections."""
+        if self._fallback is not None:
+            return self._fallback.get_connections()
+        return super().get_connections()
+
+    @property
+    def stats(self) -> dict[str, Any]:
+        """Get statistics."""
+        if self._fallback is not None:
+            return self._fallback.stats
+        return super().stats
 
     def _parse_ss_output(self, output: str, proto: str) -> set[ConnectionInfo]:
         """Parse ss command output.
