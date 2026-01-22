@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   id-token: write
+  packages: write
 
 jobs:
   build:
@@ -51,10 +52,30 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+
+  publish-github:
+    name: Publish to GitHub Packages
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish to GitHub Packages
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://pypi.pkg.github.com/cenab/
+          user: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
   github-release:
     name: Create GitHub Release
-    needs: publish-pypi
+    needs: [publish-pypi, publish-github]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
