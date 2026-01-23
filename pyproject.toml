@@ -6,8 +6,8 @@ build-backend = "hatchling.build"
 name = "joyfuljay"
 version = "0.1.0"
 description = "Python library for extracting ML-ready features from encrypted network traffic"
-readme = "README.md"
-license = "MIT"
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { file = "LICENSE" }
 requires-python = ">=3.10"
 authors = [
     { name = "JoyfulJay Contributors" }
@@ -115,6 +115,8 @@ dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",
     "hypothesis>=6.0",
+    "build>=1.0",
+    "twine>=5.0",
     "prometheus-client>=0.17.0",
     "msgpack>=1.0.0",
     "websockets>=12.0",
