@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "joyfuljay"
-version = "0.1.5"
+version = "0.1.6.1"
 description = "Python library for extracting ML-ready features from encrypted network traffic"
 readme = { file = "README.md", content-type = "text/markdown" }
 license = { file = "LICENSE" }
