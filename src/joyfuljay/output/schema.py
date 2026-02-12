@@ -1,10 +1,19 @@
-"""Feature schema definitions and documentation."""
+"""Feature schema definitions and documentation.
+
+This module backs the `jj schema` and `jj features` CLI commands.
+
+Historically this file contained a small hand-written subset of feature
+definitions. That drifted from the actual extractors/profiles over time.
+We now generate documentation/schema from the feature registry metadata
+(`joyfuljay.schema.registry`) so the CLI reflects the real output columns.
+"""
 
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from enum import Enum
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -48,223 +57,46 @@ class FeatureDefinition:
         }
 
 
-# Feature definitions for documentation and validation
-FEATURE_DEFINITIONS: dict[str, FeatureDefinition] = {
-    # Flow metadata
-    "src_ip": FeatureDefinition(
-        "src_ip",
-        FeatureType.STRING,
-        "Source IP address (flow initiator)",
-        group="flow_meta",
-    ),
-    "dst_ip": FeatureDefinition(
-        "dst_ip",
-        FeatureType.STRING,
-        "Destination IP address (flow responder)",
-        group="flow_meta",
-    ),
-    "src_port": FeatureDefinition(
-        "src_port",
-        FeatureType.INTEGER,
-        "Source port number",
-        group="flow_meta",
-    ),
-    "dst_port": FeatureDefinition(
-        "dst_port",
-        FeatureType.INTEGER,
-        "Destination port number",
-        group="flow_meta",
-    ),
-    "protocol": FeatureDefinition(
-        "protocol",
-        FeatureType.INTEGER,
-        "IP protocol number (6=TCP, 17=UDP)",
-        group="flow_meta",
-    ),
-    "duration": FeatureDefinition(
-        "duration",
-        FeatureType.FLOAT,
-        "Flow duration from first to last packet",
-        unit="seconds",
-        group="flow_meta",
-    ),
-    "total_packets": FeatureDefinition(
-        "total_packets",
-        FeatureType.INTEGER,
-        "Total number of packets in both directions",
-        group="flow_meta",
-    ),
-    "total_bytes": FeatureDefinition(
-        "total_bytes",
-        FeatureType.INTEGER,
-        "Total bytes transmitted in both directions",
-        unit="bytes",
-        group="flow_meta",
-    ),
-    # Timing features
-    "iat_mean": FeatureDefinition(
-        "iat_mean",
-        FeatureType.FLOAT,
-        "Mean inter-arrival time between packets",
-        unit="seconds",
-        group="timing",
-    ),
-    "iat_std": FeatureDefinition(
-        "iat_std",
-        FeatureType.FLOAT,
-        "Standard deviation of inter-arrival times",
-        unit="seconds",
-        group="timing",
-    ),
-    "burstiness_index": FeatureDefinition(
-        "burstiness_index",
-        FeatureType.FLOAT,
-        "Coefficient of variation of IAT (std/mean)",
-        group="timing",
-    ),
-    # Size features
-    "pkt_len_mean": FeatureDefinition(
-        "pkt_len_mean",
-        FeatureType.FLOAT,
-        "Mean packet length",
-        unit="bytes",
-        group="size",
-    ),
-    "pkt_len_std": FeatureDefinition(
-        "pkt_len_std",
-        FeatureType.FLOAT,
-        "Standard deviation of packet lengths",
-        unit="bytes",
-        group="size",
-    ),
-    "dominant_pkt_size": FeatureDefinition(
-        "dominant_pkt_size",
-        FeatureType.INTEGER,
-        "Most common packet size in the flow",
-        unit="bytes",
-        group="size",
-    ),
-    "dominant_pkt_ratio": FeatureDefinition(
-        "dominant_pkt_ratio",
-        FeatureType.FLOAT,
-        "Proportion of packets with the dominant size",
-        group="size",
-    ),
-    # TLS features
-    "tls_detected": FeatureDefinition(
-        "tls_detected",
-        FeatureType.BOOLEAN,
-        "Whether TLS handshake was detected",
-        group="tls",
-    ),
-    "tls_version_str": FeatureDefinition(
-        "tls_version_str",
-        FeatureType.STRING,
-        "TLS version string (e.g., 'TLS 1.3')",
-        group="tls",
-    ),
-    "tls_sni": FeatureDefinition(
-        "tls_sni",
-        FeatureType.STRING,
-        "Server Name Indication from ClientHello",
-        group="tls",
-    ),
-    "ja3_hash": FeatureDefinition(
-        "ja3_hash",
-        FeatureType.STRING,
-        "JA3 client fingerprint hash",
-        group="tls",
-    ),
-    "ja3s_hash": FeatureDefinition(
-        "ja3s_hash",
-        FeatureType.STRING,
-        "JA3S server fingerprint hash",
-        group="tls",
-    ),
-    "tls_key_exchange_group_name": FeatureDefinition(
-        "tls_key_exchange_group_name",
-        FeatureType.STRING,
-        "Key exchange group name (e.g., 'x25519', 'secp256r1')",
-        group="tls",
-    ),
-    # SSH features
-    "ssh_detected": FeatureDefinition(
-        "ssh_detected",
-        FeatureType.BOOLEAN,
-        "Whether SSH protocol was detected",
-        group="ssh",
-    ),
-    "ssh_hassh": FeatureDefinition(
-        "ssh_hassh",
-        FeatureType.STRING,
-        "HASSH client fingerprint hash",
-        group="ssh",
-    ),
-    "ssh_hassh_server": FeatureDefinition(
-        "ssh_hassh_server",
-        FeatureType.STRING,
-        "HASSHServer fingerprint hash",
-        group="ssh",
-    ),
-    # QUIC features
-    "quic_detected": FeatureDefinition(
-        "quic_detected",
-        FeatureType.BOOLEAN,
-        "Whether QUIC protocol was detected",
-        group="quic",
-    ),
-    "quic_version_str": FeatureDefinition(
-        "quic_version_str",
-        FeatureType.STRING,
-        "QUIC version string",
-        group="quic",
-    ),
-    "quic_sni": FeatureDefinition(
-        "quic_sni",
-        FeatureType.STRING,
-        "Server Name Indication from QUIC Initial",
-        group="quic",
-    ),
-    # Fingerprint features
-    "likely_tor": FeatureDefinition(
-        "likely_tor",
-        FeatureType.BOOLEAN,
-        "Whether traffic appears to be Tor",
-        group="fingerprint",
-    ),
-    "likely_vpn": FeatureDefinition(
-        "likely_vpn",
-        FeatureType.BOOLEAN,
-        "Whether traffic appears to be VPN",
-        group="fingerprint",
-    ),
-    "likely_doh": FeatureDefinition(
-        "likely_doh",
-        FeatureType.BOOLEAN,
-        "Whether traffic appears to be DNS-over-HTTPS",
-        group="fingerprint",
-    ),
-    "traffic_type": FeatureDefinition(
-        "traffic_type",
-        FeatureType.STRING,
-        "Classified traffic type (tor/vpn/doh/encrypted)",
-        group="fingerprint",
-    ),
-    # Entropy features
-    "entropy_payload": FeatureDefinition(
-        "entropy_payload",
-        FeatureType.FLOAT,
-        "Shannon entropy of payload bytes (0-8 scale)",
-        unit="bits/byte",
-        group="entropy",
-    ),
-    "printable_ratio": FeatureDefinition(
-        "printable_ratio",
-        FeatureType.FLOAT,
-        "Ratio of printable ASCII characters in payload",
-        group="entropy",
-    ),
-}
+def _dtype_to_feature_type(dtype: str) -> FeatureType:
+    dt = dtype.lower()
+    if dt in {"string", "categorical"}:
+        return FeatureType.STRING
+    if dt in {"int", "int32", "int64", "uint32", "uint64"}:
+        return FeatureType.INTEGER
+    if dt in {"float", "float32", "float64"}:
+        return FeatureType.FLOAT
+    if dt in {"bool", "boolean"}:
+        return FeatureType.BOOLEAN
+    return FeatureType.STRING
+
+
+@lru_cache
+def _feature_definitions_by_name() -> dict[str, FeatureDefinition]:
+    """Build a map of output column name -> FeatureDefinition."""
+    from ..schema.registry import all_feature_meta
+
+    defs: dict[str, FeatureDefinition] = {}
+    for feature_id, meta in all_feature_meta().items():
+        if "." in feature_id:
+            group, name = feature_id.split(".", 1)
+        else:
+            group, name = "general", feature_id
+
+        if name in defs:
+            raise ValueError(
+                f"Duplicate feature name across extractors: {name} "
+                f"(example id: {feature_id})"
+            )
+
+        defs[name] = FeatureDefinition(
+            name=name,
+            type=_dtype_to_feature_type(meta.dtype),
+            description=meta.description,
+            unit=meta.units or None,
+            group=group,
+        )
+
+    return defs
 
 
 def get_feature_definition(name: str) -> FeatureDefinition | None:
@@ -276,11 +108,11 @@ def get_feature_definition(name: str) -> FeatureDefinition | None:
     Returns:
         FeatureDefinition if found, None otherwise.
     """
-    return FEATURE_DEFINITIONS.get(name)
+    return _feature_definitions_by_name().get(name)
 
 
-def get_feature_documentation() -> str:
-    """Generate markdown documentation for all features.
+def get_feature_documentation(group: str | None = None) -> str:
+    """Generate markdown documentation for features.
 
     Returns:
         Markdown-formatted feature documentation.
@@ -289,7 +121,9 @@ def get_feature_documentation() -> str:
 
     # Group features by their group
     groups: dict[str, list[FeatureDefinition]] = {}
-    for defn in FEATURE_DEFINITIONS.values():
+    for defn in _feature_definitions_by_name().values():
+        if group is not None and defn.group != group:
+            continue
         if defn.group not in groups:
             groups[defn.group] = []
         groups[defn.group].append(defn)
@@ -306,19 +140,25 @@ def get_feature_documentation() -> str:
     return "\n".join(lines)
 
 
-def export_schema_json(path: str | Path | None = None) -> str:
+def export_schema_json(path: str | Path | None = None, group: str | None = None) -> str:
     """Export feature schema as JSON.
 
     Args:
         path: Optional file path to write to. If None, returns JSON string.
+        group: Optional feature group name to filter by.
 
     Returns:
         JSON string representation of the schema.
     """
+    defs = list(
+        _feature_definitions_by_name().values()
+        if group is None
+        else get_features_by_group(group)
+    )
     schema = {
         "version": "1.0",
-        "features": [defn.to_dict() for defn in FEATURE_DEFINITIONS.values()],
-        "groups": sorted(set(d.group for d in FEATURE_DEFINITIONS.values())),
+        "features": [defn.to_dict() for defn in sorted(defs, key=lambda d: (d.group, d.name))],
+        "groups": sorted(set(d.group for d in defs)),
     }
 
     json_str = json.dumps(schema, indent=2)
@@ -329,11 +169,12 @@ def export_schema_json(path: str | Path | None = None) -> str:
     return json_str
 
 
-def export_schema_csv(path: str | Path | None = None) -> str:
+def export_schema_csv(path: str | Path | None = None, group: str | None = None) -> str:
     """Export feature schema as CSV.
 
     Args:
         path: Optional file path to write to. If None, returns CSV string.
+        group: Optional feature group name to filter by.
 
     Returns:
         CSV string representation of the schema.
@@ -348,7 +189,12 @@ def export_schema_csv(path: str | Path | None = None) -> str:
     writer.writerow(["name", "type", "description", "unit", "group"])
 
     # Data
-    for defn in sorted(FEATURE_DEFINITIONS.values(), key=lambda d: (d.group, d.name)):
+    defs = (
+        _feature_definitions_by_name().values()
+        if group is None
+        else get_features_by_group(group)
+    )
+    for defn in sorted(defs, key=lambda d: (d.group, d.name)):
         writer.writerow([defn.name, defn.type.value, defn.description, defn.unit or "", defn.group])
 
     csv_str = output.getvalue()
@@ -365,7 +211,7 @@ def get_all_feature_names() -> list[str]:
     Returns:
         Sorted list of feature names.
     """
-    return sorted(FEATURE_DEFINITIONS.keys())
+    return sorted(_feature_definitions_by_name().keys())
 
 
 def get_features_by_group(group: str) -> list[FeatureDefinition]:
@@ -377,7 +223,7 @@ def get_features_by_group(group: str) -> list[FeatureDefinition]:
     Returns:
         List of FeatureDefinition objects in the group.
     """
-    return [defn for defn in FEATURE_DEFINITIONS.values() if defn.group == group]
+    return [defn for defn in _feature_definitions_by_name().values() if defn.group == group]
 
 
 def get_available_groups() -> list[str]:
@@ -386,4 +232,9 @@ def get_available_groups() -> list[str]:
     Returns:
         Sorted list of unique group names.
     """
-    return sorted(set(d.group for d in FEATURE_DEFINITIONS.values()))
+    return sorted(set(d.group for d in _feature_definitions_by_name().values()))
+
+
+# Backwards-compatible public mapping used by older callers/tests.
+# Keyed by output column name (basename).
+FEATURE_DEFINITIONS: dict[str, FeatureDefinition] = _feature_definitions_by_name()

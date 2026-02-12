@@ -19,6 +19,7 @@ from ..extractors.dns import DNSExtractor
 from ..extractors.entropy import EntropyExtractor
 from ..extractors.fingerprint import FingerprintExtractor
 from ..extractors.flow_meta import FlowMetaExtractor
+from ..extractors.http2 import HTTP2Extractor
 from ..extractors.icmp import ICMPExtractor
 from ..extractors.ip_extended import IPExtendedExtractor
 from ..extractors.ipv6_options import IPv6OptionsExtractor
@@ -163,12 +164,13 @@ class Pipeline:
 
     def _needs_raw_payload(self) -> bool:
         """Check if any enabled feature requires raw payload access."""
-        # TLS, QUIC, SSH, DNS, and entropy features need raw payload
+        # TLS, QUIC, HTTP2, SSH, DNS, and entropy features need raw payload
         return any(
             self.config.should_extract(group)
             for group in [
                 FeatureGroup.TLS,
                 FeatureGroup.QUIC,
+                FeatureGroup.HTTP2,
                 FeatureGroup.SSH,
                 FeatureGroup.DNS,
                 FeatureGroup.ENTROPY,
@@ -216,6 +218,9 @@ class Pipeline:
 
         if self.config.should_extract(FeatureGroup.QUIC):
             extractors.append(QUICExtractor())
+
+        if self.config.should_extract(FeatureGroup.HTTP2):
+            extractors.append(HTTP2Extractor())
 
         if self.config.should_extract(FeatureGroup.SSH):
             extractors.append(SSHExtractor())
@@ -311,45 +316,58 @@ class Pipeline:
 
         logger.info(f"Processing PCAP: {path}")
         start_time = time.time()
+        sampling_rate = self.config.sampling_rate
+        rand = random.random if sampling_rate is not None else None
+        record_packet = self._record_packet if self.metrics else None
+        record_flow = self._record_flow if self.metrics else None
+        flow_table = self.flow_table
+        add_packet = flow_table.add_packet
+        expire_flows = flow_table.expire_flows
+        extract_features = self._extract_features
+        features_append = features_list.append
 
         # Process packets
         for packet in self.backend.iter_packets_offline(path):
             packet_count += 1
 
             # Apply sampling if configured
-            if not self._should_sample_packet():
+            if sampling_rate is not None and rand is not None and rand() >= sampling_rate:
                 continue
-            self._record_packet(packet)
-            self._record_packet(packet)
+            if record_packet is not None:
+                record_packet(packet)
 
             # Add to flow table
-            result = self.flow_table.add_packet(packet)
+            result = add_packet(packet)
             if result is not None:
                 # Handle both single flow and list of flows (eviction case)
-                flows = result if isinstance(result, list) else [result]
+                if isinstance(result, list):
+                    flows = result
+                    reason = "evicted"
+                else:
+                    flows = (result,)
+                    reason = "completed"
                 for flow in flows:
-                    features = self._extract_features(flow)
-                    features_list.append(features)
+                    features_append(extract_features(flow))
                     flow_count += 1
-                    reason = "evicted" if isinstance(result, list) else "completed"
-                    self._record_flow(flow, reason)
+                    if record_flow is not None:
+                        record_flow(flow, reason)
 
             # Periodic expiration check
             if packet_count % 10000 == 0:
-                expired = self.flow_table.expire_flows(packet.timestamp)
+                expired = expire_flows(packet.timestamp)
                 for flow in expired:
-                    features = self._extract_features(flow)
-                    features_list.append(features)
+                    features_append(extract_features(flow))
                     flow_count += 1
-                    self._record_flow(flow, "expired")
+                    if record_flow is not None:
+                        record_flow(flow, "expired")
 
         # Flush remaining flows
-        remaining = self.flow_table.flush_all()
+        remaining = flow_table.flush_all()
         for flow in remaining:
-            features = self._extract_features(flow)
-            features_list.append(features)
+            features_append(extract_features(flow))
             flow_count += 1
-            self._record_flow(flow, "flushed")
+            if record_flow is not None:
+                record_flow(flow, "flushed")
 
         elapsed = time.time() - start_time
         self._record_processing_time("pcap", elapsed)
@@ -383,36 +401,50 @@ class Pipeline:
 
         logger.info(f"Processing PCAP (with connection analysis): {path}")
         start_time = time.time()
+        sampling_rate = self.config.sampling_rate
+        rand = random.random if sampling_rate is not None else None
+        record_flow = self._record_flow if self.metrics else None
+        flow_table = self.flow_table
+        add_packet = flow_table.add_packet
+        expire_flows = flow_table.expire_flows
+        collected_extend = collected_flows.extend
 
         # Phase 1: Collect all flows
         for packet in self.backend.iter_packets_offline(path):
             packet_count += 1
 
             # Apply sampling if configured
-            if not self._should_sample_packet():
+            if sampling_rate is not None and rand is not None and rand() >= sampling_rate:
                 continue
 
             # Add to flow table
-            result = self.flow_table.add_packet(packet)
+            result = add_packet(packet)
             if result is not None:
-                flows = result if isinstance(result, list) else [result]
-                collected_flows.extend(flows)
-                reason = "evicted" if isinstance(result, list) else "completed"
-                for flow in flows:
-                    self._record_flow(flow, reason)
+                if isinstance(result, list):
+                    flows = result
+                    reason = "evicted"
+                else:
+                    flows = (result,)
+                    reason = "completed"
+                collected_extend(flows)
+                if record_flow is not None:
+                    for flow in flows:
+                        record_flow(flow, reason)
 
             # Periodic expiration check
             if packet_count % 10000 == 0:
-                expired = self.flow_table.expire_flows(packet.timestamp)
-                collected_flows.extend(expired)
-                for flow in expired:
-                    self._record_flow(flow, "expired")
+                expired = expire_flows(packet.timestamp)
+                collected_extend(expired)
+                if record_flow is not None:
+                    for flow in expired:
+                        record_flow(flow, "expired")
 
         # Flush remaining flows
-        remaining = self.flow_table.flush_all()
-        collected_flows.extend(remaining)
-        for flow in remaining:
-            self._record_flow(flow, "flushed")
+        remaining = flow_table.flush_all()
+        collected_extend(remaining)
+        if record_flow is not None:
+            for flow in remaining:
+                record_flow(flow, "flushed")
 
         flow_count = len(collected_flows)
         phase1_time = time.time() - start_time
@@ -436,8 +468,9 @@ class Pipeline:
             graph.build_graph()
 
         # Inject graph into connection extractor
-        assert self._connection_extractor is not None
-        self._connection_extractor.set_graph(graph)
+        connection_extractor = self._connection_extractor
+        assert connection_extractor is not None
+        connection_extractor.set_graph(graph)
 
         graph_time = time.time() - graph_start
         logger.info(f"Phase 2a: Built connection graph in {graph_time:.2f}s")
@@ -445,23 +478,30 @@ class Pipeline:
         # Extract features for all flows
         extract_start = time.time()
         features_list: list[dict[str, Any]] = []
+        extract_features = self._extract_features
+        features_append = features_list.append
 
         for flow in collected_flows:
             # Extract standard features
-            features = self._extract_features(flow)
+            features = extract_features(flow)
 
             # Add connection features
             try:
-                conn_features = self._connection_extractor.extract(flow)
+                conn_features = connection_extractor.extract(flow)
                 features.update(conn_features)
             except Exception as e:
                 logger.warning(f"Connection extractor failed: {e}")
                 self._record_error("connection_extractor", e)
-                for name in self._connection_extractor.feature_names:
+                for name in connection_extractor.feature_names:
                     if name not in features:
                         features[name] = None
 
-            features_list.append(features)
+            # Connection features are added after _extract_features() has already
+            # applied Config.filter_features(). Re-apply filtering so --profile /
+            # --feature behave consistently.
+            features = self.config.filter_features(features)
+
+            features_append(features)
 
         extract_time = time.time() - extract_start
         total_time = time.time() - start_time
@@ -546,46 +586,85 @@ class Pipeline:
 
         start_time = time.time()
         last_expire = start_time
+        sampling_rate = self.config.sampling_rate
+        rand = random.random if sampling_rate is not None else None
+        record_packet = self._record_packet if self.metrics else None
+        record_flow = self._record_flow if self.metrics else None
+        flow_table = self.flow_table
+        add_packet = flow_table.add_packet
+        expire_flows = flow_table.expire_flows
+        extract_features = self._extract_features
+        time_time = time.time
 
-        for packet in self.backend.iter_packets_live(
-            interface,
-            bpf_filter=self.config.bpf_filter,
-            save_pcap=save_pcap,
-            pid=pid,
-        ):
-            # Check duration limit
-            if duration and (time.time() - start_time) >= duration:
-                break
+        # Enforce wall-clock duration even if no packets arrive (e.g., a quiet
+        # interface or remote capture with no traffic). Otherwise the `for`
+        # loop can block indefinitely waiting for the next yielded packet.
+        stop_timer = None
+        if duration is not None:
+            import threading
 
-            # Apply sampling if configured
-            if not self._should_sample_packet():
-                continue
-            self._record_packet(packet)
+            stop_timer = threading.Timer(duration, self.backend.stop)
+            stop_timer.daemon = True
+            stop_timer.start()
 
-            # Add to flow table
-            result = self.flow_table.add_packet(packet)
-            if result is not None:
-                flows = result if isinstance(result, list) else [result]
-                for flow in flows:
-                    yield self._extract_features(flow)
-                    reason = "evicted" if isinstance(result, list) else "completed"
-                    self._record_flow(flow, reason)
+        try:
+            for packet in self.backend.iter_packets_live(
+                interface,
+                bpf_filter=self.config.bpf_filter,
+                save_pcap=save_pcap,
+                pid=pid,
+            ):
+                # Check duration limit (fast path when packets are flowing)
+                if duration and (time_time() - start_time) >= duration:
+                    self.backend.stop()
+                    break
 
-            # Periodic expiration
-            current_time = time.time()
-            if current_time - last_expire > 5.0:
-                expired = self.flow_table.expire_flows(current_time)
-                for flow in expired:
-                    yield self._extract_features(flow)
-                    self._record_flow(flow, "expired")
-                last_expire = current_time
+                # Apply sampling if configured
+                if sampling_rate is not None and rand is not None and rand() >= sampling_rate:
+                    continue
+                if record_packet is not None:
+                    record_packet(packet)
+
+                # Add to flow table
+                result = add_packet(packet)
+                if result is not None:
+                    if isinstance(result, list):
+                        flows = result
+                        reason = "evicted"
+                    else:
+                        flows = (result,)
+                        reason = "completed"
+                    for flow in flows:
+                        yield extract_features(flow)
+                        if record_flow is not None:
+                            record_flow(flow, reason)
+
+                # Periodic expiration
+                current_time = time_time()
+                if current_time - last_expire > 5.0:
+                    expired = expire_flows(current_time)
+                    for flow in expired:
+                        yield extract_features(flow)
+                        if record_flow is not None:
+                            record_flow(flow, "expired")
+                    last_expire = current_time
+
+        finally:
+            if stop_timer is not None:
+                stop_timer.cancel()
+            # Always stop the backend even if the consumer stops early.
+            # Note: we intentionally do not yield from here (generator finalization).
+            try:
+                self.backend.stop()
+            except Exception:
+                pass
 
         # Flush remaining
-        self.backend.stop()
-        for flow in self.flow_table.flush_all():
-            yield self._extract_features(flow)
-            self._record_flow(flow, "flushed")
-        elapsed = time.time() - start_time
+        for flow in flow_table.flush_all():
+            yield extract_features(flow)
+            if record_flow is not None:
+                record_flow(flow, "flushed")
+        elapsed = time_time() - start_time
         self._record_processing_time("live", elapsed)
 
     def _process_live_batch(
@@ -596,7 +675,145 @@ class Pipeline:
         pid: int | None = None,
     ) -> pd.DataFrame:
         """Process live traffic and return DataFrame."""
-        features_list = list(self._process_live_stream(interface, duration, save_pcap, pid))
+        # If connection features are not requested, we can re-use the streaming
+        # implementation and just collect results.
+        if self._connection_extractor is None:
+            features_list = list(self._process_live_stream(interface, duration, save_pcap, pid))
+            return to_dataframe(features_list)
+
+        # Connection features require a graph over *all* flows, so for batch mode
+        # we collect completed flows first, then run connection extraction.
+        return self._process_live_batch_with_connection(interface, duration, save_pcap, pid)
+
+    def _process_live_batch_with_connection(
+        self,
+        interface: str,
+        duration: float | None = None,
+        save_pcap: str | None = None,
+        pid: int | None = None,
+    ) -> pd.DataFrame:
+        """Process live traffic in batch mode including connection features."""
+        from .flow import Flow
+
+        collected_flows: list[Flow] = []
+
+        start_time = time.time()
+        last_expire = start_time
+        sampling_rate = self.config.sampling_rate
+        rand = random.random if sampling_rate is not None else None
+        record_packet = self._record_packet if self.metrics else None
+        record_flow = self._record_flow if self.metrics else None
+        flow_table = self.flow_table
+        add_packet = flow_table.add_packet
+        expire_flows = flow_table.expire_flows
+        time_time = time.time
+
+        stop_timer = None
+        if duration is not None:
+            import threading
+
+            stop_timer = threading.Timer(duration, self.backend.stop)
+            stop_timer.daemon = True
+            stop_timer.start()
+
+        try:
+            for packet in self.backend.iter_packets_live(
+                interface,
+                bpf_filter=self.config.bpf_filter,
+                save_pcap=save_pcap,
+                pid=pid,
+            ):
+                # Check duration limit (fast path when packets are flowing)
+                if duration and (time_time() - start_time) >= duration:
+                    self.backend.stop()
+                    break
+
+                # Apply sampling if configured
+                if sampling_rate is not None and rand is not None and rand() >= sampling_rate:
+                    continue
+                if record_packet is not None:
+                    record_packet(packet)
+
+                # Add to flow table
+                result = add_packet(packet)
+                if result is not None:
+                    if isinstance(result, list):
+                        flows = cast(list[Flow], result)
+                        reason = "evicted"
+                    else:
+                        flows = (cast(Flow, result),)
+                        reason = "completed"
+                    collected_flows.extend(flows)
+                    if record_flow is not None:
+                        for flow in flows:
+                            record_flow(flow, reason)
+
+                # Periodic expiration
+                current_time = time_time()
+                if current_time - last_expire > 5.0:
+                    expired = expire_flows(current_time)
+                    collected_flows.extend(expired)
+                    if record_flow is not None:
+                        for flow in expired:
+                            record_flow(flow, "expired")
+                    last_expire = current_time
+
+        finally:
+            if stop_timer is not None:
+                stop_timer.cancel()
+            try:
+                self.backend.stop()
+            except Exception:
+                pass
+
+        remaining = flow_table.flush_all()
+        collected_flows.extend(remaining)
+        if record_flow is not None:
+            for flow in remaining:
+                record_flow(flow, "flushed")
+
+        # Build connection graph from all collected flows
+        graph = ConnectionGraph(
+            use_ports=self.config.connection_use_ports,
+            include_graph_metrics=self.config.connection_include_graph_metrics,
+            include_temporal=self.config.connection_include_temporal,
+            community_algorithm=self.config.connection_community_algorithm,
+        )
+        for flow in collected_flows:
+            graph.add_flow(flow)
+
+        if self.config.connection_include_graph_metrics:
+            graph.build_graph()
+
+        connection_extractor = self._connection_extractor
+        assert connection_extractor is not None
+        connection_extractor.set_graph(graph)
+
+        features_list: list[dict[str, Any]] = []
+        extract_features = self._extract_features
+
+        for flow in collected_flows:
+            features = extract_features(flow)
+
+            try:
+                conn_features = connection_extractor.extract(flow)
+                features.update(conn_features)
+            except Exception as e:
+                logger.warning(f"Connection extractor failed: {e}")
+                self._record_error("connection_extractor", e)
+                for name in connection_extractor.feature_names:
+                    if name not in features:
+                        features[name] = None
+
+            # Connection features are added after _extract_features() has already
+            # applied Config.filter_features(). Re-apply filtering so --profile /
+            # --feature behave consistently.
+            features = self.config.filter_features(features)
+
+            features_list.append(features)
+
+        elapsed = time_time() - start_time
+        self._record_processing_time("live", elapsed)
         return to_dataframe(features_list)
 
     def _extract_features(self, flow: Flow) -> dict[str, Any]:
@@ -703,6 +920,14 @@ class Pipeline:
 
         logger.info(f"Processing PCAP (streaming): {path}")
         start_time = time.time()
+        sampling_rate = self.config.sampling_rate
+        rand = random.random if sampling_rate is not None else None
+        record_packet = self._record_packet if self.metrics else None
+        record_flow = self._record_flow if self.metrics else None
+        flow_table = self.flow_table
+        add_packet = flow_table.add_packet
+        expire_flows = flow_table.expire_flows
+        extract_features = self._extract_features
 
         with StreamingWriter(output_path, format=output_format) as writer:
             # Process packets
@@ -710,37 +935,45 @@ class Pipeline:
                 packet_count += 1
 
                 # Apply sampling if configured
-                if not self._should_sample_packet():
+                if sampling_rate is not None and rand is not None and rand() >= sampling_rate:
                     continue
-                self._record_packet(packet)
+                if record_packet is not None:
+                    record_packet(packet)
 
                 # Add to flow table
-                result = self.flow_table.add_packet(packet)
+                result = add_packet(packet)
                 if result is not None:
-                    flows = result if isinstance(result, list) else [result]
+                    if isinstance(result, list):
+                        flows = result
+                        reason = "evicted"
+                    else:
+                        flows = (result,)
+                        reason = "completed"
                     for flow in flows:
-                        features = self._extract_features(flow)
+                        features = extract_features(flow)
                         writer.write(features)
                         flow_count += 1
-                        reason = "evicted" if isinstance(result, list) else "completed"
-                        self._record_flow(flow, reason)
+                        if record_flow is not None:
+                            record_flow(flow, reason)
 
                 # Periodic expiration check
                 if packet_count % 10000 == 0:
-                    expired = self.flow_table.expire_flows(packet.timestamp)
+                    expired = expire_flows(packet.timestamp)
                     for flow in expired:
-                        features = self._extract_features(flow)
+                        features = extract_features(flow)
                         writer.write(features)
                         flow_count += 1
-                        self._record_flow(flow, "expired")
+                        if record_flow is not None:
+                            record_flow(flow, "expired")
 
             # Flush remaining flows
-            remaining = self.flow_table.flush_all()
+            remaining = flow_table.flush_all()
             for flow in remaining:
-                features = self._extract_features(flow)
+                features = extract_features(flow)
                 writer.write(features)
                 flow_count += 1
-                self._record_flow(flow, "flushed")
+                if record_flow is not None:
+                    record_flow(flow, "flushed")
 
         elapsed = time.time() - start_time
         self._record_processing_time("pcap_stream", elapsed)
@@ -774,36 +1007,52 @@ class Pipeline:
 
         packet_count = 0
         start_time = time.time()
+        sampling_rate = self.config.sampling_rate
+        rand = random.random if sampling_rate is not None else None
+        record_packet = self._record_packet if self.metrics else None
+        record_flow = self._record_flow if self.metrics else None
+        flow_table = self.flow_table
+        add_packet = flow_table.add_packet
+        expire_flows = flow_table.expire_flows
+        extract_features = self._extract_features
 
         try:
             for packet in self.backend.iter_packets_offline(path):
                 packet_count += 1
 
                 # Apply sampling if configured
-                if not self._should_sample_packet():
+                if sampling_rate is not None and rand is not None and rand() >= sampling_rate:
                     continue
-                self._record_packet(packet)
+                if record_packet is not None:
+                    record_packet(packet)
 
                 # Add to flow table
-                result = self.flow_table.add_packet(packet)
+                result = add_packet(packet)
                 if result is not None:
-                    flows = result if isinstance(result, list) else [result]
+                    if isinstance(result, list):
+                        flows = result
+                        reason = "evicted"
+                    else:
+                        flows = (result,)
+                        reason = "completed"
                     for flow in flows:
-                        yield self._extract_features(flow)
-                        reason = "evicted" if isinstance(result, list) else "completed"
-                        self._record_flow(flow, reason)
+                        yield extract_features(flow)
+                        if record_flow is not None:
+                            record_flow(flow, reason)
 
                 # Periodic expiration check
                 if packet_count % 10000 == 0:
-                    expired = self.flow_table.expire_flows(packet.timestamp)
+                    expired = expire_flows(packet.timestamp)
                     for flow in expired:
-                        yield self._extract_features(flow)
-                        self._record_flow(flow, "expired")
+                        yield extract_features(flow)
+                        if record_flow is not None:
+                            record_flow(flow, "expired")
 
             # Flush remaining flows
-            for flow in self.flow_table.flush_all():
-                yield self._extract_features(flow)
-                self._record_flow(flow, "flushed")
+            for flow in flow_table.flush_all():
+                yield extract_features(flow)
+                if record_flow is not None:
+                    record_flow(flow, "flushed")
         finally:
             elapsed = time.time() - start_time
             self._record_processing_time("pcap_iter", elapsed)

@@ -83,13 +83,20 @@ class KafkaWriter:
                     "Kafka output requires kafka-python. Install with: pip install kafka-python"
                 ) from exc
 
-            self._producer = KafkaProducer(
-                bootstrap_servers=brokers_list,
-                acks=acks,
-                compression_type=compression_type,
-                linger_ms=linger_ms,
-                client_id=client_id,
-            )
+            # kafka-python expects integers for timeouts; passing None can break
+            # its internal config validation (e.g., delivery_timeout_ms math).
+            kwargs: dict[str, Any] = {
+                "bootstrap_servers": brokers_list,
+                "acks": acks,
+            }
+            if compression_type is not None:
+                kwargs["compression_type"] = compression_type
+            if linger_ms is not None:
+                kwargs["linger_ms"] = linger_ms
+            if client_id is not None:
+                kwargs["client_id"] = client_id
+
+            self._producer = KafkaProducer(**kwargs)
         else:
             self._producer = producer
 

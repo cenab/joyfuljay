@@ -73,7 +73,7 @@ class FlowKey:
         return (self.ip_a, self.port_a, self.ip_b, self.port_b, self.protocol)
 
 
-@dataclass
+@dataclass(slots=True)
 class Flow:
     """Represents a bidirectional network flow (conversation).
 
@@ -105,6 +105,12 @@ class Flow:
     tls_client_hello: bytes | None = None
     tls_server_hello: bytes | None = None
     terminated: bool = False
+    _total_bytes: int = field(default=0, repr=False)
+    _initiator_bytes: int = field(default=0, repr=False)
+    _responder_bytes: int = field(default=0, repr=False)
+    _payload_bytes_total: int = field(default=0, repr=False)
+    _payload_bytes_initiator: int = field(default=0, repr=False)
+    _payload_bytes_responder: int = field(default=0, repr=False)
 
     @classmethod
     def from_first_packet(cls, packet: Packet) -> Flow:
@@ -119,6 +125,8 @@ class Flow:
             A new Flow instance.
         """
         key = FlowKey.from_packet(packet)
+        total_len = packet.total_len
+        payload_len = packet.payload_len
         return cls(
             key=key,
             start_time=packet.timestamp,
@@ -128,6 +136,10 @@ class Flow:
             packets=[packet],
             initiator_packets=[packet],
             responder_packets=[],
+            _total_bytes=total_len,
+            _initiator_bytes=total_len,
+            _payload_bytes_total=payload_len,
+            _payload_bytes_initiator=payload_len,
         )
 
     def add_packet(self, packet: Packet) -> None:
@@ -141,11 +153,17 @@ class Flow:
         """
         self.packets.append(packet)
         self.last_seen = packet.timestamp
+        self._total_bytes += packet.total_len
+        self._payload_bytes_total += packet.payload_len
 
         if packet.src_ip == self.initiator_ip and packet.src_port == self.initiator_port:
             self.initiator_packets.append(packet)
+            self._initiator_bytes += packet.total_len
+            self._payload_bytes_initiator += packet.payload_len
         else:
             self.responder_packets.append(packet)
+            self._responder_bytes += packet.total_len
+            self._payload_bytes_responder += packet.payload_len
 
         # Check for connection termination
         if packet.is_fin or packet.is_rst:
@@ -164,17 +182,32 @@ class Flow:
     @property
     def total_bytes(self) -> int:
         """Total bytes transmitted in the flow."""
-        return sum(p.total_len for p in self.packets)
+        return self._total_bytes
 
     @property
     def initiator_bytes(self) -> int:
         """Bytes sent by the initiator."""
-        return sum(p.total_len for p in self.initiator_packets)
+        return self._initiator_bytes
 
     @property
     def responder_bytes(self) -> int:
         """Bytes sent by the responder."""
-        return sum(p.total_len for p in self.responder_packets)
+        return self._responder_bytes
+
+    @property
+    def payload_bytes_total(self) -> int:
+        """Total payload bytes transmitted in the flow."""
+        return self._payload_bytes_total
+
+    @property
+    def payload_bytes_initiator(self) -> int:
+        """Payload bytes sent by the initiator."""
+        return self._payload_bytes_initiator
+
+    @property
+    def payload_bytes_responder(self) -> int:
+        """Payload bytes sent by the responder."""
+        return self._payload_bytes_responder
 
     @property
     def responder_ip(self) -> str:
@@ -251,8 +284,8 @@ class FlowTable:
         key_tuple = key.to_tuple()
         evicted_flows: list[Flow] = []
 
-        if key_tuple in self._flows:
-            flow = self._flows[key_tuple]
+        flow = self._flows.get(key_tuple)
+        if flow is not None:
             flow.add_packet(packet)
 
             # LRU: move to end on access
@@ -298,8 +331,11 @@ class FlowTable:
                 key_tuple, flow = self._flows.popitem(last=False)
             else:
                 # Oldest: evict the flow with earliest start_time
-                oldest_key = min(self._flows.keys(), key=lambda k: self._flows[k].start_time)
-                flow = self._flows.pop(oldest_key)
+                oldest_key, flow = min(
+                    self._flows.items(),
+                    key=lambda item: item[1].start_time,
+                )
+                del self._flows[oldest_key]
 
             evicted.append(flow)
             self._evicted_count += 1
@@ -320,14 +356,16 @@ class FlowTable:
 
         expired: list[Flow] = []
         keys_to_remove: list[tuple[str, int, str, int, int]] = []
+        timeout = self.timeout
+        flows = self._flows
 
-        for key_tuple, flow in self._flows.items():
-            if current_time - flow.last_seen > self.timeout:
+        for key_tuple, flow in flows.items():
+            if current_time - flow.last_seen > timeout:
                 expired.append(flow)
                 keys_to_remove.append(key_tuple)
 
         for key_tuple in keys_to_remove:
-            del self._flows[key_tuple]
+            del flows[key_tuple]
 
         return expired
 

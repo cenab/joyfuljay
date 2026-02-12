@@ -226,8 +226,8 @@ class TCPOptionsExtractor(FeatureExtractor):
         from ..schema.registry import FeatureMeta
 
         return {
-            "tcp_options.mss_fwd": FeatureMeta(
-                id="tcp_options.mss_fwd",
+            "tcp_options.tcp_mss_fwd": FeatureMeta(
+                id="tcp_options.tcp_mss_fwd",
                 dtype="int64",
                 shape=[1],
                 units="bytes",
@@ -240,8 +240,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Maximum Segment Size advertised by the forward direction (initiator)",
             ),
-            "tcp_options.mss_bwd": FeatureMeta(
-                id="tcp_options.mss_bwd",
+            "tcp_options.tcp_mss_bwd": FeatureMeta(
+                id="tcp_options.tcp_mss_bwd",
                 dtype="int64",
                 shape=[1],
                 units="bytes",
@@ -254,8 +254,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Maximum Segment Size advertised by the backward direction (responder)",
             ),
-            "tcp_options.ws_fwd": FeatureMeta(
-                id="tcp_options.ws_fwd",
+            "tcp_options.tcp_ws_fwd": FeatureMeta(
+                id="tcp_options.tcp_ws_fwd",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -268,8 +268,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="TCP window scale factor advertised by the forward direction (initiator)",
             ),
-            "tcp_options.ws_bwd": FeatureMeta(
-                id="tcp_options.ws_bwd",
+            "tcp_options.tcp_ws_bwd": FeatureMeta(
+                id="tcp_options.tcp_ws_bwd",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -282,8 +282,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="TCP window scale factor advertised by the backward direction (responder)",
             ),
-            "tcp_options.sack_permitted_fwd": FeatureMeta(
-                id="tcp_options.sack_permitted_fwd",
+            "tcp_options.tcp_sack_permitted_fwd": FeatureMeta(
+                id="tcp_options.tcp_sack_permitted_fwd",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -296,8 +296,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether SACK (Selective Acknowledgment) was permitted by the forward direction",
             ),
-            "tcp_options.sack_permitted_bwd": FeatureMeta(
-                id="tcp_options.sack_permitted_bwd",
+            "tcp_options.tcp_sack_permitted_bwd": FeatureMeta(
+                id="tcp_options.tcp_sack_permitted_bwd",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -310,8 +310,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether SACK (Selective Acknowledgment) was permitted by the backward direction",
             ),
-            "tcp_options.sack_blocks_total": FeatureMeta(
-                id="tcp_options.sack_blocks_total",
+            "tcp_options.tcp_sack_blocks_total": FeatureMeta(
+                id="tcp_options.tcp_sack_blocks_total",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -324,8 +324,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Total number of SACK blocks seen in the entire flow",
             ),
-            "tcp_options.ts_fwd_present": FeatureMeta(
-                id="tcp_options.ts_fwd_present",
+            "tcp_options.tcp_ts_fwd_present": FeatureMeta(
+                id="tcp_options.tcp_ts_fwd_present",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -338,8 +338,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether TCP timestamps were present in the forward direction",
             ),
-            "tcp_options.ts_fwd_first": FeatureMeta(
-                id="tcp_options.ts_fwd_first",
+            "tcp_options.tcp_ts_fwd_first": FeatureMeta(
+                id="tcp_options.tcp_ts_fwd_first",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -352,8 +352,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="First TCP timestamp value seen in the forward direction",
             ),
-            "tcp_options.ts_fwd_last": FeatureMeta(
-                id="tcp_options.ts_fwd_last",
+            "tcp_options.tcp_ts_fwd_last": FeatureMeta(
+                id="tcp_options.tcp_ts_fwd_last",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -366,8 +366,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Last TCP timestamp value seen in the forward direction",
             ),
-            "tcp_options.ts_fwd_diff": FeatureMeta(
-                id="tcp_options.ts_fwd_diff",
+            "tcp_options.tcp_ts_fwd_diff": FeatureMeta(
+                id="tcp_options.tcp_ts_fwd_diff",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -380,8 +380,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Difference between first and last TCP timestamp in forward direction (useful for uptime estimation)",
             ),
-            "tcp_options.ts_ecr_fwd_first": FeatureMeta(
-                id="tcp_options.ts_ecr_fwd_first",
+            "tcp_options.tcp_ts_ecr_fwd_first": FeatureMeta(
+                id="tcp_options.tcp_ts_ecr_fwd_first",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -394,8 +394,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="First TCP timestamp echo reply value in the forward direction",
             ),
-            "tcp_options.ts_bwd_present": FeatureMeta(
-                id="tcp_options.ts_bwd_present",
+            "tcp_options.tcp_ts_bwd_present": FeatureMeta(
+                id="tcp_options.tcp_ts_bwd_present",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -408,8 +408,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether TCP timestamps were present in the backward direction",
             ),
-            "tcp_options.ts_bwd_first": FeatureMeta(
-                id="tcp_options.ts_bwd_first",
+            "tcp_options.tcp_ts_bwd_first": FeatureMeta(
+                id="tcp_options.tcp_ts_bwd_first",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -422,8 +422,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="First TCP timestamp value seen in the backward direction",
             ),
-            "tcp_options.ts_bwd_last": FeatureMeta(
-                id="tcp_options.ts_bwd_last",
+            "tcp_options.tcp_ts_bwd_last": FeatureMeta(
+                id="tcp_options.tcp_ts_bwd_last",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -436,8 +436,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Last TCP timestamp value seen in the backward direction",
             ),
-            "tcp_options.ts_bwd_diff": FeatureMeta(
-                id="tcp_options.ts_bwd_diff",
+            "tcp_options.tcp_ts_bwd_diff": FeatureMeta(
+                id="tcp_options.tcp_ts_bwd_diff",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -450,8 +450,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Difference between first and last TCP timestamp in backward direction (useful for uptime estimation)",
             ),
-            "tcp_options.ts_ecr_bwd_first": FeatureMeta(
-                id="tcp_options.ts_ecr_bwd_first",
+            "tcp_options.tcp_ts_ecr_bwd_first": FeatureMeta(
+                id="tcp_options.tcp_ts_ecr_bwd_first",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -464,8 +464,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="First TCP timestamp echo reply value in the backward direction",
             ),
-            "tcp_options.options_bitmap": FeatureMeta(
-                id="tcp_options.options_bitmap",
+            "tcp_options.tcp_options_bitmap": FeatureMeta(
+                id="tcp_options.tcp_options_bitmap",
                 dtype="int64",
                 shape=[1],
                 units="bitmap",
@@ -478,8 +478,8 @@ class TCPOptionsExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Bitmap indicating which TCP options are present (bit 0: MSS, bit 1: Window Scale, bit 2: SACK permitted, bit 3: Timestamps)",
             ),
-            "tcp_options.options_pkt_count": FeatureMeta(
-                id="tcp_options.options_pkt_count",
+            "tcp_options.tcp_options_pkt_count": FeatureMeta(
+                id="tcp_options.tcp_options_pkt_count",
                 dtype="int64",
                 shape=[1],
                 units="count",

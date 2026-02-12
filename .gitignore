@@ -163,3 +163,6 @@ scratch/
 *.tmp
 *.temp
 *.log
+
+# Local E2E verification artifacts
+.tmp_e2e/

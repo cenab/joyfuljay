@@ -160,8 +160,8 @@ class MPTCPExtractor(FeatureExtractor):
         from ..schema.registry import FeatureMeta
 
         return {
-            "tcp_mptcp.detected": FeatureMeta(
-                id="tcp_mptcp.detected",
+            "tcp_mptcp.mptcp_detected": FeatureMeta(
+                id="tcp_mptcp.mptcp_detected",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -174,8 +174,8 @@ class MPTCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether MPTCP option (kind 30) was detected in any packet",
             ),
-            "tcp_mptcp.capable_fwd": FeatureMeta(
-                id="tcp_mptcp.capable_fwd",
+            "tcp_mptcp.mptcp_capable_fwd": FeatureMeta(
+                id="tcp_mptcp.mptcp_capable_fwd",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -188,8 +188,8 @@ class MPTCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether MP_CAPABLE was seen in forward direction SYN packet",
             ),
-            "tcp_mptcp.capable_bwd": FeatureMeta(
-                id="tcp_mptcp.capable_bwd",
+            "tcp_mptcp.mptcp_capable_bwd": FeatureMeta(
+                id="tcp_mptcp.mptcp_capable_bwd",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -202,8 +202,8 @@ class MPTCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether MP_CAPABLE was seen in backward direction SYN packet",
             ),
-            "tcp_mptcp.option_count": FeatureMeta(
-                id="tcp_mptcp.option_count",
+            "tcp_mptcp.mptcp_option_count": FeatureMeta(
+                id="tcp_mptcp.mptcp_option_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -216,8 +216,8 @@ class MPTCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of packets containing MPTCP TCP option (kind 30)",
             ),
-            "tcp_mptcp.stat": FeatureMeta(
-                id="tcp_mptcp.stat",
+            "tcp_mptcp.mptcp_stat": FeatureMeta(
+                id="tcp_mptcp.mptcp_stat",
                 dtype="int64",
                 shape=[1],
                 units="bitmap",

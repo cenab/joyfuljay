@@ -35,7 +35,7 @@ def is_networkx_available() -> bool:
     return NETWORKX_AVAILABLE
 
 
-@dataclass
+@dataclass(slots=True)
 class NodeStats:
     """Statistics for a single node (IP address) in the connection graph."""
 
@@ -62,7 +62,7 @@ class NodeStats:
     flow_timestamps: list[float] = field(default_factory=list)
 
 
-@dataclass
+@dataclass(slots=True)
 class EdgeStats:
     """Statistics for an edge (connection pair) in the graph."""
 
@@ -147,6 +147,10 @@ class ConnectionGraph:
         dst_ip = flow.responder_ip
         src_port = flow.initiator_port
         dst_port = flow.responder_port
+        total_packets = flow.total_packets
+        total_bytes = flow.total_bytes
+        start_time = flow.start_time
+        last_seen = flow.last_seen
 
         src_node = self._get_node_id(src_ip, src_port if self.use_ports else None)
         dst_node = self._get_node_id(dst_ip, dst_port if self.use_ports else None)
@@ -156,32 +160,32 @@ class ConnectionGraph:
         src_stats.outbound_flows += 1
         src_stats.unique_destinations.add(dst_node)
         src_stats.unique_dst_ports.add(dst_port)
-        src_stats.total_packets_sent += flow.total_packets
-        src_stats.total_bytes_sent += flow.total_bytes
-        src_stats.first_seen = min(src_stats.first_seen, flow.start_time)
-        src_stats.last_seen = max(src_stats.last_seen, flow.last_seen)
+        src_stats.total_packets_sent += total_packets
+        src_stats.total_bytes_sent += total_bytes
+        src_stats.first_seen = min(src_stats.first_seen, start_time)
+        src_stats.last_seen = max(src_stats.last_seen, last_seen)
         if self.include_temporal:
-            src_stats.flow_timestamps.append(flow.start_time)
+            src_stats.flow_timestamps.append(start_time)
 
         # Update destination node stats
         dst_stats = self._node_stats[dst_node]
         dst_stats.inbound_flows += 1
         dst_stats.unique_sources.add(src_node)
-        dst_stats.total_packets_received += flow.total_packets
-        dst_stats.total_bytes_received += flow.total_bytes
-        dst_stats.first_seen = min(dst_stats.first_seen, flow.start_time)
-        dst_stats.last_seen = max(dst_stats.last_seen, flow.last_seen)
+        dst_stats.total_packets_received += total_packets
+        dst_stats.total_bytes_received += total_bytes
+        dst_stats.first_seen = min(dst_stats.first_seen, start_time)
+        dst_stats.last_seen = max(dst_stats.last_seen, last_seen)
         if self.include_temporal:
-            dst_stats.flow_timestamps.append(flow.start_time)
+            dst_stats.flow_timestamps.append(start_time)
 
         # Update edge stats
         edge_key = (src_node, dst_node)
         edge_stats = self._edge_stats[edge_key]
         edge_stats.flow_count += 1
-        edge_stats.total_packets += flow.total_packets
-        edge_stats.total_bytes += flow.total_bytes
-        edge_stats.first_seen = min(edge_stats.first_seen, flow.start_time)
-        edge_stats.last_seen = max(edge_stats.last_seen, flow.last_seen)
+        edge_stats.total_packets += total_packets
+        edge_stats.total_bytes += total_bytes
+        edge_stats.first_seen = min(edge_stats.first_seen, start_time)
+        edge_stats.last_seen = max(edge_stats.last_seen, last_seen)
         edge_stats.port_flows[dst_port] += 1
 
         # Invalidate cached graph

@@ -9,7 +9,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-![JoyfulJay](https://img.shields.io/badge/JoyfulJay-387%20Features-blue?style=flat-square)
+![JoyfulJay](https://img.shields.io/badge/JoyfulJay-401%20Features-blue?style=flat-square)
 ![ML Ready](https://img.shields.io/badge/ML-Research%20Ready-22D3EE?style=flat-square)
 ![Encrypted Traffic](https://img.shields.io/badge/Encrypted-TLS%20%2F%20QUIC-success?style=flat-square)
 ![Research Tool](https://img.shields.io/badge/Use-Academic%20Research-informational?style=flat-square)
@@ -27,7 +27,7 @@
 - **Remote Capture**: Stream packets from remote devices over secure WebSocket (TLS/WSS)
 - **Protocol Metadata**: TLS handshake parsing, JA3/JA3S fingerprints, QUIC metadata
 - **Traffic Fingerprinting**: Detect Tor, VPN, and DoH traffic patterns
-- **Tranalyzer Compatible**: 387 features across 21 extractors, matching research-grade tools
+- **Tranalyzer Compatible**: 401 features across 23 feature groups, matching research-grade tools
 - **Enterprise Ready**: Kafka streaming, Prometheus metrics, mDNS discovery
 
 ## Installation
@@ -59,6 +59,9 @@ pip install joyfuljay[discovery]
 # Connection graph analysis
 pip install joyfuljay[graphs]
 
+# Interactive terminal UI (TUI)
+pip install joyfuljay[tui]
+
 # All optional features
 pip install joyfuljay[fast,kafka,monitoring,discovery,graphs]
 ```
@@ -83,6 +86,9 @@ print(features_df.head())
 ```bash
 # Extract features to CSV
 jj extract capture.pcap -o features.csv
+
+# Launch the interactive TUI
+jj tui
 
 # Live capture for 60 seconds
 jj live eth0 --duration 60 -o live_features.csv

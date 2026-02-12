@@ -23,7 +23,23 @@ Submodule access:
 
 from __future__ import annotations
 
-__version__ = "0.1.0"
+from importlib.metadata import PackageNotFoundError, version as _pkg_version
+
+
+def _resolve_version() -> str:
+    """Resolve the installed package version.
+
+    This avoids version skew between the packaging metadata (pyproject.toml) and
+    a hard-coded module constant.
+    """
+    try:
+        return _pkg_version("joyfuljay")
+    except PackageNotFoundError:
+        # Source checkout without an installed distribution.
+        return "0.0.0"
+
+
+__version__ = _resolve_version()
 
 # Core classes at top level (TensorFlow style)
 from .core.config import Config, FeatureGroup

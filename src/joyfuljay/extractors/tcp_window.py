@@ -207,8 +207,8 @@ class TCPWindowExtractor(FeatureExtractor):
         from ..schema.registry import FeatureMeta
 
         return {
-            "tcp_window.init_win_fwd": FeatureMeta(
-                id="tcp_window.init_win_fwd",
+            "tcp_window.tcp_init_win_fwd": FeatureMeta(
+                id="tcp_window.tcp_init_win_fwd",
                 dtype="int64",
                 shape=[1],
                 units="bytes",
@@ -221,8 +221,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Initial TCP window size advertised by the flow initiator",
             ),
-            "tcp_window.init_win_bwd": FeatureMeta(
-                id="tcp_window.init_win_bwd",
+            "tcp_window.tcp_init_win_bwd": FeatureMeta(
+                id="tcp_window.tcp_init_win_bwd",
                 dtype="int64",
                 shape=[1],
                 units="bytes",
@@ -235,8 +235,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Initial TCP window size advertised by the flow responder",
             ),
-            "tcp_window.win_scale_fwd": FeatureMeta(
-                id="tcp_window.win_scale_fwd",
+            "tcp_window.tcp_win_scale_fwd": FeatureMeta(
+                id="tcp_window.tcp_win_scale_fwd",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -249,8 +249,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="TCP window scale factor advertised by the flow initiator",
             ),
-            "tcp_window.win_scale_bwd": FeatureMeta(
-                id="tcp_window.win_scale_bwd",
+            "tcp_window.tcp_win_scale_bwd": FeatureMeta(
+                id="tcp_window.tcp_win_scale_bwd",
                 dtype="int64",
                 shape=[1],
                 units="",
@@ -263,8 +263,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="TCP window scale factor advertised by the flow responder",
             ),
-            "tcp_window.win_fwd_min": FeatureMeta(
-                id="tcp_window.win_fwd_min",
+            "tcp_window.tcp_win_fwd_min": FeatureMeta(
+                id="tcp_window.tcp_win_fwd_min",
                 dtype="int64",
                 shape=[1],
                 units="bytes",
@@ -277,8 +277,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Minimum TCP window size observed from the flow initiator",
             ),
-            "tcp_window.win_fwd_max": FeatureMeta(
-                id="tcp_window.win_fwd_max",
+            "tcp_window.tcp_win_fwd_max": FeatureMeta(
+                id="tcp_window.tcp_win_fwd_max",
                 dtype="int64",
                 shape=[1],
                 units="bytes",
@@ -291,8 +291,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Maximum TCP window size observed from the flow initiator",
             ),
-            "tcp_window.win_fwd_mean": FeatureMeta(
-                id="tcp_window.win_fwd_mean",
+            "tcp_window.tcp_win_fwd_mean": FeatureMeta(
+                id="tcp_window.tcp_win_fwd_mean",
                 dtype="float64",
                 shape=[1],
                 units="bytes",
@@ -305,8 +305,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Mean TCP window size observed from the flow initiator",
             ),
-            "tcp_window.win_fwd_zero_count": FeatureMeta(
-                id="tcp_window.win_fwd_zero_count",
+            "tcp_window.tcp_win_fwd_zero_count": FeatureMeta(
+                id="tcp_window.tcp_win_fwd_zero_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -319,8 +319,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of packets with zero window size from the flow initiator",
             ),
-            "tcp_window.win_bwd_min": FeatureMeta(
-                id="tcp_window.win_bwd_min",
+            "tcp_window.tcp_win_bwd_min": FeatureMeta(
+                id="tcp_window.tcp_win_bwd_min",
                 dtype="int64",
                 shape=[1],
                 units="bytes",
@@ -333,8 +333,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Minimum TCP window size observed from the flow responder",
             ),
-            "tcp_window.win_bwd_max": FeatureMeta(
-                id="tcp_window.win_bwd_max",
+            "tcp_window.tcp_win_bwd_max": FeatureMeta(
+                id="tcp_window.tcp_win_bwd_max",
                 dtype="int64",
                 shape=[1],
                 units="bytes",
@@ -347,8 +347,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Maximum TCP window size observed from the flow responder",
             ),
-            "tcp_window.win_bwd_mean": FeatureMeta(
-                id="tcp_window.win_bwd_mean",
+            "tcp_window.tcp_win_bwd_mean": FeatureMeta(
+                id="tcp_window.tcp_win_bwd_mean",
                 dtype="float64",
                 shape=[1],
                 units="bytes",
@@ -361,8 +361,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Mean TCP window size observed from the flow responder",
             ),
-            "tcp_window.win_bwd_zero_count": FeatureMeta(
-                id="tcp_window.win_bwd_zero_count",
+            "tcp_window.tcp_win_bwd_zero_count": FeatureMeta(
+                id="tcp_window.tcp_win_bwd_zero_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -375,8 +375,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of packets with zero window size from the flow responder",
             ),
-            "tcp_window.win_fwd_up_count": FeatureMeta(
-                id="tcp_window.win_fwd_up_count",
+            "tcp_window.tcp_win_fwd_up_count": FeatureMeta(
+                id="tcp_window.tcp_win_fwd_up_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -389,8 +389,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of times window size increased from the flow initiator",
             ),
-            "tcp_window.win_fwd_down_count": FeatureMeta(
-                id="tcp_window.win_fwd_down_count",
+            "tcp_window.tcp_win_fwd_down_count": FeatureMeta(
+                id="tcp_window.tcp_win_fwd_down_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -403,8 +403,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of times window size decreased from the flow initiator",
             ),
-            "tcp_window.win_fwd_change_count": FeatureMeta(
-                id="tcp_window.win_fwd_change_count",
+            "tcp_window.tcp_win_fwd_change_count": FeatureMeta(
+                id="tcp_window.tcp_win_fwd_change_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -417,8 +417,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Total number of window size changes from the flow initiator",
             ),
-            "tcp_window.win_bwd_up_count": FeatureMeta(
-                id="tcp_window.win_bwd_up_count",
+            "tcp_window.tcp_win_bwd_up_count": FeatureMeta(
+                id="tcp_window.tcp_win_bwd_up_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -431,8 +431,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of times window size increased from the flow responder",
             ),
-            "tcp_window.win_bwd_down_count": FeatureMeta(
-                id="tcp_window.win_bwd_down_count",
+            "tcp_window.tcp_win_bwd_down_count": FeatureMeta(
+                id="tcp_window.tcp_win_bwd_down_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -445,8 +445,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of times window size decreased from the flow responder",
             ),
-            "tcp_window.win_bwd_change_count": FeatureMeta(
-                id="tcp_window.win_bwd_change_count",
+            "tcp_window.tcp_win_bwd_change_count": FeatureMeta(
+                id="tcp_window.tcp_win_bwd_change_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -459,8 +459,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Total number of window size changes from the flow responder",
             ),
-            "tcp_window.scaled_win_fwd_max": FeatureMeta(
-                id="tcp_window.scaled_win_fwd_max",
+            "tcp_window.tcp_scaled_win_fwd_max": FeatureMeta(
+                id="tcp_window.tcp_scaled_win_fwd_max",
                 dtype="int64",
                 shape=[1],
                 units="bytes",
@@ -473,8 +473,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Maximum TCP window size with scale factor applied from the flow initiator",
             ),
-            "tcp_window.scaled_win_bwd_max": FeatureMeta(
-                id="tcp_window.scaled_win_bwd_max",
+            "tcp_window.tcp_scaled_win_bwd_max": FeatureMeta(
+                id="tcp_window.tcp_scaled_win_bwd_max",
                 dtype="int64",
                 shape=[1],
                 units="bytes",
@@ -487,8 +487,8 @@ class TCPWindowExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Maximum TCP window size with scale factor applied from the flow responder",
             ),
-            "tcp_window.zero_win_ratio": FeatureMeta(
-                id="tcp_window.zero_win_ratio",
+            "tcp_window.tcp_zero_win_ratio": FeatureMeta(
+                id="tcp_window.tcp_zero_win_ratio",
                 dtype="float64",
                 shape=[1],
                 units="ratio",

@@ -148,16 +148,19 @@ class TimingExtractor(FeatureExtractor):
         Returns:
             List of (length, time, direction) tuples, truncated to max_sequence_length.
         """
-        if not flow.packets:
+        packets = flow.packets
+        if not packets:
             return []
 
         splt: list[tuple[int, float, int]] = []
-        prev_time = flow.packets[0].timestamp
+        initiator_ip = flow.initiator_ip
+        initiator_port = flow.initiator_port
+        prev_time = packets[0].timestamp
 
-        for i, packet in enumerate(flow.packets[: self.max_sequence_length]):
+        for i, packet in enumerate(packets[: self.max_sequence_length]):
             # Determine direction
-            if (packet.src_ip == flow.initiator_ip and
-                packet.src_port == flow.initiator_port):
+            if (packet.src_ip == initiator_ip and
+                packet.src_port == initiator_port):
                 direction = 1
             else:
                 direction = -1
@@ -201,46 +204,59 @@ class TimingExtractor(FeatureExtractor):
                 "max_idle_duration": 0.0,
             }
 
-        bursts: list[dict[str, float]] = []
-        idles: list[float] = []
+        threshold = self.burst_threshold_seconds
+        prefix_sums = [0.0]
+        for iat in iats:
+            prefix_sums.append(prefix_sums[-1] + iat)
+
+        burst_count = 0
+        sum_burst_packets = 0
+        sum_burst_duration = 0.0
+        max_burst_packets = 0
+
+        idle_count = 0
+        idle_sum = 0.0
+        idle_max = 0.0
 
         current_burst_packets = 1  # First packet starts a burst
         current_burst_start_idx = 0
 
         for i, iat in enumerate(iats):
-            if iat < self.burst_threshold_seconds:
+            if iat < threshold:
                 # Continue current burst
                 current_burst_packets += 1
             else:
                 # End current burst, start idle
                 if current_burst_packets > 0:
-                    burst_duration = sum(iats[current_burst_start_idx:i]) if i > current_burst_start_idx else 0.0
-                    bursts.append({
-                        "packets": current_burst_packets,
-                        "duration": burst_duration,
-                    })
+                    burst_duration = prefix_sums[i] - prefix_sums[current_burst_start_idx]
+                    burst_count += 1
+                    sum_burst_packets += current_burst_packets
+                    sum_burst_duration += burst_duration
+                    if current_burst_packets > max_burst_packets:
+                        max_burst_packets = current_burst_packets
 
-                idles.append(iat)
+                idle_count += 1
+                idle_sum += iat
+                if iat > idle_max:
+                    idle_max = iat
                 current_burst_packets = 1
                 current_burst_start_idx = i + 1
 
         # Don't forget the last burst
         if current_burst_packets > 0:
-            burst_duration = sum(iats[current_burst_start_idx:]) if current_burst_start_idx < len(iats) else 0.0
-            bursts.append({
-                "packets": current_burst_packets,
-                "duration": burst_duration,
-            })
+            burst_duration = prefix_sums[-1] - prefix_sums[current_burst_start_idx]
+            burst_count += 1
+            sum_burst_packets += current_burst_packets
+            sum_burst_duration += burst_duration
+            if current_burst_packets > max_burst_packets:
+                max_burst_packets = current_burst_packets
 
         # Compute metrics
-        burst_count = len(bursts)
-        avg_burst_packets = sum(b["packets"] for b in bursts) / burst_count if burst_count > 0 else 0.0
-        avg_burst_duration = sum(b["duration"] for b in bursts) / burst_count if burst_count > 0 else 0.0
-        max_burst_packets = max((b["packets"] for b in bursts), default=0)
+        avg_burst_packets = sum_burst_packets / burst_count if burst_count > 0 else 0.0
+        avg_burst_duration = sum_burst_duration / burst_count if burst_count > 0 else 0.0
 
-        idle_count = len(idles)
-        avg_idle_duration = sum(idles) / idle_count if idle_count > 0 else 0.0
-        max_idle_duration = max(idles, default=0.0)
+        avg_idle_duration = idle_sum / idle_count if idle_count > 0 else 0.0
+        max_idle_duration = idle_max
 
         return {
             "burst_count": burst_count,

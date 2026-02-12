@@ -206,7 +206,12 @@ class Server:
         Returns:
             Connection URL with embedded token.
         """
-        ip = self.get_local_ip()
+        # If the server is bound to a specific host (e.g., 127.0.0.1), prefer
+        # that over auto-detected LAN IP so the printed URL is actually reachable.
+        if self.host and self.host not in {"0.0.0.0", "::"}:
+            ip = self.host
+        else:
+            ip = self.get_local_ip()
         suffix = f"token={self.token}"
         if self.ssl_context is not None:
             suffix += "&tls=1"
@@ -348,8 +353,21 @@ class Server:
                     continue
 
                 for websocket, queue in list(self._client_queues.items()):
-                    if websocket.closed:
-                        continue
+                    # websockets <16 used WebSocketServerProtocol with `.closed`;
+                    # websockets >=16 uses ServerConnection with `.state`.
+                    state = getattr(websocket, "state", None)
+                    if state is not None:
+                        try:
+                            from websockets.protocol import State
+
+                            if state in (State.CLOSING, State.CLOSED):
+                                continue
+                        except Exception:
+                            # If State import fails, fall back to attempting `.closed`.
+                            pass
+                    else:
+                        if bool(getattr(websocket, "closed", False)):
+                            continue
                     try:
                         queue.put_nowait(packet_data)
                     except asyncio.QueueFull:
@@ -357,6 +375,8 @@ class Server:
                         continue
         except asyncio.CancelledError:
             pass
+        except Exception as e:
+            logger.error(f"Broadcast loop error: {e}")
 
     def _capture_thread(self) -> None:
         """Run packet capture in a separate thread."""
@@ -408,7 +428,10 @@ class Server:
                 properties=props,
             )
             self._announcer = announcer
-            announcer.start()
+            # Newer zeroconf versions implement register_service via asyncio
+            # under the hood. Calling the sync API directly from the event loop
+            # thread can raise EventLoopBlocked; run in a worker thread instead.
+            await asyncio.to_thread(announcer.start)
 
         # Start capture thread
         capture_thread = threading.Thread(
@@ -445,7 +468,7 @@ class Server:
         logger.info("Server stopped")
 
         if self._announcer is not None:
-            self._announcer.stop()
+            await asyncio.to_thread(self._announcer.stop)
             self._announcer = None
 
     def stop(self) -> None:

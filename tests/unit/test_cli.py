@@ -124,6 +124,13 @@ class TestHelpOption:
         assert result.exit_code == 0
         assert "INPUT_PATH" in result.output
 
+    def test_tui_help(self, runner: CliRunner) -> None:
+        """Test TUI command help (should not require optional deps)."""
+        result = runner.invoke(cli, ["tui", "--help"])
+        assert result.exit_code == 0
+        assert "--check" in result.output
+        assert "--cwd" in result.output
+
 
 class TestExtractCommand:
     """Tests for extract command."""

@@ -242,7 +242,12 @@ class ScapyBackend(CaptureBackend):
                     if packet_count and packets_captured >= packet_count:
                         break
                 except Empty:
-                    if not self._capture_thread.is_alive():
+                    # Allow external stop() (e.g., duration timer) to end the generator
+                    # even if no new packets arrive.
+                    if self._stop_event is not None and self._stop_event.is_set():
+                        break
+                    thread = self._capture_thread
+                    if thread is None or not thread.is_alive():
                         break
                     continue
         finally:
@@ -260,11 +265,15 @@ class ScapyBackend(CaptureBackend):
         if self._stop_event:
             self._stop_event.set()
 
-        if self._capture_thread and self._capture_thread.is_alive():
-            self._capture_thread.join(timeout=2.0)
+        thread = self._capture_thread
+        if thread and thread.is_alive():
+            thread.join(timeout=2.0)
 
-        self._stop_event = None
-        self._capture_thread = None
+        # Only clear references once the capture thread has stopped; otherwise
+        # scapy's stop_filter may never observe the stop event.
+        if thread is None or not thread.is_alive():
+            self._stop_event = None
+            self._capture_thread = None
 
     def _convert_packet(self, scapy_pkt: ScapyPacket) -> Packet | None:
         """Convert a Scapy packet to our Packet dataclass.

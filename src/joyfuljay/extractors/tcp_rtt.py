@@ -244,8 +244,8 @@ class TCPRTTExtractor(FeatureExtractor):
         from ..schema.registry import FeatureMeta
 
         return {
-            "tcp_rtt.handshake": FeatureMeta(
-                id="tcp_rtt.handshake",
+            "tcp_rtt.tcp_rtt_handshake": FeatureMeta(
+                id="tcp_rtt.tcp_rtt_handshake",
                 dtype="float64",
                 shape=[1],
                 units="s",
@@ -258,8 +258,8 @@ class TCPRTTExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Round-trip time estimated from TCP handshake (SYN -> SYN-ACK -> ACK)",
             ),
-            "tcp_rtt.min": FeatureMeta(
-                id="tcp_rtt.min",
+            "tcp_rtt.tcp_rtt_min": FeatureMeta(
+                id="tcp_rtt.tcp_rtt_min",
                 dtype="float64",
                 shape=[1],
                 units="s",
@@ -272,8 +272,8 @@ class TCPRTTExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Minimum round-trip time from TCP timestamp echo replies",
             ),
-            "tcp_rtt.max": FeatureMeta(
-                id="tcp_rtt.max",
+            "tcp_rtt.tcp_rtt_max": FeatureMeta(
+                id="tcp_rtt.tcp_rtt_max",
                 dtype="float64",
                 shape=[1],
                 units="s",
@@ -286,8 +286,8 @@ class TCPRTTExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Maximum round-trip time from TCP timestamp echo replies",
             ),
-            "tcp_rtt.mean": FeatureMeta(
-                id="tcp_rtt.mean",
+            "tcp_rtt.tcp_rtt_mean": FeatureMeta(
+                id="tcp_rtt.tcp_rtt_mean",
                 dtype="float64",
                 shape=[1],
                 units="s",
@@ -300,8 +300,8 @@ class TCPRTTExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Mean round-trip time from TCP timestamp echo replies",
             ),
-            "tcp_rtt.samples": FeatureMeta(
-                id="tcp_rtt.samples",
+            "tcp_rtt.tcp_rtt_samples": FeatureMeta(
+                id="tcp_rtt.tcp_rtt_samples",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -314,8 +314,8 @@ class TCPRTTExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of RTT samples from TCP timestamp echo replies",
             ),
-            "tcp_rtt.std": FeatureMeta(
-                id="tcp_rtt.std",
+            "tcp_rtt.tcp_rtt_std": FeatureMeta(
+                id="tcp_rtt.tcp_rtt_std",
                 dtype="float64",
                 shape=[1],
                 units="s",
@@ -328,8 +328,8 @@ class TCPRTTExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Standard deviation of round-trip times",
             ),
-            "tcp_rtt.jitter_avg": FeatureMeta(
-                id="tcp_rtt.jitter_avg",
+            "tcp_rtt.tcp_rtt_jitter_avg": FeatureMeta(
+                id="tcp_rtt.tcp_rtt_jitter_avg",
                 dtype="float64",
                 shape=[1],
                 units="s",
@@ -342,8 +342,8 @@ class TCPRTTExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Average RTT jitter (variation between consecutive samples)",
             ),
-            "tcp_rtt.ack_min": FeatureMeta(
-                id="tcp_rtt.ack_min",
+            "tcp_rtt.tcp_rtt_ack_min": FeatureMeta(
+                id="tcp_rtt.tcp_rtt_ack_min",
                 dtype="float64",
                 shape=[1],
                 units="s",
@@ -356,8 +356,8 @@ class TCPRTTExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Minimum round-trip time from data packet to ACK timing",
             ),
-            "tcp_rtt.ack_max": FeatureMeta(
-                id="tcp_rtt.ack_max",
+            "tcp_rtt.tcp_rtt_ack_max": FeatureMeta(
+                id="tcp_rtt.tcp_rtt_ack_max",
                 dtype="float64",
                 shape=[1],
                 units="s",
@@ -370,8 +370,8 @@ class TCPRTTExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Maximum round-trip time from data packet to ACK timing",
             ),
-            "tcp_rtt.ack_mean": FeatureMeta(
-                id="tcp_rtt.ack_mean",
+            "tcp_rtt.tcp_rtt_ack_mean": FeatureMeta(
+                id="tcp_rtt.tcp_rtt_ack_mean",
                 dtype="float64",
                 shape=[1],
                 units="s",

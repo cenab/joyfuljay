@@ -81,12 +81,22 @@ Type 'help' for commands, 'quit' to exit.
             flow_table = FlowTable(timeout=self._config["flow_timeout"])
 
             packet_count = 0
+            completed_flows: list[Any] = []
             for packet in backend.iter_packets_offline(str(path)):
-                flow_table.add_packet(packet)
+                result = flow_table.add_packet(packet)
+                if result is not None:
+                    # FlowTable may return a single completed flow or a list of
+                    # flows (eviction case). The REPL should retain them.
+                    if isinstance(result, list):
+                        completed_flows.extend(result)
+                    else:
+                        completed_flows.append(result)
                 packet_count += 1
 
-            # Get all flows including active ones
-            self._flows = list(flow_table.get_all_flows())
+            # Flush remaining active flows to mirror pipeline behavior.
+            completed_flows.extend(flow_table.flush_all())
+
+            self._flows = completed_flows
             self._pcap_path = path
             self._features = []  # Clear previous features
 

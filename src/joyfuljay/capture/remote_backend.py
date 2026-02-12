@@ -191,7 +191,11 @@ class RemoteCaptureBackend(CaptureBackend):
             interface: Ignored for remote backend.
             bpf_filter: Ignored (filtering happens on server).
             packet_count: Optional maximum number of packets.
-            save_pcap: Ignored (use pipeline's save_pcap instead).
+            save_pcap: Optional path to save *received* packets to a PCAP file.
+                Note: Remote protocol does not carry full raw frames. If enabled,
+                JoyfulJay will write a best-effort synthetic PCAP containing
+                reconstructed IP/TCP/UDP headers plus whatever payload bytes are
+                available.
 
         Yields:
             Packets received from the remote server.
@@ -203,6 +207,67 @@ class RemoteCaptureBackend(CaptureBackend):
         self._stop_event.clear()
         self._error = None
         packets_received = 0
+
+        pcap_writer: Any | None = None
+        pcap_write: Any | None = None
+        if save_pcap:
+            try:
+                import ipaddress
+                from pathlib import Path
+
+                from scapy.layers.inet import ICMP, IP, TCP, UDP  # type: ignore[import-untyped]
+                from scapy.layers.inet6 import IPv6  # type: ignore[import-untyped]
+                from scapy.layers.l2 import Ether  # type: ignore[import-untyped]
+                from scapy.packet import Raw  # type: ignore[import-untyped]
+                from scapy.utils import PcapWriter  # type: ignore[import-untyped]
+
+                Path(save_pcap).parent.mkdir(parents=True, exist_ok=True)
+                pcap_writer = PcapWriter(save_pcap, append=False, sync=True)
+
+                def _write(packet: Packet) -> None:
+                    payload = packet.raw_payload or b""
+                    if packet.payload_len and len(payload) < packet.payload_len:
+                        payload = payload + (b"\x00" * (packet.payload_len - len(payload)))
+                    elif packet.payload_len and len(payload) > packet.payload_len:
+                        payload = payload[: packet.payload_len]
+
+                    try:
+                        ip_obj = ipaddress.ip_address(packet.src_ip)
+                        is_v6 = ip_obj.version == 6
+                    except ValueError:
+                        is_v6 = ":" in packet.src_ip
+
+                    ip_layer = IPv6(src=packet.src_ip, dst=packet.dst_ip) if is_v6 else IP(
+                        src=packet.src_ip, dst=packet.dst_ip
+                    )
+
+                    l4 = None
+                    if packet.protocol == Packet.PROTO_TCP:
+                        l4 = TCP(
+                            sport=packet.src_port,
+                            dport=packet.dst_port,
+                            flags=int(packet.tcp_flags or 0),
+                        )
+                    elif packet.protocol == Packet.PROTO_UDP:
+                        l4 = UDP(sport=packet.src_port, dport=packet.dst_port)
+                    elif packet.protocol == Packet.PROTO_ICMP:
+                        l4 = ICMP()
+
+                    eth = Ether(src="00:00:00:00:00:00", dst="00:00:00:00:00:00")
+                    scapy_pkt = eth / ip_layer
+                    if l4 is not None:
+                        scapy_pkt = scapy_pkt / l4
+                    if payload:
+                        scapy_pkt = scapy_pkt / Raw(load=payload)
+
+                    scapy_pkt.time = float(packet.timestamp)
+                    pcap_writer.write(scapy_pkt)
+
+                pcap_write = _write
+            except Exception as exc:
+                logger.warning(f"Failed to enable save_pcap for remote capture: {exc}")
+                pcap_writer = None
+                pcap_write = None
 
         # Start receive thread
         self._receive_thread = threading.Thread(
@@ -218,7 +283,16 @@ class RemoteCaptureBackend(CaptureBackend):
 
                     # Check for end signal
                     if packet is None:
+                        if self._error is not None:
+                            raise self._error
                         break
+
+                    if pcap_write is not None:
+                        try:
+                            pcap_write(packet)
+                        except Exception as exc:
+                            logger.warning(f"Failed to write packet to PCAP: {exc}")
+                            pcap_write = None
 
                     yield packet
                     packets_received += 1
@@ -228,14 +302,22 @@ class RemoteCaptureBackend(CaptureBackend):
                         break
 
                 except Empty:
+                    if self._stop_event.is_set():
+                        break
                     # Check if receive thread is still alive
-                    if not self._receive_thread.is_alive():
+                    thread = self._receive_thread
+                    if thread is None or not thread.is_alive():
                         # Check for errors
                         if self._error:
                             raise self._error
                         break
 
         finally:
+            if pcap_writer is not None:
+                try:
+                    pcap_writer.close()
+                except Exception:
+                    pass
             self.stop()
 
     def _receive_loop(self) -> None:

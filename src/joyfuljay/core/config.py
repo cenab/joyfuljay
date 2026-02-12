@@ -24,6 +24,7 @@ class FeatureGroup(str, Enum):
     TCP = "tcp"
     TLS = "tls"
     QUIC = "quic"
+    HTTP2 = "http2"
     SSH = "ssh"
     DNS = "dns"
     PADDING = "padding"
@@ -105,6 +106,7 @@ class Config:
     connection_community_algorithm: str = "louvain"
 
     _profile_features: set[str] | None = field(default=None, init=False, repr=False)
+    _profile_feature_basenames: set[str] | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:
         """Validate configuration after initialization."""
@@ -130,6 +132,10 @@ class Config:
                     f"Valid profiles: {valid_profiles}"
                 )
             self._profile_features = get_profile_features(self.profile)
+            self._profile_feature_basenames = {
+                feature.split(".", 1)[1] if "." in feature else feature
+                for feature in self._profile_features
+            }
 
     def should_extract(self, group: str | FeatureGroup) -> bool:
         """Check if a feature group should be extracted.
@@ -181,24 +187,12 @@ class Config:
         # Profile filtering takes precedence
         if self._profile_features is not None:
             # Match both prefixed (flow_meta.src_ip) and unprefixed (src_ip) names
+            basenames = self._profile_feature_basenames or set()
             result = {}
             for k, v in features.items():
                 # Direct match
-                if k in self._profile_features:
+                if k in self._profile_features or k in basenames:
                     result[k] = v
-                    continue
-                # Try with common prefixes for unprefixed names
-                for prefix in [
-                    "flow_meta", "timing", "size", "tcp", "tls", "dns",
-                    "ssh", "quic", "http2", "entropy", "fingerprint",
-                    "padding", "connection", "mac", "ip_extended",
-                    "ipv6_options", "tcp_sequence", "tcp_window",
-                    "tcp_options", "tcp_mptcp", "tcp_rtt",
-                    "tcp_fingerprint", "icmp",
-                ]:
-                    if f"{prefix}.{k}" in self._profile_features:
-                        result[k] = v
-                        break
             return result
 
         if self.specific_features is None:

@@ -862,17 +862,57 @@ def schema(
             )
 
     if output_format == "json":
-        content = export_schema_json()
+        content = export_schema_json(group=group)
     elif output_format == "csv":
-        content = export_schema_csv()
+        content = export_schema_csv(group=group)
     else:  # markdown
-        content = get_feature_documentation()
+        content = get_feature_documentation(group=group)
 
     if output:
         Path(output).write_text(content)
         click.echo(f"Schema written to: {output}", err=True)
     else:
         click.echo(content)
+
+
+@cli.command()
+@click.option(
+    "--cwd",
+    type=click.Path(file_okay=False, dir_okay=True, exists=True),
+    default=".",
+    help="Working directory used when running commands from the TUI.",
+)
+@click.option(
+    "--check",
+    is_flag=True,
+    help="Validate that the TUI dependencies are installed and exit.",
+)
+@click.pass_context
+def tui(ctx: click.Context, cwd: str, check: bool) -> None:
+    """Launch an interactive terminal UI (TUI) for JoyfulJay.
+
+    The TUI is optional. Install with:
+
+        pip install "joyfuljay[tui]"
+    """
+    if check:
+        try:
+            import textual  # type: ignore[import-not-found]
+        except Exception as exc:
+            raise click.ClickException(
+                "TUI dependency 'textual' is not installed. Install with: joyfuljay[tui]"
+            ) from exc
+        click.echo(f"TUI OK (textual {getattr(textual, '__version__', 'unknown')})")
+        return
+
+    try:
+        from ..tui import run_tui
+    except Exception as exc:
+        raise click.ClickException(
+            "TUI dependencies are not installed. Install with: joyfuljay[tui]"
+        ) from exc
+
+    run_tui(verbose=bool(ctx.obj.get("verbose")), cwd=cwd)
 
 
 @cli.command()
@@ -1690,7 +1730,7 @@ def profiles_show(
 
         jj profiles show JJ-CORE
 
-        jj profiles show JJ-EXTENDED --group tls
+        jj profiles show JJ-EXTENDED --group ip_extended
 
         jj profiles show JJ-CORE --json
     """
@@ -1782,11 +1822,14 @@ def cite(ctx: click.Context, output_format: str) -> None:
         citation = f'''JoyfulJay Contributors. (2025). JoyfulJay: Encrypted Traffic Feature Extraction Library (Version {__version__}) [Computer software]. https://github.com/cenab/joyfuljay'''
     else:  # cff
         from pathlib import Path
-        cff_path = Path(__file__).parents[2] / "CITATION.cff"
-        if cff_path.exists():
-            citation = cff_path.read_text()
-        else:
-            citation = "CITATION.cff not found. See https://github.com/cenab/joyfuljay"
+        # Try to locate CITATION.cff in both source checkouts and installed
+        # environments. In editable/dev mode, it usually sits at repo root.
+        citation = "CITATION.cff not found. See https://github.com/cenab/joyfuljay"
+        for parent in Path(__file__).resolve().parents:
+            cff_path = parent / "CITATION.cff"
+            if cff_path.exists():
+                citation = cff_path.read_text()
+                break
 
     click.echo(citation)
 
@@ -1840,6 +1883,7 @@ def validate_golden(
         jj validate test.pcap --expected golden.json --tolerance 1e-6 -v
     """
     import json as json_module
+    import math
     from pathlib import Path
 
     # Load expected output
@@ -1880,6 +1924,12 @@ def validate_golden(
 
     differences: list[str] = []
 
+    def _is_nan(value: Any) -> bool:
+        try:
+            return math.isnan(value)
+        except TypeError:
+            return False
+
     for i, (actual, expected_flow) in enumerate(zip(actual_flows, expected_flows)):
         flow_diffs: list[str] = []
 
@@ -1892,8 +1942,11 @@ def validate_golden(
 
         if missing:
             flow_diffs.append(f"  Missing features: {sorted(missing)}")
-        if extra and verbose:
-            flow_diffs.append(f"  Extra features: {sorted(extra)}")
+        if extra:
+            if verbose:
+                flow_diffs.append(f"  Extra features: {sorted(extra)}")
+            else:
+                flow_diffs.append(f"  Extra features: {len(extra)}")
 
         # Compare common keys
         for key in actual_keys & expected_keys:
@@ -1901,6 +1954,27 @@ def validate_golden(
             expected_val = expected_flow[key]
 
             # Handle float comparison with tolerance
+            if _is_nan(actual_val):
+                if expected_val in ("", None) or _is_nan(expected_val):
+                    continue
+                if verbose:
+                    flow_diffs.append(f"  {key}: expected {expected_val!r}, got nan")
+                else:
+                    flow_diffs.append(f"  {key}: mismatch")
+                continue
+
+            if _is_nan(expected_val):
+                if actual_val in ("", None):
+                    continue
+                if verbose:
+                    flow_diffs.append(f"  {key}: expected nan, got {actual_val!r}")
+                else:
+                    flow_diffs.append(f"  {key}: mismatch")
+                continue
+
+            if expected_val in ("", None) and actual_val in ("", None):
+                continue
+
             if isinstance(expected_val, float) and isinstance(actual_val, (int, float)):
                 if abs(float(actual_val) - expected_val) > tolerance:
                     flow_diffs.append(

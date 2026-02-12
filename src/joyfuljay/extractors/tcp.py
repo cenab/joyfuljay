@@ -324,8 +324,8 @@ class TCPExtractor(FeatureExtractor):
         from ..schema.registry import FeatureMeta
 
         return {
-            "tcp.is_tcp": FeatureMeta(
-                id="tcp.is_tcp",
+            "tcp.tcp_is_tcp": FeatureMeta(
+                id="tcp.tcp_is_tcp",
                 dtype="bool",
                 shape=[1],
                 units="",
@@ -338,8 +338,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether the flow is a TCP flow",
             ),
-            "tcp.syn_count": FeatureMeta(
-                id="tcp.syn_count",
+            "tcp.tcp_syn_count": FeatureMeta(
+                id="tcp.tcp_syn_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -352,8 +352,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of TCP SYN packets (without ACK)",
             ),
-            "tcp.synack_count": FeatureMeta(
-                id="tcp.synack_count",
+            "tcp.tcp_synack_count": FeatureMeta(
+                id="tcp.tcp_synack_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -366,8 +366,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of TCP SYN-ACK packets",
             ),
-            "tcp.fin_count": FeatureMeta(
-                id="tcp.fin_count",
+            "tcp.tcp_fin_count": FeatureMeta(
+                id="tcp.tcp_fin_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -380,8 +380,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of TCP FIN packets",
             ),
-            "tcp.rst_count": FeatureMeta(
-                id="tcp.rst_count",
+            "tcp.tcp_rst_count": FeatureMeta(
+                id="tcp.tcp_rst_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -394,8 +394,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of TCP RST packets",
             ),
-            "tcp.ack_count": FeatureMeta(
-                id="tcp.ack_count",
+            "tcp.tcp_ack_count": FeatureMeta(
+                id="tcp.tcp_ack_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -408,8 +408,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of TCP packets with ACK flag set",
             ),
-            "tcp.psh_count": FeatureMeta(
-                id="tcp.psh_count",
+            "tcp.tcp_psh_count": FeatureMeta(
+                id="tcp.tcp_psh_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -422,8 +422,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of TCP packets with PSH flag set",
             ),
-            "tcp.urg_count": FeatureMeta(
-                id="tcp.urg_count",
+            "tcp.tcp_urg_count": FeatureMeta(
+                id="tcp.tcp_urg_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -436,8 +436,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of TCP packets with URG flag set",
             ),
-            "tcp.ece_count": FeatureMeta(
-                id="tcp.ece_count",
+            "tcp.tcp_ece_count": FeatureMeta(
+                id="tcp.tcp_ece_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -450,8 +450,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of TCP packets with ECE flag set",
             ),
-            "tcp.cwr_count": FeatureMeta(
-                id="tcp.cwr_count",
+            "tcp.tcp_cwr_count": FeatureMeta(
+                id="tcp.tcp_cwr_count",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -464,8 +464,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of TCP packets with CWR flag set",
             ),
-            "tcp.complete_handshake": FeatureMeta(
-                id="tcp.complete_handshake",
+            "tcp.tcp_complete_handshake": FeatureMeta(
+                id="tcp.tcp_complete_handshake",
                 dtype="bool",
                 shape=[1],
                 units="",
@@ -478,8 +478,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether a complete TCP handshake was observed",
             ),
-            "tcp.graceful_close": FeatureMeta(
-                id="tcp.graceful_close",
+            "tcp.tcp_graceful_close": FeatureMeta(
+                id="tcp.tcp_graceful_close",
                 dtype="bool",
                 shape=[1],
                 units="",
@@ -492,8 +492,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether the connection closed gracefully with FIN from both sides",
             ),
-            "tcp.reset_close": FeatureMeta(
-                id="tcp.reset_close",
+            "tcp.tcp_reset_close": FeatureMeta(
+                id="tcp.tcp_reset_close",
                 dtype="bool",
                 shape=[1],
                 units="",
@@ -506,8 +506,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether the connection was closed with a RST",
             ),
-            "tcp.syn_ratio": FeatureMeta(
-                id="tcp.syn_ratio",
+            "tcp.tcp_syn_ratio": FeatureMeta(
+                id="tcp.tcp_syn_ratio",
                 dtype="float64",
                 shape=[1],
                 units="ratio",
@@ -520,8 +520,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Ratio of SYN and SYN-ACK packets to total packets",
             ),
-            "tcp.fin_ratio": FeatureMeta(
-                id="tcp.fin_ratio",
+            "tcp.tcp_fin_ratio": FeatureMeta(
+                id="tcp.tcp_fin_ratio",
                 dtype="float64",
                 shape=[1],
                 units="ratio",
@@ -534,8 +534,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Ratio of FIN packets to total packets",
             ),
-            "tcp.rst_ratio": FeatureMeta(
-                id="tcp.rst_ratio",
+            "tcp.tcp_rst_ratio": FeatureMeta(
+                id="tcp.tcp_rst_ratio",
                 dtype="float64",
                 shape=[1],
                 units="ratio",
@@ -548,8 +548,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Ratio of RST packets to total packets",
             ),
-            "tcp.psh_ratio": FeatureMeta(
-                id="tcp.psh_ratio",
+            "tcp.tcp_psh_ratio": FeatureMeta(
+                id="tcp.tcp_psh_ratio",
                 dtype="float64",
                 shape=[1],
                 units="ratio",
@@ -562,8 +562,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Ratio of PSH packets to total packets",
             ),
-            "tcp.data_packets": FeatureMeta(
-                id="tcp.data_packets",
+            "tcp.tcp_data_packets": FeatureMeta(
+                id="tcp.tcp_data_packets",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -576,8 +576,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of TCP packets with non-zero payload",
             ),
-            "tcp.ack_only_packets": FeatureMeta(
-                id="tcp.ack_only_packets",
+            "tcp.tcp_ack_only_packets": FeatureMeta(
+                id="tcp.tcp_ack_only_packets",
                 dtype="int64",
                 shape=[1],
                 units="count",
@@ -590,8 +590,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Number of TCP packets with only ACK flag and no payload",
             ),
-            "tcp.flags_anomaly": FeatureMeta(
-                id="tcp.flags_anomaly",
+            "tcp.tcp_flags_anomaly": FeatureMeta(
+                id="tcp.tcp_flags_anomaly",
                 dtype="bool",
                 shape=[1],
                 units="",
@@ -604,8 +604,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether anomalous TCP flag combinations were detected (null scan, xmas tree, etc.)",
             ),
-            "tcp.initiator_syn": FeatureMeta(
-                id="tcp.initiator_syn",
+            "tcp.tcp_initiator_syn": FeatureMeta(
+                id="tcp.tcp_initiator_syn",
                 dtype="bool",
                 shape=[1],
                 units="",
@@ -618,8 +618,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether the flow initiator sent a SYN packet",
             ),
-            "tcp.responder_synack": FeatureMeta(
-                id="tcp.responder_synack",
+            "tcp.tcp_responder_synack": FeatureMeta(
+                id="tcp.tcp_responder_synack",
                 dtype="bool",
                 shape=[1],
                 units="",
@@ -632,8 +632,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Whether the flow responder sent a SYN-ACK packet",
             ),
-            "tcp.fstat": FeatureMeta(
-                id="tcp.fstat",
+            "tcp.tcp_fstat": FeatureMeta(
+                id="tcp.tcp_fstat",
                 dtype="int64",
                 shape=[1],
                 units="bitmap",
@@ -646,8 +646,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Tranalyzer-compatible TCP flow status bitmap",
             ),
-            "tcp.flags_agg": FeatureMeta(
-                id="tcp.flags_agg",
+            "tcp.tcp_flags_agg": FeatureMeta(
+                id="tcp.tcp_flags_agg",
                 dtype="int64",
                 shape=[1],
                 units="bitmap",
@@ -660,8 +660,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Aggregate TCP flags (OR of all flags seen in flow)",
             ),
-            "tcp.flags_fwd": FeatureMeta(
-                id="tcp.flags_fwd",
+            "tcp.tcp_flags_fwd": FeatureMeta(
+                id="tcp.tcp_flags_fwd",
                 dtype="int64",
                 shape=[1],
                 units="bitmap",
@@ -674,8 +674,8 @@ class TCPExtractor(FeatureExtractor):
                 privacy_level="safe",
                 description="Aggregate TCP flags from forward direction (initiator to responder)",
             ),
-            "tcp.flags_bwd": FeatureMeta(
-                id="tcp.flags_bwd",
+            "tcp.tcp_flags_bwd": FeatureMeta(
+                id="tcp.tcp_flags_bwd",
                 dtype="int64",
                 shape=[1],
                 units="bitmap",

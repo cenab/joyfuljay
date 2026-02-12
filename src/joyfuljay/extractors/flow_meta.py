@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import hashlib
+from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
-from ..utils.port_classifier import get_port_class_name, get_port_class_number
+from ..utils.port_classifier import classify_port
 from .base import FeatureExtractor
 
 if TYPE_CHECKING:
@@ -56,7 +57,13 @@ class FlowMetaExtractor(FeatureExtractor):
         Returns:
             Hashed IP address (hex string).
         """
-        data = f"{self.anonymization_salt}{ip}".encode("utf-8")
+        return self._hash_ip(self.anonymization_salt, ip)
+
+    @staticmethod
+    @lru_cache(maxsize=4096)
+    def _hash_ip(salt: str, ip: str) -> str:
+        """Hash an IP address with a salt for caching."""
+        data = f"{salt}{ip}".encode("utf-8")
         return hashlib.sha256(data).hexdigest()[:16]
 
     def _compute_flow_id(self, flow: Flow) -> str:
@@ -106,67 +113,73 @@ class FlowMetaExtractor(FeatureExtractor):
             features["src_port"] = flow.initiator_port
             features["dst_port"] = flow.responder_port
             # Port classification - Tranalyzer compatible
-            features["dst_port_class"] = get_port_class_name(flow.responder_port)
-            features["dst_port_class_num"] = get_port_class_number(flow.responder_port)
+            port_class_name, port_class_num = classify_port(flow.responder_port)
+            features["dst_port_class"] = port_class_name
+            features["dst_port_class_num"] = port_class_num
 
         # Protocol
         features["protocol"] = flow.key.protocol
 
         # Timing features
-        features["start_time"] = flow.start_time
-        features["end_time"] = flow.last_seen
-        features["duration"] = flow.duration
+        start_time = flow.start_time
+        end_time = flow.last_seen
+        duration = flow.duration
+        features["start_time"] = start_time
+        features["end_time"] = end_time
+        features["duration"] = duration
 
         # Packet counts
-        features["total_packets"] = flow.total_packets
-        features["packets_fwd"] = len(flow.initiator_packets)
-        features["packets_bwd"] = len(flow.responder_packets)
+        total_packets = flow.total_packets
+        packets_fwd = len(flow.initiator_packets)
+        packets_bwd = len(flow.responder_packets)
+        features["total_packets"] = total_packets
+        features["packets_fwd"] = packets_fwd
+        features["packets_bwd"] = packets_bwd
 
         # Byte counts
-        features["total_bytes"] = flow.total_bytes
-        features["bytes_fwd"] = flow.initiator_bytes
-        features["bytes_bwd"] = flow.responder_bytes
+        total_bytes = flow.total_bytes
+        bytes_fwd = flow.initiator_bytes
+        bytes_bwd = flow.responder_bytes
+        features["total_bytes"] = total_bytes
+        features["bytes_fwd"] = bytes_fwd
+        features["bytes_bwd"] = bytes_bwd
 
         # Payload bytes (excluding headers)
-        features["payload_bytes_fwd"] = sum(
-            p.payload_len for p in flow.initiator_packets
-        )
-        features["payload_bytes_bwd"] = sum(
-            p.payload_len for p in flow.responder_packets
-        )
-        features["payload_bytes_total"] = (
-            features["payload_bytes_fwd"] + features["payload_bytes_bwd"]
-        )
+        payload_bytes_fwd = flow.payload_bytes_initiator
+        payload_bytes_bwd = flow.payload_bytes_responder
+        features["payload_bytes_fwd"] = payload_bytes_fwd
+        features["payload_bytes_bwd"] = payload_bytes_bwd
+        features["payload_bytes_total"] = payload_bytes_fwd + payload_bytes_bwd
 
         # Ratios (avoid division by zero)
-        if features["packets_bwd"] > 0:
-            features["packets_ratio"] = features["packets_fwd"] / features["packets_bwd"]
+        if packets_bwd > 0:
+            features["packets_ratio"] = packets_fwd / packets_bwd
         else:
-            features["packets_ratio"] = float(features["packets_fwd"]) if features["packets_fwd"] > 0 else 0.0
+            features["packets_ratio"] = float(packets_fwd) if packets_fwd > 0 else 0.0
 
-        if features["bytes_bwd"] > 0:
-            features["bytes_ratio"] = features["bytes_fwd"] / features["bytes_bwd"]
+        if bytes_bwd > 0:
+            features["bytes_ratio"] = bytes_fwd / bytes_bwd
         else:
-            features["bytes_ratio"] = float(features["bytes_fwd"]) if features["bytes_fwd"] > 0 else 0.0
+            features["bytes_ratio"] = float(bytes_fwd) if bytes_fwd > 0 else 0.0
 
         # Packets per second
-        if flow.duration > 0:
-            features["packets_per_second"] = flow.total_packets / flow.duration
-            features["bytes_per_second"] = flow.total_bytes / flow.duration
+        if duration > 0:
+            features["packets_per_second"] = total_packets / duration
+            features["bytes_per_second"] = total_bytes / duration
         else:
-            features["packets_per_second"] = float(flow.total_packets)
-            features["bytes_per_second"] = float(flow.total_bytes)
+            features["packets_per_second"] = float(total_packets)
+            features["bytes_per_second"] = float(total_bytes)
 
         # Average packet size
-        if flow.total_packets > 0:
-            features["avg_packet_size"] = flow.total_bytes / flow.total_packets
+        if total_packets > 0:
+            features["avg_packet_size"] = total_bytes / total_packets
         else:
             features["avg_packet_size"] = 0.0
 
         # Tranalyzer-compatible features (#44)
         # timeFirst/timeLast aliases
-        features["time_first"] = flow.start_time
-        features["time_last"] = flow.last_seen
+        features["time_first"] = start_time
+        features["time_last"] = end_time
 
         # Flow termination status (flowStat)
         # Bit 0: Has SYN
@@ -202,12 +215,14 @@ class FlowMetaExtractor(FeatureExtractor):
         has_fin_bwd = False
         has_rst = False
 
+        initiator_ip = flow.initiator_ip
+        initiator_port = flow.initiator_port
         for pkt in flow.packets:
             if pkt.tcp_flags is None:
                 continue
 
             is_forward = (
-                pkt.src_ip == flow.initiator_ip and pkt.src_port == flow.initiator_port
+                pkt.src_ip == initiator_ip and pkt.src_port == initiator_port
             )
 
             is_syn = bool(pkt.tcp_flags & 0x02)
